@@ -1,0 +1,17 @@
+*.lock
+.tool-versions
+node_modules
+dist
+pkg/
+vendor/bundle
+test/log/
+tmp/
+.byebug_history
+log
+blade.yml
+breezy/build/**/*.js
+*.gem
+props_template/performance/**/*.png
+.tool-versions
+testapp/
+superglue/

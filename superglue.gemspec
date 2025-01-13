@@ -1,4 +1,4 @@
-version = File.read(File.expand_path("../VERSION", __dir__)).strip
+version = File.read(File.expand_path("./VERSION", __dir__)).strip
 
 Gem::Specification.new do |s|
   s.name = "superglue"
@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.author = "Johny Ho"
   s.email = "jho406@gmail.com"
   s.license = "MIT"
-  s.homepage = "https://github.com/thoughtbot/superglue/"
+  s.homepage = "https://github.com/thoughtbot/superglue_rails/"
   s.summary = "Rails integration for SuperglueJS"
   s.description = s.summary
   s.files = Dir["MIT-LICENSE", "README.md", "lib/**/*", "app/**/*"]

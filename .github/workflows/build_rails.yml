@@ -1,0 +1,38 @@
+name: Test superglue_rails
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Ruby ${{ matrix.ruby }}. Rails ${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.3", "3.2", "3.1"]
+        version: ["70", "71", "72", "80"]
+        exclude:
+          - ruby: 3.1
+            version: 80
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Which bundler?
+        run: bundle -v
+      - name: Using Gemfile
+        run: |
+          mv -f Gemfile.${{ matrix.version }} ./Gemfile
+      - name: Bundle install
+        run: bundle install
+      - name: Run unit test
+        run: bundle exec rake test
+      - name: Run acceptance test
+        run: BUNDLE_GEMFILE='' ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb

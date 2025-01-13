@@ -9,3 +9,6 @@ gem 'capybara'
 gem 'minitest'
 gem 'rake'
 gem 'sqlite3', '~> 1.4'
+gem 'byebug'
+gem 'git'
+

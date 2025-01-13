@@ -2,15 +2,13 @@ require "minitest/autorun"
 require "capybara"
 require "capybara/minitest"
 require "selenium-webdriver"
+require "git"
 
-ROOT_DIR = File.expand_path("../../../../", __FILE__)
+ROOT_DIR = File.expand_path("../../../", __FILE__)
 TMP_DIR = File.join(ROOT_DIR, "tmp")
-SUPERGLUE_RAILS_PATH = File.join(ROOT_DIR, "superglue_rails")
-SUPERGLUE_SUPERGLUE_PATH = File.join(ROOT_DIR, "superglue")
-VERSION = File.read(File.expand_path("../../../VERSION", __dir__)).strip
-SUPERGLUE_JS_VERSION = JSON.parse(
-  File.read(File.expand_path("../../../superglue/package.json", __dir__)).strip
-)["version"]
+SUPERGLUE_RAILS_PATH = ROOT_DIR
+SUPERGLUE_SUPERGLUE_PATH = File.join(ROOT_DIR, "superglue/superglue")
+VERSION = File.read(File.expand_path("../../VERSION", __dir__)).strip
 
 SERVER_PORT = "3000"
 
@@ -52,14 +50,24 @@ class SuperglueInstallationTest < Minitest::Test
   end
 
   def update_package_json
+    js_version = JSON.parse(
+      File.read(File.expand_path("package.json", SUPERGLUE_SUPERGLUE_PATH)).strip
+    )["version"]
+
     content = File.read("package.json").gsub(
       /"@thoughtbot\/superglue.*$/,
-      "\"@thoughtbot/superglue\":\"file:#{SUPERGLUE_SUPERGLUE_PATH}/thoughtbot-superglue-#{SUPERGLUE_JS_VERSION}.tgz\","
+      "\"@thoughtbot/superglue\":\"file:#{SUPERGLUE_SUPERGLUE_PATH}/thoughtbot-superglue-#{js_version}.tgz\","
     )
+
     File.open("package.json", "w") { |file| file.puts content }
   end
 
   def install_superglue
+    Dir.chdir(ROOT_DIR) do
+      successfully "rm -rf ./superglue"
+      Git.clone("https://github.com/thoughtbot/superglue.git")
+    end
+
     Dir.chdir(SUPERGLUE_SUPERGLUE_PATH) do
       successfully "npm install"
       successfully "npm run build"
