@@ -16,6 +16,8 @@ module Superglue
         remove_file "#{app_js_path}/application.js"
 
         use_typescript = options["typescript"]
+        copy_erb_files
+
         if use_typescript
           copy_ts_files
         else
@@ -31,6 +33,9 @@ module Superglue
         say "Adding required member methods to ApplicationRecord"
         add_member_methods
 
+        say "Enabling jsx rendering defaults"
+        insert_jsx_rendering_defaults
+
         say "Installing Superglue and friends"
         run "yarn add react react-dom @reduxjs/toolkit react-redux @thoughtbot/superglue"
 
@@ -42,6 +47,39 @@ module Superglue
       end
 
       private
+
+      def insert_jsx_rendering_defaults
+        inject_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::Base\n" do
+          <<-RUBY
+  # Enables Superglue rendering defaults for sensible view directories. 
+  #
+  # without `use_jsx_rendering_defaults`:
+  #
+  # ```
+  # app/views/posts/
+  #  - index.jsx
+  #  - index.json.props
+  #  - index.html.erb
+  # ```
+  #
+  # with `use_jsx_rendering_defaults`:
+  #
+  # ```
+  # app/views/posts/
+  #   - index.jsx
+  #   - index.json.props
+  # ```
+  #
+  # before_action :use_jsx_rendering_defaults
+
+          RUBY
+        end
+      end
+
+      def copy_erb_files
+        say "Copying superglue.html.erb file to app/views/application/"
+        copy_file "#{__dir__}/templates/erb/superglue.html.erb", "app/views/application/superglue.html.erb"
+      end
 
       def copy_ts_files
         say "Copying application.tsx file to #{app_js_path}"

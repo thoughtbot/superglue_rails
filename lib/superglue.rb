@@ -1,5 +1,7 @@
 require "superglue/helpers"
 require "superglue/redirection"
+require "superglue/rendering"
+require "superglue/resolver"
 require "props_template"
 require "form_props"
 
@@ -9,8 +11,10 @@ module Superglue
     include Helpers
 
     def self.included(base)
+      base.include ::Superglue::Rendering
       if base.respond_to?(:helper_method)
         base.helper_method :param_to_dig_path
+        base.helper_method :render_props
       end
     end
   end
@@ -31,6 +35,10 @@ module Superglue
 
         if app.config.superglue.auto_include
           include Controller
+
+          prepend_view_path(
+            Superglue::Resolver.new(Rails.root.join("app/views"))
+          )
         end
       end
     end
