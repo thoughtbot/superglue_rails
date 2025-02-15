@@ -21,14 +21,6 @@ module Superglue
         empty_directory path unless File.directory?(path)
       end
 
-      def copy_erb_files
-        available_views.each do |view|
-          @action_name = view
-          filename = filename_with_html_extensions(view)
-          template "erb/" + filename, File.join("app/views", controller_file_path, filename)
-        end
-      end
-
       def copy_prop_files
         available_views.each do |view|
           @action_name = view
