@@ -51,7 +51,7 @@ module Superglue
       def insert_jsx_rendering_defaults
         inject_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::Base\n" do
           <<-RUBY
-  # Enables Superglue rendering defaults for sensible view directories. 
+  # Enables Superglue rendering defaults for sensible view directories.
   #
   # without `use_jsx_rendering_defaults`:
   #
@@ -71,6 +71,12 @@ module Superglue
   # ```
   #
   # before_action :use_jsx_rendering_defaults
+  #
+  #
+  # The html template used when `use_jsx_rendering_defaults` is enabled.
+  # Defaults to "application/superglue".
+  #
+  # superglue_template "application/superglue"
 
           RUBY
         end
