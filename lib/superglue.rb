@@ -23,12 +23,6 @@ module Superglue
     config.superglue = ActiveSupport::OrderedOptions.new
     config.superglue.auto_include = true
 
-    generators do |app|
-      Rails::Generators.configure! app.config.generators
-      Rails::Generators.hidden_namespaces.uniq!
-      require "generators/rails/scaffold_controller_generator"
-    end
-
     initializer :superglue do |app|
       ActiveSupport.on_load(:action_controller) do
         next if self != ActionController::Base
