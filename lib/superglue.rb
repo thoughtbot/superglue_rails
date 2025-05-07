@@ -25,13 +25,11 @@ module Superglue
       ActiveSupport.on_load(:action_controller) do
         next if self != ActionController::Base
 
-        if app.config.superglue.auto_include
-          include Controller
+        include Controller
 
-          prepend_view_path(
-            Superglue::Resolver.new(Rails.root.join("app/views"))
-          )
-        end
+        prepend_view_path(
+          Superglue::Resolver.new(Rails.root.join("app/views"))
+        )
       end
     end
   end
