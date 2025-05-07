@@ -1,5 +1,4 @@
 require "superglue/helpers"
-require "superglue/redirection"
 require "superglue/rendering"
 require "superglue/resolver"
 require "props_template"
@@ -7,7 +6,6 @@ require "form_props"
 
 module Superglue
   module Controller
-    include Redirection
     include Helpers
 
     def self.included(base)
