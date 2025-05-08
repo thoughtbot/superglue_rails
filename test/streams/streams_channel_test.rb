@@ -26,17 +26,17 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
 
-  # test 'broadcasting replace now' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test 'broadcasting replace now' do
+    options = { partial: 'messages/message', locals: { message: 'hello!' } }
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_replace_to 'stream', target: 'message_1', **options
-  #   end
+    assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: render(options)) do
+      Superglue::StreamsChannel.broadcast_replace_to 'stream', target: 'message_1', **options
+    end
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', targets: '.message', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_replace_to 'stream', targets: '.message', **options
-  #   end
-  # end
+    # assert_broadcast_on 'stream', turbo_stream_action_tag('replace', targets: '.message', template: render(options)) do
+    #   Superglue::StreamsChannel.broadcast_replace_to 'stream', targets: '.message', **options
+    # end
+  end
 
   # test 'broadcasting update now' do
   #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
