@@ -183,41 +183,57 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
 
-  # test 'broadcasting append later' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting append later" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('append', target: 'messages', template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_append_later_to \
-  #         'stream', target: 'messages', **options
-  #     end
-  #   end
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["messages"],
+        broadcast_action: "append",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('append', targets: '.message', template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_append_later_to \
-  #         'stream', targets: '.message', **options
-  #     end
-  #   end
-  # end
+    assert_broadcast_on "stream", render_message(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_append_later_to "stream", target: "messages", **rendering
+      end
+    end
 
-  # test 'broadcasting prepend later' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+    assert_broadcast_on "stream", render_message(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_append_later_to "stream", targets: ["messages"], **rendering
+      end
+    end
+  end
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('prepend', target: 'messages', template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_prepend_later_to \
-  #         'stream', target: 'messages', **options
-  #     end
-  #   end
+  test "broadcasting prepend later" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('prepend', targets: '.message', template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_prepend_later_to \
-  #         'stream', targets: '.message', **options
-  #     end
-  #   end
-  # end
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["messages"],
+        broadcast_action: "prepend",
+        broadcast_options: {}
+      })
+    )
+
+    assert_broadcast_on "stream", render_message(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", target: "messages", **rendering
+      end
+    end
+
+    assert_broadcast_on "stream", render_message(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", targets: ["messages"], **rendering
+      end
+    end
+  end
 
   # test 'broadcasting refresh later' do
   #   assert_broadcast_on 'stream', turbo_stream_refresh_tag do

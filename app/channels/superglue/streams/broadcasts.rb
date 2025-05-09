@@ -63,13 +63,13 @@ module Superglue::Streams::Broadcasts
   #   broadcast_action_later_to(*streamables, action: :after, **opts)
   # end
 
-  # def broadcast_append_later_to(*streamables, **opts)
-  #   broadcast_action_later_to(*streamables, action: :append, **opts)
-  # end
+  def broadcast_append_later_to(*streamables, **opts)
+    broadcast_action_later_to(*streamables, action: :append, **opts)
+  end
 
-  # def broadcast_prepend_later_to(*streamables, **opts)
-  #   broadcast_action_later_to(*streamables, action: :prepend, **opts)
-  # end
+  def broadcast_prepend_later_to(*streamables, **opts)
+    broadcast_action_later_to(*streamables, action: :prepend, **opts)
+  end
 
   # def broadcast_refresh_later_to(*streamables, request_id: Superglue.current_request_id, **opts)
   #   stream_name = stream_name_from(streamables)
