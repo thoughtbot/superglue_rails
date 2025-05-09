@@ -34,7 +34,7 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     locals = {message: "hello!"}
     rendering = {partial: "messages/message", locals: locals}
 
-    expected = rendering.clone.merge(
+    expected = rendering.merge(
       layout: "superglue/layouts/fragment",
       locals: locals.merge({
         broadcast_targets: ["message_1"],
@@ -68,7 +68,7 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     locals = {message: "hello!"}
     rendering = {partial: "messages/message", locals: locals}
 
-    expected = rendering.clone.merge(
+    expected = rendering.merge(
       layout: "superglue/layouts/fragment",
       locals: locals.merge({
         broadcast_targets: ["messages"],
