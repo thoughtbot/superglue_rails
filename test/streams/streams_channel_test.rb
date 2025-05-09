@@ -1,15 +1,14 @@
-require 'test_helper'
-require 'action_cable'
+require "test_helper"
+require "action_cable"
 
 class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   # include Superglue::Streams::ActionHelper
   include ActiveJob::TestHelper
 
-  test 'verified stream name' do
-    assert_equal 'stream',
-                 Superglue::StreamsChannel.verified_stream_name(Superglue::StreamsChannel.signed_stream_name('stream'))
+  test "verified stream name" do
+    assert_equal "stream",
+      Superglue::StreamsChannel.verified_stream_name(Superglue::StreamsChannel.signed_stream_name("stream"))
   end
-
 
   def render_message(options)
     ApplicationController.render(formats: [:json], **options)
@@ -31,16 +30,22 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
 
-  test 'broadcasting replace now' do
-    options = { partial: 'messages/message', locals: { message: 'hello!' }, layout: "superglue/layouts/fragment" }
+  test "broadcasting replace now" do
+    locals = {message: "hello!"}
+    options = {partial: "messages/message", locals: locals}
 
-    assert_broadcast_on 'stream', render_message(options) do
-      Superglue::StreamsChannel.broadcast_replace_to 'stream', target: 'message_1', **options
+    expected_options = options.clone.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["message_1"],
+        broadcast_action: "replace",
+        broadcast_attributes: {}
+      })
+    )
+
+    assert_broadcast_on "stream", render_message(expected_options) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", target: "message_1", **options
     end
-
-    # assert_broadcast_on 'stream', turbo_stream_action_tag('replace', targets: '.message', template: render(options)) do
-    #   Superglue::StreamsChannel.broadcast_replace_to 'stream', targets: '.message', **options
-    # end
   end
 
   # test 'broadcasting update now' do

@@ -38,6 +38,12 @@ module Superglue::Streams::Broadcasts
   # end
 
   def broadcast_action_to(*streamables, action:, target: nil, targets: nil, attributes: {}, **rendering)
+    locals = rendering[:locals] || {}
+    locals[:broadcast_targets] = Array(target || targets)
+    locals[:broadcast_action] = action
+    locals[:broadcast_attributes] = attributes
+    rendering[:locals] = locals
+
     broadcast_stream_to(*streamables, content: render_broadcast_action(rendering))
   end
 
@@ -109,7 +115,7 @@ module Superglue::Streams::Broadcasts
   private
 
   def render_format(format, **rendering)
-    rendering[:layout] = "superglue/layouts/fragment"
+    rendering[:layout] = 'superglue/layouts/fragment'
     ApplicationController.render(formats: [format], **rendering)
   end
 
