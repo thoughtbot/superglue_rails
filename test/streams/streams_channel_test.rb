@@ -93,17 +93,27 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
 
-  # test 'broadcasting prepend now' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting prepend now" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('prepend', target: 'messages', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_prepend_to 'stream', target: 'messages', **options
-  #   end
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["messages"],
+        broadcast_action: "prepend",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('prepend', targets: '.message', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_prepend_to 'stream', targets: '.message', **options
-  #   end
-  # end
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_prepend_to "stream", target: "messages", **rendering
+    end
+
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_prepend_to "stream", targets: ["messages"], **rendering
+    end
+  end
 
   # test 'broadcasting action now' do
   #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
