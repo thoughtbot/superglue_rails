@@ -139,23 +139,31 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
 
-  # test 'broadcasting replace later' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting replace later" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_replace_later_to \
-  #         'stream', target: 'message_1', **options
-  #     end
-  #   end
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["message_1"],
+        broadcast_action: "replace",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', targets: '.message', template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_replace_later_to \
-  #         'stream', targets: '.message', **options
-  #     end
-  #   end
-  # end
+    assert_broadcast_on "stream", render_message(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_replace_later_to "stream", target: "message_1", **rendering
+      end
+    end
+
+    assert_broadcast_on "stream", render_message(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_replace_later_to "stream", targets: ["message_1"], **rendering
+      end
+    end
+  end
 
   # test 'broadcasting update later' do
   #   options = { partial: 'messages/message', locals: { message: 'hello!' } }

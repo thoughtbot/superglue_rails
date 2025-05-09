@@ -29,9 +29,9 @@ module Superglue::Streams::Broadcasts
     broadcast_action_to(*streamables, action: :append, **opts)
   end
 
-  # def broadcast_prepend_to(*streamables, **opts)
-  #   broadcast_action_to(*streamables, action: :prepend, **opts)
-  # end
+  def broadcast_prepend_to(*streamables, **opts)
+    broadcast_action_to(*streamables, action: :prepend, **opts)
+  end
 
   # def broadcast_refresh_to(*streamables, **opts)
   #   broadcast_stream_to(*streamables, content: superglue_stream_refresh_tag)
@@ -47,9 +47,9 @@ module Superglue::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: render_broadcast_action(rendering))
   end
 
-  # def broadcast_replace_later_to(*streamables, **opts)
-  #   broadcast_action_later_to(*streamables, action: :replace, **opts)
-  # end
+  def broadcast_replace_later_to(*streamables, **opts)
+    broadcast_action_later_to(*streamables, action: :replace, **opts)
+  end
 
   # def broadcast_update_later_to(*streamables, **opts)
   #   broadcast_action_later_to(*streamables, action: :update, **opts)
@@ -79,17 +79,17 @@ module Superglue::Streams::Broadcasts
   #   end
   # end
 
-  # def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
-  #   streamables.flatten!
-  #   streamables.compact_blank!
+  def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
+    streamables.flatten!
+    streamables.compact_blank!
 
-  #   return unless streamables.present?
+    return unless streamables.present?
 
-  #   target = convert_to_superglue_stream_dom_id(target)
-  #   targets = convert_to_superglue_stream_dom_id(targets, include_selector: true)
-  #   Superglue::Streams::ActionBroadcastJob.perform_later \
-  #     stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
-  # end
+    # target = convert_to_superglue_stream_dom_id(target)
+    # targets = convert_to_superglue_stream_dom_id(targets, include_selector: true)
+    Superglue::Streams::ActionBroadcastJob.perform_later \
+      stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
+  end
 
   # def broadcast_render_to(*streamables, **rendering)
   #   broadcast_stream_to(*streamables, content: render_format(:superglue_stream, **rendering))
