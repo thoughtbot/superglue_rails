@@ -10,6 +10,11 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
                  Superglue::StreamsChannel.verified_stream_name(Superglue::StreamsChannel.signed_stream_name('stream'))
   end
 
+
+  def render_message(options)
+    ApplicationController.render(formats: [:json], **options)
+  end
+
   # test 'broadcasting remove now' do
   #   assert_broadcast_on 'stream', turbo_stream_action_tag('remove', target: 'message_1') do
   #     Superglue::StreamsChannel.broadcast_remove_to 'stream', target: 'message_1'
@@ -27,9 +32,9 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   # end
 
   test 'broadcasting replace now' do
-    options = { partial: 'messages/message', locals: { message: 'hello!' } }
+    options = { partial: 'messages/message', locals: { message: 'hello!' }, layout: "superglue/layouts/fragment" }
 
-    assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: render(options)) do
+    assert_broadcast_on 'stream', render_message(options) do
       Superglue::StreamsChannel.broadcast_replace_to 'stream', target: 'message_1', **options
     end
 

@@ -38,9 +38,7 @@ module Superglue::Streams::Broadcasts
   # end
 
   def broadcast_action_to(*streamables, action:, target: nil, targets: nil, attributes: {}, **rendering)
-    broadcast_stream_to(*streamables, content: superglue_stream_action_tag(
-      action, target: target, targets: targets, template: render_broadcast_action(rendering), **attributes
-    ))
+    broadcast_stream_to(*streamables, content: render_broadcast_action(rendering))
   end
 
   # def broadcast_replace_later_to(*streamables, **opts)
@@ -111,6 +109,7 @@ module Superglue::Streams::Broadcasts
   private
 
   def render_format(format, **rendering)
+    rendering[:layout] = "superglue/layouts/fragment"
     ApplicationController.render(formats: [format], **rendering)
   end
 
@@ -122,7 +121,7 @@ module Superglue::Streams::Broadcasts
     if render == false
       nil
     else
-      content || html || (render_format(:html, **rendering) if rendering.present?)
+      content || html || (render_format(:json, **rendering) if rendering.present?)
     end
   end
 end
