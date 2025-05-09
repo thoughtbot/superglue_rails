@@ -32,19 +32,23 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
 
   test "broadcasting replace now" do
     locals = {message: "hello!"}
-    options = {partial: "messages/message", locals: locals}
+    rendering = {partial: "messages/message", locals: locals}
 
-    expected_options = options.clone.merge(
+    expected = rendering.clone.merge(
       layout: "superglue/layouts/fragment",
       locals: locals.merge({
         broadcast_targets: ["message_1"],
         broadcast_action: "replace",
-        broadcast_attributes: {}
+        broadcast_options: {}
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected_options) do
-      Superglue::StreamsChannel.broadcast_replace_to "stream", target: "message_1", **options
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", target: "message_1", **rendering
+    end
+
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", targets: ["message_1"], **rendering
     end
   end
 
@@ -60,17 +64,27 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
 
-  # test 'broadcasting append now' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting append now" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('append', target: 'messages', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_append_to 'stream', target: 'messages', **options
-  #   end
+    expected = rendering.clone.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["messages"],
+        broadcast_action: "append",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('append', targets: '.message', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_append_to 'stream', targets: '.message', **options
-  #   end
-  # end
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_append_to "stream", target: "messages", **rendering
+    end
+
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_append_to "stream", targets: ["messages"], **rendering
+    end
+  end
 
   # test 'broadcasting append now with empty template' do
   #   assert_broadcast_on 'stream',

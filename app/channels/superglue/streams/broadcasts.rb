@@ -25,9 +25,9 @@ module Superglue::Streams::Broadcasts
   #   broadcast_action_to(*streamables, action: :after, **opts)
   # end
 
-  # def broadcast_append_to(*streamables, **opts)
-  #   broadcast_action_to(*streamables, action: :append, **opts)
-  # end
+  def broadcast_append_to(*streamables, **opts)
+    broadcast_action_to(*streamables, action: :append, **opts)
+  end
 
   # def broadcast_prepend_to(*streamables, **opts)
   #   broadcast_action_to(*streamables, action: :prepend, **opts)
@@ -37,11 +37,11 @@ module Superglue::Streams::Broadcasts
   #   broadcast_stream_to(*streamables, content: superglue_stream_refresh_tag)
   # end
 
-  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, attributes: {}, **rendering)
+  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}
     locals[:broadcast_targets] = Array(target || targets)
     locals[:broadcast_action] = action
-    locals[:broadcast_attributes] = attributes
+    locals[:broadcast_options] = options
     rendering[:locals] = locals
 
     broadcast_stream_to(*streamables, content: render_broadcast_action(rendering))
@@ -79,7 +79,7 @@ module Superglue::Streams::Broadcasts
   #   end
   # end
 
-  # def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, attributes: {}, **rendering)
+  # def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
   #   streamables.flatten!
   #   streamables.compact_blank!
 
@@ -88,7 +88,7 @@ module Superglue::Streams::Broadcasts
   #   target = convert_to_superglue_stream_dom_id(target)
   #   targets = convert_to_superglue_stream_dom_id(targets, include_selector: true)
   #   Superglue::Streams::ActionBroadcastJob.perform_later \
-  #     stream_name_from(streamables), action: action, target: target, targets: targets, attributes: attributes, **rendering
+  #     stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
   # end
 
   # def broadcast_render_to(*streamables, **rendering)
@@ -115,14 +115,14 @@ module Superglue::Streams::Broadcasts
   private
 
   def render_format(format, **rendering)
-    rendering[:layout] = 'superglue/layouts/fragment'
+    rendering[:layout] = "superglue/layouts/fragment"
     ApplicationController.render(formats: [format], **rendering)
   end
 
   def render_broadcast_action(rendering)
-    content = rendering.delete(:content)
-    html    = rendering.delete(:html)
-    render  = rendering.delete(:render)
+    content = rendering.delete(:content) # i should remove content
+    html = rendering.delete(:html) # i should add json and stringify it
+    render = rendering.delete(:render)
 
     if render == false
       nil

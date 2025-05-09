@@ -8,4 +8,4 @@ json.fragments json.fragments!
 json.type "message"
 json.action broadcast_action
 json.targets broadcast_targets
-json.attributes broadcast_attributes
+json.attributes broadcast_options
