@@ -235,30 +235,44 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  # test 'broadcasting refresh later' do
-  #   assert_broadcast_on 'stream', turbo_stream_refresh_tag do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_refresh_later_to 'stream'
-  #       Superglue::StreamsChannel.refresh_debouncer_for('stream').wait
-  #     end
-  #   end
+  test "broadcasting refresh later" do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: nil,
+      options: {}
+    }
 
-  #   Turbo.current_request_id = '123'
-  #   assert_broadcast_on 'stream', turbo_stream_refresh_tag(request_id: '123') do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_refresh_later_to 'stream'
-  #       Superglue::StreamsChannel.refresh_debouncer_for('stream', request_id: '123').wait
-  #     end
-  #   end
-  # end
+    assert_broadcast_on "stream", JSON.generate(content) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+        Superglue::StreamsChannel.refresh_debouncer_for("stream").wait
+      end
+    end
 
-  # test 'broadcasting refresh later is debounced' do
-  #   assert_broadcast_on 'stream', turbo_stream_refresh_tag do
-  #     assert_broadcasts('stream', 1) do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: "123",
+      options: {}
+    }
+
+    Superglue.current_request_id = "123"
+    assert_broadcast_on "stream", JSON.generate(content) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+        Superglue::StreamsChannel.refresh_debouncer_for("stream", request_id: "123").wait
+      end
+    end
+  end
+
+  # test "broadcasting refresh later is debounced" do
+  #   assert_broadcast_on "stream", "hi" do
+  #     assert_broadcasts("stream", 1) do
   #       perform_enqueued_jobs do
-  #         Superglue::StreamsChannel.broadcast_refresh_later_to 'stream'
+  #         Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
 
-  #         Superglue::StreamsChannel.refresh_debouncer_for('stream').wait
+  #         Superglue::StreamsChannel.refresh_debouncer_for("stream").wait
   #       end
   #     end
   #   end

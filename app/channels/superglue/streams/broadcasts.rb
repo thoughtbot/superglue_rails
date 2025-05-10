@@ -63,6 +63,8 @@ module Superglue::Streams::Broadcasts
   #   broadcast_action_later_to(*streamables, action: :after, **opts)
   # end
 
+  ### convert_to_turbo_stream_dom_id ican use this as the fragment name!
+
   def broadcast_append_later_to(*streamables, **opts)
     broadcast_action_later_to(*streamables, action: :append, **opts)
   end
@@ -71,13 +73,20 @@ module Superglue::Streams::Broadcasts
     broadcast_action_later_to(*streamables, action: :prepend, **opts)
   end
 
-  # def broadcast_refresh_later_to(*streamables, request_id: Superglue.current_request_id, **opts)
-  #   stream_name = stream_name_from(streamables)
+  def broadcast_refresh_later_to(*streamables, request_id: Superglue.current_request_id, **opts)
+    stream_name = stream_name_from(streamables)
 
-  #   refresh_debouncer_for(*streamables, request_id: request_id).debounce do
-  #     Superglue::Streams::BroadcastStreamJob.perform_later stream_name, content: superglue_stream_refresh_tag(request_id: request_id, **opts).to_str # Sidekiq requires job arguments to be valid JSON types, such as String
-  #   end
-  # end
+    refresh_debouncer_for(*streamables, request_id: request_id).debounce do
+      content = JSON.generate({
+        type: "message",
+        action: "refresh",
+        requestId: request_id,
+        options: opts
+      })
+
+      Superglue::Streams::BroadcastStreamJob.perform_later stream_name, content: content
+    end
+  end
 
   def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
     streamables.flatten!
@@ -85,8 +94,6 @@ module Superglue::Streams::Broadcasts
 
     return unless streamables.present?
 
-    # target = convert_to_superglue_stream_dom_id(target)
-    # targets = convert_to_superglue_stream_dom_id(targets, include_selector: true)
     Superglue::Streams::ActionBroadcastJob.perform_later \
       stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
   end
@@ -108,9 +115,9 @@ module Superglue::Streams::Broadcasts
     ActionCable.server.broadcast stream_name_from(streamables), content
   end
 
-  # def refresh_debouncer_for(*streamables, request_id: nil) # :nodoc:
-  #   Superglue::ThreadDebouncer.for("superglue-refresh-debouncer-#{stream_name_from(streamables.including(request_id))}")
-  # end
+  def refresh_debouncer_for(*streamables, request_id: nil) # :nodoc:
+    Superglue::ThreadDebouncer.for("superglue-refresh-debouncer-#{stream_name_from(streamables.including(request_id))}")
+  end
 
   private
 
