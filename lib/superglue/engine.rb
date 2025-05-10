@@ -20,17 +20,18 @@ module Superglue
         next if self != ActionController::Base
 
         include Controller
+        include Superglue::RequestIdTracking
 
         prepend_view_path(
-          Superglue::Resolver.new(Rails.root.join('app/views'))
+          Superglue::Resolver.new(Rails.root.join("app/views"))
         )
       end
     end
 
-    initializer 'superglue.signed_stream_verifier_key' do
+    initializer "superglue.signed_stream_verifier_key" do
       config.after_initialize do
         Superglue.signed_stream_verifier_key = config.superglue.signed_stream_verifier_key ||
-                                               Rails.application.key_generator.generate_key('superglue/signed_stream_verifier_key')
+          Rails.application.key_generator.generate_key("superglue/signed_stream_verifier_key")
       end
     end
   end
