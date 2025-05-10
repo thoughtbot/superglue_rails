@@ -14,7 +14,7 @@ class ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   setup do
-    # Turbo.current_request_id = nil
+    Superglue.current_request_id = nil
   end
 end
 
@@ -25,4 +25,3 @@ end
 class ActionCable::Channel::TestCase
   include ActionViewTestCaseExtensions
 end
-

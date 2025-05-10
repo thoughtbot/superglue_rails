@@ -266,17 +266,24 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  # test "broadcasting refresh later is debounced" do
-  #   assert_broadcast_on "stream", "hi" do
-  #     assert_broadcasts("stream", 1) do
-  #       perform_enqueued_jobs do
-  #         Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+  test "broadcasting refresh later is debounced" do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: nil,
+      options: {}
+    }
 
-  #         Superglue::StreamsChannel.refresh_debouncer_for("stream").wait
-  #       end
-  #     end
-  #   end
-  # end
+    assert_broadcast_on "stream", JSON.generate(content) do
+      assert_broadcasts("stream", 1) do
+        perform_enqueued_jobs do
+          Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+
+          Superglue::StreamsChannel.refresh_debouncer_for("stream").wait
+        end
+      end
+    end
+  end
 
   # test 'broadcasting refresh later is debounced considering the current request id' do
   #   assert_broadcasts('stream', 2) do
