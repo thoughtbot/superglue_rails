@@ -115,29 +115,39 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  # test 'broadcasting action now' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting action now" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('prepend', target: 'messages', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_action_to 'stream', action: 'prepend', target: 'messages', **options
-  #   end
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["messages"],
+        broadcast_action: "prepend",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream', turbo_stream_action_tag('prepend', targets: '.message', template: render(options)) do
-  #     Superglue::StreamsChannel.broadcast_action_to 'stream', action: 'prepend', targets: '.message', **options
-  #   end
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", target: "messages", **rendering
+    end
 
-  #   assert_broadcast_on 'stream',
-  #                       turbo_stream_action_tag('prepend', targets: '.message', template: '<span>test</span>') do
-  #     Superglue::StreamsChannel.broadcast_action_to 'stream', action: 'prepend', targets: '.message',
-  #                                                             content: '<span>test</span>'
-  #   end
+    assert_broadcast_on "stream", render_message(expected) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: "messages", **rendering
+    end
 
-  #   assert_broadcast_on 'stream',
-  #                       turbo_stream_action_tag('prepend', targets: '.message', template: '<span>test</span>') do
-  #     Superglue::StreamsChannel.broadcast_action_to 'stream', action: 'prepend', targets: '.message',
-  #                                                             html: '<span>test</span>'
-  #   end
-  # end
+    # assert_broadcast_on "stream",
+    #   turbo_stream_action_tag("prepend", targets: ".message", template: "<span>test</span>") do
+    #   Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ".message",
+    #     content: "<span>test</span>"
+    # end
+
+    # assert_broadcast_on "stream",
+    #   turbo_stream_action_tag("prepend", targets: ".message", template: "<span>test</span>") do
+    #   Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ".message",
+    #     html: "<span>test</span>"
+    # end
+  end
 
   test "broadcasting replace later" do
     locals = {message: "hello!"}
