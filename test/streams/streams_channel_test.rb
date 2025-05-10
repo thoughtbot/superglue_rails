@@ -285,24 +285,31 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  # test 'broadcasting refresh later is debounced considering the current request id' do
-  #   assert_broadcasts('stream', 2) do
-  #     perform_enqueued_jobs do
-  #       assert_broadcast_on 'stream', turbo_stream_refresh_tag("request-id": '123') do
-  #         assert_broadcast_on 'stream', turbo_stream_refresh_tag("request-id": '456') do
-  #           Turbo.current_request_id = '123'
-  #           3.times { Superglue::StreamsChannel.broadcast_refresh_later_to 'stream' }
+  test "broadcasting refresh later is debounced considering the current request id" do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: "123",
+      options: {}
+    }
+    assert_broadcasts("stream", 2) do
+      perform_enqueued_jobs do
+        assert_broadcast_on "stream", JSON.generate(content) do
+          content[:requestId] = "456"
+          assert_broadcast_on "stream", JSON.generate(content) do
+            Superglue.current_request_id = "123"
+            3.times { Superglue::StreamsChannel.broadcast_refresh_later_to "stream" }
 
-  #           Turbo.current_request_id = '456'
-  #           3.times { Superglue::StreamsChannel.broadcast_refresh_later_to 'stream' }
+            Superglue.current_request_id = "456"
+            3.times { Superglue::StreamsChannel.broadcast_refresh_later_to "stream" }
 
-  #           Superglue::StreamsChannel.refresh_debouncer_for('stream', request_id: '123').wait
-  #           Superglue::StreamsChannel.refresh_debouncer_for('stream', request_id: '456').wait
-  #         end
-  #       end
-  #     end
-  #   end
-  # end
+            Superglue::StreamsChannel.refresh_debouncer_for("stream", request_id: "123").wait
+            Superglue::StreamsChannel.refresh_debouncer_for("stream", request_id: "456").wait
+          end
+        end
+      end
+    end
+  end
 
   # test 'broadcasting action later' do
   #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
