@@ -100,8 +100,9 @@ module Superglue::Streams::Broadcasts
 
     return unless streamables.present?
 
-    target = convert_to_turbo_stream_dom_id(target)
-    targets = convert_to_turbo_stream_dom_id(targets, include_selector: true)
+    targets = (target ? [target] : targets).map do |item|
+      convert_to_superglue_fragment_id(item)
+    end
 
     Superglue::Streams::ActionBroadcastJob.perform_later \
       stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering

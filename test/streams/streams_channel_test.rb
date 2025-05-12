@@ -133,7 +133,7 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
 
     assert_broadcast_on "stream", render_message(expected) do
-      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: "messages", **rendering
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ["messages"], **rendering
     end
 
     # assert_broadcast_on "stream",
@@ -344,7 +344,7 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     assert_broadcast_on "stream", render_message(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
-          "stream", action: "prepend", targets: "messages", **rendering
+          "stream", action: "prepend", targets: ["messages"], **rendering
       end
     end
   end
