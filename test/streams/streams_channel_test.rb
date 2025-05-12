@@ -10,9 +10,9 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       Superglue::StreamsChannel.verified_stream_name(Superglue::StreamsChannel.signed_stream_name("stream"))
   end
 
-  def render_message(options)
-    ApplicationController.render(formats: [:json], **options)
-  end
+  # def render(options)
+  #   ApplicationController.render(formats: [:json], **options)
+  # end
 
   # test 'broadcasting remove now' do
   #   assert_broadcast_on 'stream', turbo_stream_action_tag('remove', target: 'message_1') do
@@ -43,11 +43,11 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_replace_to "stream", target: "message_1", **rendering
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_replace_to "stream", targets: ["message_1"], **rendering
     end
   end
@@ -77,11 +77,11 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_append_to "stream", target: "messages", **rendering
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_append_to "stream", targets: ["messages"], **rendering
     end
   end
@@ -106,11 +106,11 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_prepend_to "stream", target: "messages", **rendering
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_prepend_to "stream", targets: ["messages"], **rendering
     end
   end
@@ -128,11 +128,11 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", target: "messages", **rendering
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ["messages"], **rendering
     end
 
@@ -162,13 +162,13 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_replace_later_to "stream", target: "message_1", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_replace_later_to "stream", targets: ["message_1"], **rendering
       end
@@ -206,13 +206,13 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_append_later_to "stream", target: "messages", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_append_later_to "stream", targets: ["messages"], **rendering
       end
@@ -232,13 +232,13 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_prepend_later_to "stream", target: "messages", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_prepend_later_to "stream", targets: ["messages"], **rendering
       end
@@ -334,14 +334,14 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
       })
     )
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
           "stream", action: "prepend", target: "messages", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_message(expected) do
+    assert_broadcast_on "stream", render(expected) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
           "stream", action: "prepend", targets: ["messages"], **rendering
