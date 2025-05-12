@@ -39,7 +39,13 @@ module Superglue::Streams::Broadcasts
 
   def broadcast_action_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}
-    locals[:broadcast_targets] = Array(target || targets)
+    targets = (target ? [target] : targets)
+
+    targets = targets.map do |item|
+      convert_to_superglue_fragment_id(item)
+    end
+
+    locals[:broadcast_targets] = targets
     locals[:broadcast_action] = action
     locals[:broadcast_options] = options
     rendering[:locals] = locals
@@ -94,6 +100,9 @@ module Superglue::Streams::Broadcasts
 
     return unless streamables.present?
 
+    target = convert_to_turbo_stream_dom_id(target)
+    targets = convert_to_turbo_stream_dom_id(targets, include_selector: true)
+
     Superglue::Streams::ActionBroadcastJob.perform_later \
       stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
   end
@@ -120,6 +129,15 @@ module Superglue::Streams::Broadcasts
   end
 
   private
+
+  def convert_to_superglue_fragment_id(target, include_selector: false)
+    target_array = Array.wrap(target)
+    if target_array.any? { |value| value.respond_to?(:to_key) }
+      ActionView::RecordIdentifier.dom_id(*target_array)
+    else
+      target
+    end
+  end
 
   def render_format(format, **rendering)
     rendering[:layout] = "superglue/layouts/fragment"
