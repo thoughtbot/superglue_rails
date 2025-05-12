@@ -104,8 +104,11 @@ module Superglue::Streams::Broadcasts
       convert_to_superglue_fragment_id(item)
     end
 
+    # bugs
+    # ActionBroadcastJOB doesn't take in targets
+    # targets does not work with multi ids
     Superglue::Streams::ActionBroadcastJob.perform_later \
-      stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
+      stream_name_from(streamables), action: action, targets: targets, options: options, **rendering
   end
 
   # def broadcast_render_to(*streamables, **rendering)

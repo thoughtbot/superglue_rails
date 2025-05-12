@@ -349,21 +349,29 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  # test 'broadcasting action later with ActiveModel array target' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting action later with ActiveModel array target" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   message = Message.new(id: 42)
-  #   target = [message, 'opt']
-  #   expected_target = 'opt_message_42'
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["opt_message_42"],
+        broadcast_action: "prepend",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream',
-  #                       turbo_stream_action_tag('prepend', target: expected_target, template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_action_later_to \
-  #         'stream', action: 'prepend', target: target, **options
-  #     end
-  #   end
-  # end
+    message = Message.new(id: 42)
+    target = [message, "opt"]
+
+    assert_broadcast_on "stream", render(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_action_later_to \
+          "stream", action: "prepend", target: target, **rendering
+      end
+    end
+  end
 
   # test 'broadcasting action later with multiple ActiveModel targets' do
   #   options = { partial: 'messages/message', locals: { message: 'hello!' } }

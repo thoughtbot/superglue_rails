@@ -1,4 +1,4 @@
-json.disable_deferments!
+# json.disable_deferments!
 
 json.data do
   yield
