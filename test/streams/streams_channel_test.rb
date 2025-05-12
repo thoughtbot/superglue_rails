@@ -373,21 +373,30 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  # test 'broadcasting action later with multiple ActiveModel targets' do
-  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+  test "broadcasting action later with multiple ActiveModel targets" do
+    locals = {message: "hello!"}
+    rendering = {partial: "messages/message", locals: locals}
 
-  #   one = Message.new(id: 1)
-  #   targets = [one, 'messages']
-  #   expected_targets = '#messages_message_1'
+    expected = rendering.merge(
+      layout: "superglue/layouts/fragment",
+      locals: locals.merge({
+        broadcast_targets: ["msg_message_1", "msg_message_2"],
+        broadcast_action: "prepend",
+        broadcast_options: {}
+      })
+    )
 
-  #   assert_broadcast_on 'stream',
-  #                       turbo_stream_action_tag('prepend', targets: expected_targets, template: render(options)) do
-  #     perform_enqueued_jobs do
-  #       Superglue::StreamsChannel.broadcast_action_later_to \
-  #         'stream', action: 'prepend', targets: targets, **options
-  #     end
-  #   end
-  # end
+    one = Message.new(id: 1)
+    two = Message.new(id: 2)
+    targets = [[one, "msg"], [two, "msg"]]
+
+    assert_broadcast_on "stream", render(expected) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_action_later_to \
+          "stream", action: "prepend", targets: targets, **rendering
+      end
+    end
+  end
 
   # test 'broadcasting render now' do
   #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: 'Goodbye!') do
