@@ -30,21 +30,6 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   #   end
   # end
   #
-
-  def render_props(action, partial:, locals: {}, target: nil, targets: nil, options: {})
-    targets = target ? [target] : targets
-
-    render({
-      partial: partial,
-      layout: "superglue/layouts/fragment",
-      locals: locals.merge({
-        broadcast_targets: targets,
-        broadcast_action: action,
-        broadcast_options: options
-      })
-    })
-  end
-
   test "broadcasting replace now" do
     rendering = {partial: "messages/message", locals: {message: "hello!"}}
 
