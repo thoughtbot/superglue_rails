@@ -33,6 +33,7 @@ module Superglue::Streams::Broadcasts
     broadcast_action_to(*streamables, action: :prepend, **opts)
   end
 
+  # i think we need to keep this?
   # def broadcast_refresh_to(*streamables, **opts)
   #   broadcast_stream_to(*streamables, content: superglue_stream_refresh_tag)
   # end
