@@ -55,19 +55,19 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # end
 
   test "broadcasting replace to stream now" do
-    assert_broadcast_on "stream", render_props("replace", target: "message_1", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("replace", target: "message_1", partial: @message.to_partial_path) do
       @message.broadcast_replace_to "stream"
     end
   end
 
   test "broadcasting replace now" do
-    assert_broadcast_on @message.to_gid_param, render_props("replace", target: "message_1", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("replace", target: "message_1", partial: @message.to_partial_path) do
       @message.broadcast_replace
     end
   end
 
   # test "broadcasting update to stream now" do
-  #   assert_broadcast_on "stream", render_props("update", target: "message_1", template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("update", target: "message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_update_to "stream"
   #   end
   # end
@@ -79,55 +79,55 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # end
 
   # test "broadcasting update now" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_update
   #   end
   # end
 
   # test "broadcasting before to stream now" do
-  #   assert_broadcast_on "stream", render_props("before", target: "message_1", template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("before", target: "message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_before_to "stream", target: "message_1"
   #   end
   # end
 
   # test "broadcasting after to stream now" do
-  #   assert_broadcast_on "stream", render_props("after", target: "message_1", template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("after", target: "message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_after_to "stream", target: "message_1"
   #   end
   # end
 
   test "broadcasting append to stream now" do
-    assert_broadcast_on "stream", render_props("append", target: "messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("append", target: "messages", partial: @message.to_partial_path) do
       @message.broadcast_append_to "stream"
     end
   end
 
   test "broadcasting append to stream with custom target now" do
-    assert_broadcast_on "stream", render_props("append", target: "board_messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("append", target: "board_messages", partial: @message.to_partial_path) do
       @message.broadcast_append_to "stream", target: "board_messages"
     end
   end
 
   test "broadcasting append now" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", target: "messages", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", target: "messages", partial: @message.to_partial_path) do
       @message.broadcast_append
     end
   end
 
   test "broadcasting prepend to stream now" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path) do
       @message.broadcast_prepend_to "stream"
     end
   end
 
   test "broadcasting prepend to stream with custom target now" do
-    assert_broadcast_on "stream", render_props("prepend", target: "board_messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("prepend", target: "board_messages", partial: @message.to_partial_path) do
       @message.broadcast_prepend_to "stream", target: "board_messages"
     end
   end
 
   test "broadcasting prepend now" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path) do
       @message.broadcast_prepend
     end
   end
@@ -167,13 +167,13 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting action to stream now" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path) do
       @message.broadcast_action_to "stream", action: "prepend"
     end
   end
 
   test "broadcasting action now" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path) do
       @message.broadcast_action "prepend"
     end
   end
@@ -251,7 +251,7 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
 
   test "local variables don't get overwritten if they collide with the template name" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, render_props("replace", target: "users_profile_1", template: render(@message)) do
+    assert_broadcast_on @profile.to_param, render_props("replace", target: "users_profile_1", partial: @message.to_partial_path) do
       @profile.broadcast_replace partial: "messages/message", locals: {message: @message}
     end
   end
@@ -270,73 +270,73 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # end
 
   # test "broadcast_update to target string" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", partial: @message.to_partial_path) do
   #     @message.broadcast_update target: "unique_id"
   #   end
   # end
 
   # test "broadcast_update to target object" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_update target: @message
   #   end
   # end
 
   # test "broadcast_update to targets" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_update targets: ".message_1"
   #   end
   # end
 
   # test "broadcast_update_to to target string" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", partial: @message.to_partial_path) do
   #     @message.broadcast_update_to @message, target: "unique_id"
   #   end
   # end
 
   # test "broadcast_update_to to target object" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_update_to @message, target: @message
   #   end
   # end
 
   # test "broadcast_update_to to targets" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_update_to @message, targets: ".message_1"
   #   end
   # end
 
   test "broadcast_append to targets" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path) do
       @message.broadcast_append targets: ["message_1"]
     end
   end
 
   test "broadcast_remove targets" do
-    assert_broadcast_on @message.to_gid_param, render_props("remove", targets: ["message_1"], template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("remove", targets: ["message_1"], partial: @message.to_partial_path) do
       @message.broadcast_remove targets: ["message_1"]
     end
   end
 
   test "broadcast_append targets" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path) do
       @message.broadcast_append targets: ["message_1"]
     end
   end
 
   test "broadcast_prepend targets" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", targets: ["message_1"], template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", targets: ["message_1"], partial: @message.to_partial_path) do
       @message.broadcast_prepend targets: ["message_1"]
     end
   end
 
   # test "broadcast_before_to targets" do
-  #   assert_broadcast_on "stream", render_props("before", targets: ".message_1", template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("before", targets: ".message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_before_to "stream", targets: ".message_1"
   #   end
   # end
 
   # test "broadcast_after_to targets" do
-  #   assert_broadcast_on "stream", render_props("after", targets: ".message_1", template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("after", targets: ".message_1", partial: @message.to_partial_path) do
   #     @message.broadcast_after_to "stream", targets: ".message_1"
   #   end
   # end
@@ -344,12 +344,12 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # test "broadcast_update_later" do
   #   @message.save! # Need to save the record, otherwise Active Job will not be able to retrieve it
 
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", partial: @message.to_partial_path) do
   #     perform_enqueued_jobs do
   #       @message.broadcast_update_later target: "unique_id"
   #     end
   #   end
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", partial: @message.to_partial_path) do
   #     perform_enqueued_jobs do
   #       @message.broadcast_update_later targets: ".message_1"
   #     end
@@ -359,12 +359,12 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # test "broadcast_update_later_to" do
   #   @message.save!
 
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "unique_id", partial: @message.to_partial_path) do
   #     perform_enqueued_jobs do
   #       @message.broadcast_update_later_to @message, target: "unique_id"
   #     end
   #   end
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", targets: ".message_1", partial: @message.to_partial_path) do
   #     perform_enqueued_jobs do
   #       @message.broadcast_update_later_to @message, targets: ".message_1"
   #     end
@@ -372,25 +372,25 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # end
 
   # test "broadcasting replace morph to stream now" do
-  #   assert_broadcast_on "stream", render_props("replace", target: "message_1", method: :morph, template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("replace", target: "message_1", method: :morph, partial: @message.to_partial_path) do
   #     @message.broadcast_replace_to "stream", target: "message_1", attributes: {method: :morph}
   #   end
   # end
 
   # test "broadcasting update morph to stream now targeting" do
-  #   assert_broadcast_on "stream", render_props("update", target: "message_1", method: :morph, template: render(@message)) do
+  #   assert_broadcast_on "stream", render_props("update", target: "message_1", method: :morph, partial: @message.to_partial_path) do
   #     @message.broadcast_update_to "stream", target: "message_1", attributes: {method: :morph}
   #   end
   # end
 
   # test "broadcasting replace morph now" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("replace", target: "message_1", method: :morph, template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("replace", target: "message_1", method: :morph, partial: @message.to_partial_path) do
   #     @message.broadcast_replace target: "message_1", attributes: {method: :morph}
   #   end
   # end
 
   # test "broadcasting update morph now" do
-  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", method: :morph, template: render(@message)) do
+  #   assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", method: :morph, partial: @message.to_partial_path) do
   #     @message.broadcast_update target: "message_1", attributes: {method: :morph}
   #   end
   # end
@@ -498,7 +498,7 @@ class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
   end
 
   test "updating a board broadcasts to the models channel" do
-    board = Board.suppressing_turbo_broadcasts do
+    board = Board.suppressing_superglue_broadcasts do
       Board.create!(name: "Hey")
     end
 
@@ -511,7 +511,7 @@ class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
   end
 
   test "destroying a board broadcasts refreshes to the model channel" do
-    board = Board.suppressing_turbo_broadcasts do
+    board = Board.suppressing_superglue_broadcasts do
       Board.create!(name: "Hey")
     end
 
@@ -713,7 +713,7 @@ class Superglue::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
 
   def assert_no_broadcasts_when_suppressing
     assert_no_broadcasts @message.to_gid_param do
-      Message.suppressing_turbo_broadcasts do
+      Message.suppressing_superglue_broadcasts do
         yield
       end
     end
