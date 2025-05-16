@@ -150,14 +150,21 @@ module Superglue::Streams::Broadcasts
   end
 
   def render_broadcast_action(rendering)
-    content = rendering.delete(:content) # i should remove content
-    html = rendering.delete(:html) # i should add json and stringify it
+    # content = rendering.delete(:content) # i should remove content
+    # html = rendering.delete(:html) # i should add json and stringify it
     render = rendering.delete(:render)
+    json = rendering.delete(:json)
 
     if render == false
       nil
-    else
-      content || html || (render_format(:json, **rendering) if rendering.present?)
+    elsif rendering.present?
+      if json
+        rendering[:partial] = "superglue/body"
+        rendering[:locals] ||= {}
+        rendering[:locals][:broadcast_json] = json
+      end
+
+      render_format(:json, **rendering)
     end
   end
 end

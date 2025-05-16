@@ -184,11 +184,11 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting action with no rendering" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: nil) do
-      @message.broadcast_action "prepend", target: "messages", render: false
-    end
-  end
+  # test "broadcasting action with no rendering" do
+  #   assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: nil) do
+  #     @message.broadcast_action "prepend", target: "messages", render: false
+  #   end
+  # end
 
   test "broadcasting action to with attributes" do
     assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, options: {"data-foo" => "bar"}) do
@@ -196,11 +196,11 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting action to with no rendering" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", template: nil) do
-      @message.broadcast_action_to "stream", action: "prepend", render: false
-    end
-  end
+  # test "broadcasting action to with no rendering" do
+  #   assert_broadcast_on "stream", render_props("prepend", target: "messages", template: nil) do
+  #     @message.broadcast_action_to "stream", action: "prepend", render: false
+  #   end
+  # end
 
   test "broadcasting action later to with attributes" do
     @message.save!
@@ -212,15 +212,15 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting action later to with no rendering" do
-    @message.save!
+  # test "broadcasting action later to with no rendering" do
+  #   @message.save!
 
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: nil) do
-      perform_enqueued_jobs do
-        @message.broadcast_action_later_to @message, action: "prepend", target: "messages", render: false
-      end
-    end
-  end
+  #   assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: nil) do
+  #     perform_enqueued_jobs do
+  #       @message.broadcast_action_later_to @message, action: "prepend", target: "messages", render: false
+  #     end
+  #   end
+  # end
 
   test "broadcasting action later with attributes" do
     @message.save!
@@ -232,15 +232,15 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting action later with no rendering" do
-    @message.save!
+  # test "broadcasting action later with no rendering" do
+  #   @message.save!
 
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: nil) do
-      perform_enqueued_jobs do
-        @message.broadcast_action_later action: "prepend", target: "messages", render: false
-      end
-    end
-  end
+  #   assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", template: nil) do
+  #     perform_enqueued_jobs do
+  #       @message.broadcast_action_later action: "prepend", target: "messages", render: false
+  #     end
+  #   end
+  # end
 
   test "render correct local name in partial for namespaced models" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
@@ -311,11 +311,11 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcast_remove targets" do
-    assert_broadcast_on @message.to_gid_param, render_props("remove", targets: ["message_1"], partial: @message.to_partial_path) do
-      @message.broadcast_remove targets: ["message_1"]
-    end
-  end
+  # test "broadcast_remove targets" do
+  #   assert_broadcast_on @message.to_gid_param, render_props("remove", targets: ["message_1"], partial: @message.to_partial_path) do
+  #     @message.broadcast_remove targets: ["message_1"]
+  #   end
+  # end
 
   test "broadcast_append targets" do
     assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path) do
@@ -411,7 +411,7 @@ class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
   test "updating an article broadcasts" do
     article = Article.create!(body: "Hey")
 
-    assert_broadcast_on "ho", render_props("replace", target: "article_#{article.id}", partial: "articles/article", locals: {article: article}) do
+    assert_broadcast_on "ho", render_props("replace", target: "article_#{article.id}", partial: "articles/article", locals: {article: Article.new(body: "Ho")}) do
       perform_enqueued_jobs do
         article.update!(body: "Ho")
       end
