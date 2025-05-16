@@ -146,7 +146,7 @@ module Superglue::Broadcastable
   end
 
   def broadcast_refresh_later_to(*streamables)
-    Superglue::StreamsChannel.broadcast_refresh_later_to(*streamables, request_id: superglue.current_request_id) unless suppressed_superglue_broadcasts?
+    Superglue::StreamsChannel.broadcast_refresh_later_to(*streamables, request_id: Superglue.current_request_id) unless suppressed_superglue_broadcasts?
   end
 
   def broadcast_refresh_later

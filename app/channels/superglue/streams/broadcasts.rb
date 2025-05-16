@@ -33,10 +33,16 @@ module Superglue::Streams::Broadcasts
     broadcast_action_to(*streamables, action: :prepend, **opts)
   end
 
-  # i think we need to keep this?
-  # def broadcast_refresh_to(*streamables, **opts)
-  #   broadcast_stream_to(*streamables, content: superglue_stream_refresh_tag)
-  # end
+  def broadcast_refresh_to(*streamables, **opts)
+    request_id = Superglue.current_request_id
+    content = JSON.generate({
+      type: "message",
+      action: "refresh",
+      requestId: request_id,
+      options: opts
+    })
+    broadcast_stream_to(*streamables, content: content)
+  end
 
   def broadcast_action_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}

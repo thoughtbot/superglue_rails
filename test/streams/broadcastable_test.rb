@@ -2,6 +2,15 @@ require "test_helper"
 require "action_cable"
 require "minitest/mock"
 
+def render_refresh(request_id = nil)
+  JSON.generate({
+    type: "message",
+    action: "refresh",
+    requestId: request_id,
+    options: {}
+  })
+end
+
 class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   # include Superglue::Streams::ActionHelper
   include ActiveJob::TestHelper
@@ -133,13 +142,13 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting refresh to stream now" do
-    assert_broadcast_on "stream", turbo_stream_refresh_tag do
+    assert_broadcast_on "stream", render_refresh do
       @message.broadcast_refresh_to "stream"
     end
   end
 
   test "broadcasting refresh now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_refresh_tag do
+    assert_broadcast_on @message.to_gid_param, render_refresh do
       @message.broadcast_refresh
     end
   end
@@ -147,13 +156,13 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting refresh does not render contents" do
     message = MessageThatRendersError.new(id: 1)
 
-    assert_broadcast_on message.to_gid_param, render_props("refresh") do
+    assert_broadcast_on message.to_gid_param, render_refresh do
       message.broadcast_refresh
     end
   end
 
   test "broadcasting refresh later is debounced" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_refresh_tag do
+    assert_broadcast_on @message.to_gid_param, render_refresh do
       assert_broadcasts(@message.to_gid_param, 1) do
         perform_enqueued_jobs do
           assert_no_changes -> { Thread.current.keys.size } do
@@ -244,7 +253,7 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
 
   test "render correct local name in partial for namespaced models" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, render_props("replace", target: "users_profile_1", template: "<p>Ryan</p>\n") do
+    assert_broadcast_on @profile.to_param, render_props("replace", target: "users_profile_1", partial: @profile.to_partial_path, locals: {profile: @profile}) do
       @profile.broadcast_replace
     end
   end
@@ -489,7 +498,7 @@ class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
   include ActiveJob::TestHelper
 
   test "creating a board broadcasts refreshes to a channel using models plural name when creating" do
-    assert_broadcast_on "boards", render_props("refresh") do
+    assert_broadcast_on "boards", render_refresh do
       perform_enqueued_jobs do
         Board.create!(name: "Board")
         Superglue::StreamsChannel.refresh_debouncer_for(["boards"]).wait
