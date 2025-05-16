@@ -511,7 +511,7 @@ class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
       Board.create!(name: "Hey")
     end
 
-    assert_broadcast_on board.to_gid_param, render_props("refresh") do
+    assert_broadcast_on board.to_gid_param, render_refresh do
       perform_enqueued_jobs do
         board.update!(name: "Ho")
         Superglue::StreamsChannel.refresh_debouncer_for(board).wait
@@ -524,7 +524,7 @@ class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
       Board.create!(name: "Hey")
     end
 
-    assert_broadcast_on board.to_gid_param, render_props("refresh") do
+    assert_broadcast_on board.to_gid_param, render_refresh do
       board.destroy!
     end
   end
