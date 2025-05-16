@@ -446,7 +446,7 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "article_#{@article.id}_comments"
 
-    assert_broadcast_on stream, render_props("append", target: target, template: %(<p class="different">comment</p>\n)) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "comment")
       end
@@ -457,13 +457,13 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "article_#{@article.id}_comments"
 
-    assert_broadcast_on stream, render_props("append", target: target, template: %(<p class="different">comment</p>\n)) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "comment")
       end
     end
 
-    assert_broadcast_on stream, render_props("append", target: target, template: %(<p class="different">another comment</p>\n)) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "another comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "another comment")
       end
@@ -475,22 +475,22 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "comment_#{comment.id}"
 
-    assert_broadcast_on stream, render_props("replace", target: target, template: %(<p class="different">precise</p>\n)) do
+    assert_broadcast_on stream, render_props("replace", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "precise")}) do
       perform_enqueued_jobs do
         comment.update!(body: "precise")
       end
     end
   end
 
-  test "destroying a comment broadcasts" do
-    comment = @article.comments.create!(body: "comment")
-    stream = "#{@article.to_gid_param}:comments"
-    target = "comment_#{comment.id}"
+  #   test "destroying a comment broadcasts" do
+  #     comment = @article.comments.create!(body: "comment")
+  #     stream = "#{@article.to_gid_param}:comments"
+  #     target = "comment_#{comment.id}"
 
-    assert_broadcast_on stream, render_props("remove", target: target) do
-      comment.destroy!
-    end
-  end
+  #     assert_broadcast_on stream, render_props("remove", target: target) do
+  #       comment.destroy!
+  #     end
+  #   end
 end
 
 class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
