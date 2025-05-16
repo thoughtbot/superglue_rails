@@ -1,19 +1,41 @@
-require "rails"
-require "abstract_controller"
-require "abstract_controller/railties/routes_helpers"
-require "action_controller"
-require "superglue"
-require "active_support"
-require "active_record"
-require "active_support/testing/autorun"
-require "active_support/test_case"
+# Configure Rails Environment
+ENV["RAILS_ENV"] = "test"
+require_relative "../test/dummy/config/environment"
+ActiveRecord::Migrator.migrations_paths = [File.expand_path("../test/dummy/db/migrate", __dir__)]
+require "rails/test_help"
 
-require "props_template"
+ActionCable.server.config.logger = Logger.new(STDOUT) if ENV["VERBOSE"]
 
-ActiveSupport::TestCase.test_order = :random if ActiveSupport::TestCase.respond_to?(:test_order=)
-ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
-Rails.cache = ActiveSupport::Cache::MemoryStore.new
+module ActionViewTestCaseExtensions
+  delegate :render, to: ApplicationController
+end
 
-load File.dirname(__FILE__) + "/support/schema.rb"
-require "support/models"
-require "support/test_application"
+class ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
+  setup do
+    Superglue.current_request_id = nil
+  end
+end
+
+class ActionDispatch::IntegrationTest
+  include ActionViewTestCaseExtensions
+end
+
+class ActionCable::Channel::TestCase
+  include ActionViewTestCaseExtensions
+end
+
+def render_props(action, partial:, locals: {}, target: nil, targets: nil, options: {})
+  targets = target ? [target] : targets
+
+  render({
+    partial: partial,
+    layout: "superglue/layouts/fragment",
+    locals: locals.merge({
+      broadcast_targets: targets,
+      broadcast_action: action,
+      broadcast_options: options
+    })
+  })
+end

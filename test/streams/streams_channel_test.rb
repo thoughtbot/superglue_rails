@@ -1,0 +1,388 @@
+require "test_helper"
+require "action_cable"
+
+class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
+  # include Superglue::Streams::ActionHelper
+  include ActiveJob::TestHelper
+
+  test "verified stream name" do
+    assert_equal "stream",
+      Superglue::StreamsChannel.verified_stream_name(Superglue::StreamsChannel.signed_stream_name("stream"))
+  end
+
+  # def render(options)
+  #   ApplicationController.render(formats: [:json], **options)
+  # end
+
+  # test 'broadcasting remove now' do
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('remove', target: 'message_1') do
+  #     Superglue::StreamsChannel.broadcast_remove_to 'stream', target: 'message_1'
+  #   end
+
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('remove', targets: '.message') do
+  #     Superglue::StreamsChannel.broadcast_remove_to 'stream', targets: '.message'
+  #   end
+  # end
+
+  # test 'broadcasting remove now with record' do
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('remove', target: 'message_1') do
+  #     Superglue::StreamsChannel.broadcast_remove_to 'stream', target: Message.new(id: 1, content: 'hello!')
+  #   end
+  # end
+  #
+  test "broadcasting replace now" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("replace", target: "message_1", **rendering) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", target: "message_1", **rendering
+    end
+
+    assert_broadcast_on "stream", render_props("replace", targets: ["message_1"], **rendering) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", targets: ["message_1"], **rendering
+    end
+  end
+
+  # test 'broadcasting update now' do
+  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('update', target: 'message_1', template: render(options)) do
+  #     Superglue::StreamsChannel.broadcast_update_to 'stream', target: 'message_1', **options
+  #   end
+
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('update', targets: '.message', template: render(options)) do
+  #     Superglue::StreamsChannel.broadcast_update_to 'stream', targets: '.message', **options
+  #   end
+  # end
+
+  test "broadcasting append now" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("append", target: "messages", **rendering) do
+      Superglue::StreamsChannel.broadcast_append_to "stream", target: "messages", **rendering
+    end
+
+    assert_broadcast_on "stream", render_props("append", targets: ["messages"], **rendering) do
+      Superglue::StreamsChannel.broadcast_append_to "stream", targets: ["messages"], **rendering
+    end
+  end
+
+  # test 'broadcasting append now with empty template' do
+  #   assert_broadcast_on 'stream',
+  #                       %(<turbo-stream action="append" target="message_1"><template></template></turbo-stream>) do
+  #     Superglue::StreamsChannel.broadcast_append_to 'stream', target: 'message_1', content: ''
+  #   end
+  # end
+
+  test "broadcasting prepend now" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
+      Superglue::StreamsChannel.broadcast_prepend_to "stream", target: "messages", **rendering
+    end
+
+    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
+      Superglue::StreamsChannel.broadcast_prepend_to "stream", targets: ["messages"], **rendering
+    end
+  end
+
+  test "broadcasting action now" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", target: "messages", **rendering
+    end
+
+    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ["messages"], **rendering
+    end
+
+    # assert_broadcast_on "stream",
+    #   turbo_stream_action_tag("prepend", targets: ".message", template: "<span>test</span>") do
+    #   Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ".message",
+    #     content: "<span>test</span>"
+    # end
+
+    # assert_broadcast_on "stream",
+    #   turbo_stream_action_tag("prepend", targets: ".message", template: "<span>test</span>") do
+    #   Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ".message",
+    #     html: "<span>test</span>"
+    # end
+  end
+
+  test "broadcasting replace later" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("replace", target: "message_1", **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_replace_later_to "stream", target: "message_1", **rendering
+      end
+    end
+
+    assert_broadcast_on "stream", render_props("replace", targets: ["message_1"], **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_replace_later_to "stream", targets: ["message_1"], **rendering
+      end
+    end
+  end
+
+  # test 'broadcasting update later' do
+  #   options = { partial: 'messages/message', locals: { message: 'hello!' } }
+
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('update', target: 'message_1', template: render(options)) do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_update_later_to \
+  #         'stream', target: 'message_1', **options
+  #     end
+  #   end
+
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('update', targets: '.message', template: render(options)) do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_update_later_to \
+  #         'stream', targets: '.message', **options
+  #     end
+  #   end
+  # end
+
+  test "broadcasting append later" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("append", target: "messages", **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_append_later_to "stream", target: "messages", **rendering
+      end
+    end
+
+    assert_broadcast_on "stream", render_props("append", targets: ["messages"], **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_append_later_to "stream", targets: ["messages"], **rendering
+      end
+    end
+  end
+
+  test "broadcasting prepend later" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", target: "messages", **rendering
+      end
+    end
+
+    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", targets: ["messages"], **rendering
+      end
+    end
+  end
+
+  test "broadcasting refresh later" do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: nil,
+      options: {}
+    }
+
+    assert_broadcast_on "stream", JSON.generate(content) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+        Superglue::StreamsChannel.refresh_debouncer_for("stream").wait
+      end
+    end
+
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: "123",
+      options: {}
+    }
+
+    Superglue.current_request_id = "123"
+    assert_broadcast_on "stream", JSON.generate(content) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+        Superglue::StreamsChannel.refresh_debouncer_for("stream", request_id: "123").wait
+      end
+    end
+  end
+
+  test "broadcasting refresh later is debounced" do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: nil,
+      options: {}
+    }
+
+    assert_broadcast_on "stream", JSON.generate(content) do
+      assert_broadcasts("stream", 1) do
+        perform_enqueued_jobs do
+          Superglue::StreamsChannel.broadcast_refresh_later_to "stream"
+
+          Superglue::StreamsChannel.refresh_debouncer_for("stream").wait
+        end
+      end
+    end
+  end
+
+  test "broadcasting refresh later is debounced considering the current request id" do
+    content = {
+      type: "message",
+      action: "refresh",
+      requestId: "123",
+      options: {}
+    }
+    assert_broadcasts("stream", 2) do
+      perform_enqueued_jobs do
+        assert_broadcast_on "stream", JSON.generate(content) do
+          content[:requestId] = "456"
+          assert_broadcast_on "stream", JSON.generate(content) do
+            Superglue.current_request_id = "123"
+            3.times { Superglue::StreamsChannel.broadcast_refresh_later_to "stream" }
+
+            Superglue.current_request_id = "456"
+            3.times { Superglue::StreamsChannel.broadcast_refresh_later_to "stream" }
+
+            Superglue::StreamsChannel.refresh_debouncer_for("stream", request_id: "123").wait
+            Superglue::StreamsChannel.refresh_debouncer_for("stream", request_id: "456").wait
+          end
+        end
+      end
+    end
+  end
+
+  test "broadcasting action later" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_action_later_to \
+          "stream", action: "prepend", target: "messages", **rendering
+      end
+    end
+
+    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_action_later_to \
+          "stream", action: "prepend", targets: ["messages"], **rendering
+      end
+    end
+  end
+
+  test "broadcasting action later with ActiveModel array target" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    message = Message.new(id: 42)
+    target = [message, "opt"]
+
+    assert_broadcast_on "stream", render_props("prepend", target: "opt_message_42", **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_action_later_to \
+          "stream", action: "prepend", target: target, **rendering
+      end
+    end
+  end
+
+  test "broadcasting action later with multiple ActiveModel targets" do
+    rendering = {partial: "messages/message", locals: {message: "hello!"}}
+
+    one = Message.new(id: 1)
+    two = Message.new(id: 2)
+    targets = [[one, "msg"], [two, "msg"]]
+
+    assert_broadcast_on "stream", render_props("prepend", targets: ["msg_message_1", "msg_message_2"], **rendering) do
+      perform_enqueued_jobs do
+        Superglue::StreamsChannel.broadcast_action_later_to \
+          "stream", action: "prepend", targets: targets, **rendering
+      end
+    end
+  end
+
+  # test 'broadcasting render now' do
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: 'Goodbye!') do
+  #     Superglue::StreamsChannel.broadcast_render_to 'stream', partial: 'messages/message'
+  #   end
+  # end
+
+  # test 'broadcasting render later' do
+  #   assert_broadcast_on 'stream', turbo_stream_action_tag('replace', target: 'message_1', template: 'Goodbye!') do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_render_later_to 'stream', partial: 'messages/message'
+  #     end
+  #   end
+  # end
+
+  # test 'broadcasting direct update now' do
+  #   assert_broadcast_on 'stream', %(direct) do
+  #     Superglue::StreamsChannel.broadcast_stream_to 'stream', content: 'direct'
+  #   end
+  # end
+
+  # test 'broadcasting actions with method morph now' do
+  #   options = { attributes: { method: :morph }, partial: 'messages/message', locals: { message: 'hello!' } }
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('replace', target: 'message_1', method: :morph,
+  #                                                          template: render(options)) do
+  #     Superglue::StreamsChannel.broadcast_replace_to 'stream', target: 'message_1', **options
+  #   end
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('replace', targets: '.message', method: :morph,
+  #                                                          template: render(options)) do
+  #     Superglue::StreamsChannel.broadcast_replace_to 'stream', targets: '.message', **options
+  #   end
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('update', target: 'message_1', method: :morph,
+  #                                                         template: render(options)) do
+  #     Superglue::StreamsChannel.broadcast_update_to 'stream', target: 'message_1', **options
+  #   end
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('update', targets: '.message', method: :morph,
+  #                                                         template: render(options)) do
+  #     Superglue::StreamsChannel.broadcast_update_to 'stream', targets: '.message', **options
+  #   end
+  # end
+
+  # test 'broadcasting actions with method morph later' do
+  #   options = { attributes: { method: :morph }, partial: 'messages/message', locals: { message: 'hello!' } }
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('replace', target: 'message_1', method: :morph,
+  #                                                          template: render(options)) do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_replace_later_to \
+  #         'stream', target: 'message_1', **options
+  #     end
+  #   end
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('replace', targets: '.message', method: :morph,
+  #                                                          template: render(options)) do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_replace_later_to \
+  #         'stream', targets: '.message', **options
+  #     end
+  #   end
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('update', target: 'message_1', method: :morph,
+  #                                                         template: render(options)) do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_update_later_to \
+  #         'stream', target: 'message_1', **options
+  #     end
+  #   end
+
+  #   assert_broadcast_on 'stream',
+  #                       turbo_stream_action_tag('update', targets: '.message', method: :morph,
+  #                                                         template: render(options)) do
+  #     perform_enqueued_jobs do
+  #       Superglue::StreamsChannel.broadcast_update_later_to \
+  #         'stream', targets: '.message', **options
+  #     end
+  #   end
+  # end
+end

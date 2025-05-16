@@ -1,0 +1,8 @@
+# json.disable_deferments!
+json.data broadcast_json
+
+json.fragments json.fragments!
+json.type "message"
+json.action broadcast_action
+json.targets broadcast_targets
+json.options broadcast_options

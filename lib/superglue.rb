@@ -1,40 +1,38 @@
-require "superglue/helpers"
-require "superglue/redirection"
-require "superglue/rendering"
-require "superglue/resolver"
-require "props_template"
-require "form_props"
+require 'superglue/helpers'
+require 'superglue/rendering'
+require 'superglue/resolver'
+require 'superglue/engine'
+require 'props_template'
+require 'form_props'
 
 module Superglue
-  module Controller
-    include Redirection
-    include Helpers
+  extend ActiveSupport::Autoload
 
-    def self.included(base)
-      base.include ::Superglue::Rendering
-      if base.respond_to?(:helper_method)
-        base.helper_method :param_to_dig_path
-        base.helper_method :render_props
-      end
+  mattr_accessor :draw_routes, default: true
+
+  thread_mattr_accessor :current_request_id
+
+  class << self
+    attr_writer :signed_stream_verifier_key
+
+    def signed_stream_verifier
+      @signed_stream_verifier ||= ActiveSupport::MessageVerifier.new(
+        signed_stream_verifier_key,
+        digest: 'SHA256',
+        serializer: JSON
+      )
     end
-  end
 
-  class Engine < ::Rails::Engine
-    config.superglue = ActiveSupport::OrderedOptions.new
-    config.superglue.auto_include = true
+    def signed_stream_verifier_key
+      @signed_stream_verifier_key or raise ArgumentError, 'Superglue requires a signed_stream_verifier_key'
+    end
 
-    initializer :superglue do |app|
-      ActiveSupport.on_load(:action_controller) do
-        next if self != ActionController::Base
-
-        if app.config.superglue.auto_include
-          include Controller
-
-          prepend_view_path(
-            Superglue::Resolver.new(Rails.root.join("app/views"))
-          )
-        end
-      end
+    def with_request_id(request_id)
+      old_request_id = current_request_id
+      self.current_request_id = request_id
+      yield
+    ensure
+      self.current_request_id = old_request_id
     end
   end
 end
