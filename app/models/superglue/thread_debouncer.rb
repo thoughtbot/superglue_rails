@@ -1,5 +1,3 @@
-# A decorated debouncer that will store instances in the current thread clearing them
-# after the debounced logic triggers.
 class Turbo::ThreadDebouncer
   delegate :wait, to: :debouncer
 
