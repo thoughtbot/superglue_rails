@@ -1,7 +1,3 @@
-# Provides the broadcast actions in synchronous and asynchronous form for the <tt>Turbo::StreamsChannel</tt>.
-# See <tt>Turbo::Broadcastable</tt> for the user-facing API that invokes these methods with most of the paperwork filled out already.
-#
-# Can be used directly using something like <tt>Turbo::StreamsChannel.broadcast_remove_to :entries, target: 1</tt>.
 module Turbo::Streams::Broadcasts
   include Turbo::Streams::ActionHelper
 
