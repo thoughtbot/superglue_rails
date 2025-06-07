@@ -65,24 +65,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting update to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("update", target: "message_1", template: render(@message)) do
-      @message.broadcast_update_to "stream"
-    end
-  end
-
-  test "broadcasting update to stream now with template option" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("update", target: "message_1", template: render("messages/index", layout: false)) do
-      @message.broadcast_update_to "stream", template: "messages/index"
-    end
-  end
-
-  test "broadcasting update now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "message_1", template: render(@message)) do
-      @message.broadcast_update
-    end
-  end
-
   test "broadcasting before to stream now" do
     assert_broadcast_on "stream", turbo_stream_action_tag("before", target: "message_1", template: render(@message)) do
       @message.broadcast_before_to "stream", target: "message_1"
@@ -268,42 +250,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcast_update to target string" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "unique_id", template: render(@message)) do
-      @message.broadcast_update target: "unique_id"
-    end
-  end
-
-  test "broadcast_update to target object" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "message_1", template: render(@message)) do
-      @message.broadcast_update target: @message
-    end
-  end
-
-  test "broadcast_update to targets" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_update targets: ".message_1"
-    end
-  end
-
-  test "broadcast_update_to to target string" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "unique_id", template: render(@message)) do
-      @message.broadcast_update_to @message, target: "unique_id"
-    end
-  end
-
-  test "broadcast_update_to to target object" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "message_1", template: render(@message)) do
-      @message.broadcast_update_to @message, target: @message
-    end
-  end
-
-  test "broadcast_update_to to targets" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_update_to @message, targets: ".message_1"
-    end
-  end
-
   test "broadcast_append to targets" do
     assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("append", targets: ".message_1", template: render(@message)) do
       @message.broadcast_append targets: ".message_1"
@@ -337,36 +283,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcast_after_to targets" do
     assert_broadcast_on "stream", turbo_stream_action_tag("after", targets: ".message_1", template: render(@message)) do
       @message.broadcast_after_to "stream", targets: ".message_1"
-    end
-  end
-
-  test "broadcast_update_later" do
-    @message.save! # Need to save the record, otherwise Active Job will not be able to retrieve it
-
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "unique_id", template: render(@message)) do
-      perform_enqueued_jobs do
-        @message.broadcast_update_later target: "unique_id"
-      end
-    end
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", targets: ".message_1", template: render(@message)) do
-      perform_enqueued_jobs do
-        @message.broadcast_update_later targets: ".message_1"
-      end
-    end
-  end
-
-  test "broadcast_update_later_to" do
-    @message.save!
-
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "unique_id", template: render(@message)) do
-      perform_enqueued_jobs do
-        @message.broadcast_update_later_to @message, target: "unique_id"
-      end
-    end
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", targets: ".message_1", template: render(@message)) do
-      perform_enqueued_jobs do
-        @message.broadcast_update_later_to @message, targets: ".message_1"
-      end
     end
   end
 end
@@ -531,30 +447,6 @@ class Turbo::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   test "suppressing broadcasting replace later" do
     assert_no_broadcasts_later_when_supressing do
       @message.broadcast_replace_later
-    end
-  end
-
-  test "suppressing broadcasting update to stream now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_update_to "stream"
-    end
-  end
-
-  test "suppressing broadcasting update to stream later" do
-    assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_update_later_to "stream"
-    end
-  end
-
-  test "suppressing broadcasting update now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_update
-    end
-  end
-
-  test "suppressing broadcasting update later" do
-    assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_update_later
     end
   end
 
