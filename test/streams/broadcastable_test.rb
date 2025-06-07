@@ -217,19 +217,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcast render now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("replace", target: "message_1", template: "Goodbye!") do
-      @message.broadcast_render
-    end
-  end
-
-  test "broadcast render to stream now" do
-    @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, turbo_stream_action_tag("replace", target: "message_1", template: "Goodbye!") do
-      @message.broadcast_render_to @profile
-    end
-  end
-
   test "broadcast_append to targets" do
     assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("append", targets: ".message_1", template: render(@message)) do
       @message.broadcast_append targets: ".message_1"
@@ -495,32 +482,6 @@ class Turbo::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   test "suppressing broadcasting action later" do
     assert_no_broadcasts_later_when_supressing do
       @message.broadcast_action_later action: "prepend"
-    end
-  end
-
-  test "suppressing broadcast render now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_render
-    end
-  end
-
-  test "suppressing broadcast render later" do
-    assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_render_later
-    end
-  end
-
-  test "suppressing broadcast render to stream now" do
-    @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_render_to @profile
-    end
-  end
-
-  test "suppressing broadcast render to stream later" do
-    @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_render_to @profile
     end
   end
 

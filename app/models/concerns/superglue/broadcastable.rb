@@ -135,22 +135,6 @@ module Turbo::Broadcastable
     broadcast_action_later_to self, action: action, target: target, attributes: attributes, **rendering
   end
 
-  def broadcast_render(**rendering)
-    broadcast_render_to self, **rendering
-  end
-
-  def broadcast_render_to(*streamables, **rendering)
-    Turbo::StreamsChannel.broadcast_render_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_turbo_broadcasts?
-  end
-
-  def broadcast_render_later(**rendering)
-    broadcast_render_later_to self, **rendering
-  end
-
-  def broadcast_render_later_to(*streamables, **rendering)
-    Turbo::StreamsChannel.broadcast_render_later_to(*streamables, **extract_options_and_add_target(rendering)) unless suppressed_turbo_broadcasts?
-  end
-
   private
     def broadcast_target_default
       self.class.broadcast_target_default

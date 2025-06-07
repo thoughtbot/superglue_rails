@@ -79,14 +79,6 @@ module Turbo::Streams::Broadcasts
     end
   end
 
-  def broadcast_render_to(*streamables, **rendering)
-    broadcast_stream_to(*streamables, content: render_format(:turbo_stream, **rendering))
-  end
-
-  def broadcast_render_later_to(*streamables, **rendering)
-    Turbo::Streams::BroadcastJob.perform_later stream_name_from(streamables), **rendering
-  end
-
   def broadcast_stream_to(*streamables, content:)
     streamables.flatten!
     streamables.compact_blank!

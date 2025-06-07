@@ -220,20 +220,6 @@ class Turbo::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting render now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("replace", target: "message_1", template: "Goodbye!") do
-      Turbo::StreamsChannel.broadcast_render_to "stream", partial: "messages/message"
-    end
-  end
-
-  test "broadcasting render later" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("replace", target: "message_1", template: "Goodbye!") do
-      perform_enqueued_jobs do
-        Turbo::StreamsChannel.broadcast_render_later_to "stream", partial: "messages/message"
-      end
-    end
-  end
-
   test "broadcasting direct update now" do
     assert_broadcast_on "stream", %(direct) do
       Turbo::StreamsChannel.broadcast_stream_to "stream", content: "direct"
