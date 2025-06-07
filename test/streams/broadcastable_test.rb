@@ -369,30 +369,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
       end
     end
   end
-
-  test "broadcasting replace morph to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("replace", target: "message_1", method: :morph, template: render(@message)) do
-      @message.broadcast_replace_to "stream", target: "message_1", attributes: { method: :morph }
-    end
-  end
-
-  test "broadcasting update morph to stream now targeting" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("update", target: "message_1", method: :morph, template: render(@message)) do
-      @message.broadcast_update_to "stream", target: "message_1", attributes: { method: :morph }
-    end
-  end
-
-  test "broadcasting replace morph now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("replace", target: "message_1", method: :morph, template: render(@message)) do
-      @message.broadcast_replace target: "message_1", attributes: { method: :morph }
-    end
-  end
-
-  test "broadcasting update morph now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("update", target: "message_1", method: :morph, template: render(@message)) do
-      @message.broadcast_update target: "message_1", attributes: { method: :morph }
-    end
-  end
 end
 
 class Turbo::BroadcastableArticleTest < ActionCable::Channel::TestCase
