@@ -10,13 +10,11 @@ module Turbo::Broadcastable
     def broadcasts_to(stream, inserts_by: :append, target: broadcast_target_default, **rendering)
       after_create_commit  -> { broadcast_action_later_to(stream.try(:call, self) || send(stream), action: inserts_by, target: target.try(:call, self) || target, **rendering) }
       after_update_commit  -> { broadcast_replace_later_to(stream.try(:call, self) || send(stream), **rendering) }
-      after_destroy_commit -> { broadcast_remove_to(stream.try(:call, self) || send(stream)) }
     end
 
     def broadcasts(stream = model_name.plural, inserts_by: :append, target: broadcast_target_default, **rendering)
       after_create_commit  -> { broadcast_action_later_to(stream, action: inserts_by, target: target.try(:call, self) || target, **rendering) }
       after_update_commit  -> { broadcast_replace_later(**rendering) }
-      after_destroy_commit -> { broadcast_remove }
     end
 
     def broadcasts_refreshes_to(stream)
@@ -43,14 +41,6 @@ module Turbo::Broadcastable
     def suppressed_turbo_broadcasts?
       suppressed_turbo_broadcasts
     end
-  end
-
-  def broadcast_remove_to(*streamables, target: self, **rendering)
-    Turbo::StreamsChannel.broadcast_remove_to(*streamables, **extract_options_and_add_target(rendering, target: target)) unless suppressed_turbo_broadcasts?
-  end
-
-  def broadcast_remove(**rendering)
-    broadcast_remove_to self, **rendering
   end
 
   def broadcast_replace_to(*streamables, **rendering)
