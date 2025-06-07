@@ -16,10 +16,10 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting ignores blank streamables" do
     ActionCable.server.stub :broadcast, proc { flunk "expected no broadcasts" } do
       assert_no_broadcasts @message.to_gid_param do
-        @message.broadcast_remove_to nil
-        @message.broadcast_remove_to [nil]
-        @message.broadcast_remove_to ""
-        @message.broadcast_remove_to [""]
+        @message.broadcast_append_to nil
+        @message.broadcast_append_to [nil]
+        @message.broadcast_append_to ""
+        @message.broadcast_append_to [""]
       end
     end
   end
@@ -30,26 +30,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
       @message.broadcast_append_later_to [nil]
       @message.broadcast_append_later_to ""
       @message.broadcast_append_later_to [""]
-    end
-  end
-
-  test "broadcasting remove to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("remove", target: "message_1") do
-      @message.broadcast_remove_to "stream"
-    end
-  end
-
-  test "broadcasting remove now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("remove", target: "message_1") do
-      @message.broadcast_remove
-    end
-  end
-
-  test "broadcasting remove does not render contents" do
-    message = MessageThatRendersError.new(id: 1)
-
-    assert_broadcast_on message.to_gid_param, turbo_stream_action_tag("remove", target: dom_id(message)) do
-      message.broadcast_remove
     end
   end
 
@@ -256,12 +236,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcast_remove targets" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("remove", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_remove targets: ".message_1"
-    end
-  end
-
   test "broadcast_append targets" do
     assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("append", targets: ".message_1", template: render(@message)) do
       @message.broadcast_append targets: ".message_1"
@@ -361,16 +335,6 @@ class Turbo::BroadcastableCommentTest < ActionCable::Channel::TestCase
       end
     end
   end
-
-  test "destroying a comment broadcasts" do
-    comment = @article.comments.create!(body: "comment")
-    stream = "#{@article.to_gid_param}:comments"
-    target = "comment_#{comment.id}"
-
-    assert_broadcast_on stream, turbo_stream_action_tag("remove", target: target) do
-      comment.destroy!
-    end
-  end
 end
 
 class Turbo::BroadcastableBoardTest < ActionCable::Channel::TestCase
@@ -413,18 +377,6 @@ class Turbo::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   include ActiveJob::TestHelper, Turbo::Streams::ActionHelper
 
   setup { @message = Message.new(id: 1, content: "Hello!") }
-
-  test "suppressing broadcasting remove to stream now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_remove_to "stream"
-    end
-  end
-
-  test "suppressing broadcasting remove now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_remove
-    end
-  end
 
   test "suppressing broadcasting replace to stream now" do
     assert_no_broadcasts_when_suppressing do

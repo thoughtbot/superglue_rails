@@ -1,10 +1,6 @@
 module Turbo::Streams::Broadcasts
   include Turbo::Streams::ActionHelper
 
-  def broadcast_remove_to(*streamables, **opts)
-    broadcast_action_to(*streamables, action: :remove, render: false, **opts)
-  end
-
   def broadcast_replace_to(*streamables, **opts)
     broadcast_action_to(*streamables, action: :replace, **opts)
   end

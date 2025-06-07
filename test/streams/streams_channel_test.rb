@@ -8,22 +8,6 @@ class Turbo::StreamsChannelTest < ActionCable::Channel::TestCase
     assert_equal "stream", Turbo::StreamsChannel.verified_stream_name(Turbo::StreamsChannel.signed_stream_name("stream"))
   end
 
-  test "broadcasting remove now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("remove", target: "message_1") do
-      Turbo::StreamsChannel.broadcast_remove_to "stream", target: "message_1"
-    end
-
-    assert_broadcast_on "stream", turbo_stream_action_tag("remove", targets: ".message") do
-      Turbo::StreamsChannel.broadcast_remove_to "stream", targets: ".message"
-    end
-  end
-
-  test "broadcasting remove now with record" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("remove", target: "message_1") do
-      Turbo::StreamsChannel.broadcast_remove_to "stream", target: Message.new(id: 1, content: "hello!")
-    end
-  end
-
   test "broadcasting replace now" do
     options = { partial: "messages/message", locals: { message: "hello!" } }
 
