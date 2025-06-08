@@ -45,18 +45,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting before to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("before", target: "message_1", template: render(@message)) do
-      @message.broadcast_before_to "stream", target: "message_1"
-    end
-  end
-
-  test "broadcasting after to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("after", target: "message_1", template: render(@message)) do
-      @message.broadcast_after_to "stream", target: "message_1"
-    end
-  end
-
   test "broadcasting append to stream now" do
     assert_broadcast_on "stream", turbo_stream_action_tag("append", target: "messages", template: render(@message)) do
       @message.broadcast_append_to "stream"
@@ -234,18 +222,6 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
       @message.broadcast_prepend targets: ".message_1"
     end
   end
-
-  test "broadcast_before_to targets" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("before", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_before_to "stream", targets: ".message_1"
-    end
-  end
-
-  test "broadcast_after_to targets" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("after", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_after_to "stream", targets: ".message_1"
-    end
-  end
 end
 
 class Turbo::BroadcastableArticleTest < ActionCable::Channel::TestCase
@@ -386,18 +362,6 @@ class Turbo::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   test "suppressing broadcasting replace later" do
     assert_no_broadcasts_later_when_supressing do
       @message.broadcast_replace_later
-    end
-  end
-
-  test "suppressing broadcasting before to stream now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_before_to "stream", target: "message_1"
-    end
-  end
-
-  test "suppressing broadcasting after to stream now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_after_to "stream", target: "message_1"
     end
   end
 

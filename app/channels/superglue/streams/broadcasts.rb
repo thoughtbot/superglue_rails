@@ -9,14 +9,6 @@ module Turbo::Streams::Broadcasts
     broadcast_action_to(*streamables, action: :update, **opts)
   end
 
-  def broadcast_before_to(*streamables, **opts)
-    broadcast_action_to(*streamables, action: :before, **opts)
-  end
-
-  def broadcast_after_to(*streamables, **opts)
-    broadcast_action_to(*streamables, action: :after, **opts)
-  end
-
   def broadcast_append_to(*streamables, **opts)
     broadcast_action_to(*streamables, action: :append, **opts)
   end
@@ -41,14 +33,6 @@ module Turbo::Streams::Broadcasts
 
   def broadcast_update_later_to(*streamables, **opts)
     broadcast_action_later_to(*streamables, action: :update, **opts)
-  end
-
-  def broadcast_before_later_to(*streamables, **opts)
-    broadcast_action_later_to(*streamables, action: :before, **opts)
-  end
-
-  def broadcast_after_later_to(*streamables, **opts)
-    broadcast_action_later_to(*streamables, action: :after, **opts)
   end
 
   def broadcast_append_later_to(*streamables, **opts)

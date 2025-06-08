@@ -51,18 +51,6 @@ module Turbo::Broadcastable
     broadcast_replace_to self, **rendering
   end
 
-  def broadcast_before_to(*streamables, target: nil, targets: nil, **rendering)
-    raise ArgumentError, "at least one of target or targets is required" unless target || targets
-
-    Turbo::StreamsChannel.broadcast_before_to(*streamables, **extract_options_and_add_target(rendering.merge(target: target, targets: targets)))
-  end
-
-  def broadcast_after_to(*streamables, target: nil, targets: nil, **rendering)
-    raise ArgumentError, "at least one of target or targets is required" unless target || targets
-
-    Turbo::StreamsChannel.broadcast_after_to(*streamables, **extract_options_and_add_target(rendering.merge(target: target, targets: targets)))
-  end
-
   def broadcast_append_to(*streamables, target: broadcast_target_default, **rendering)
     Turbo::StreamsChannel.broadcast_append_to(*streamables, **extract_options_and_add_target(rendering, target: target)) unless suppressed_turbo_broadcasts?
   end
