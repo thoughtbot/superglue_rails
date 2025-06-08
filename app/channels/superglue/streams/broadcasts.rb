@@ -84,12 +84,7 @@ module Turbo::Streams::Broadcasts
     def render_broadcast_action(rendering)
       content = rendering.delete(:content)
       html    = rendering.delete(:html)
-      render  = rendering.delete(:render)
-
-      if render == false
-        nil
-      else
-        content || html || (render_format(:html, **rendering) if rendering.present?)
-      end
+      
+      content || html || (render_format(:html, **rendering) if rendering.present?)
     end
 end

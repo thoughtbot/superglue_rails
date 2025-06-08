@@ -52,14 +52,6 @@ class BroadcastsTest < ApplicationSystemTestCase
     end
   end
 
-  test "Message broadcasts with no rendering" do
-    visit messages_path
-
-    assert_forwards_turbo_stream_tag_attribute attr_key: "data-foo", attr_value: "bar", to: :messages do |attr_key, attr_value, target|
-      Message.create(content: text).broadcast_action_to(target, action: :test, render: false, partial: "non_existant", attributes: { attr_key => attr_value })
-    end
-  end
-
   test "Message broadcasts later with extra attributes to turbo stream tag" do
     visit messages_path
 
@@ -77,16 +69,6 @@ class BroadcastsTest < ApplicationSystemTestCase
     perform_enqueued_jobs do
       assert_forwards_turbo_stream_tag_attribute attr_key: "data-foo", attr_value: "bar", to: :messages do |attr_key, attr_value, target|
         Message.create(content: text).broadcast_action_later_to(target, action: :test, attributes: { attr_key => attr_value })
-      end
-    end
-  end
-
-  test "Message broadcasts later with no rendering" do
-    visit messages_path
-
-    perform_enqueued_jobs do
-      assert_forwards_turbo_stream_tag_attribute attr_key: "data-foo", attr_value: "bar", to: :messages do |attr_key, attr_value, target|
-        Message.create(content: text).broadcast_action_to(target, action: :test, render: false, partial: "non_existant", attributes: { attr_key => attr_value })
       end
     end
   end
