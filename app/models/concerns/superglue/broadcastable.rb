@@ -75,12 +75,12 @@ module Turbo::Broadcastable
     broadcast_refresh_to self
   end
 
-  def broadcast_action_to(*streamables, action:, target: broadcast_target_default, attributes: {}, **rendering)
-    Turbo::StreamsChannel.broadcast_action_to(*streamables, action: action, attributes: attributes, **extract_options_and_add_target(rendering, target: target)) unless suppressed_turbo_broadcasts?
+  def broadcast_action_to(*streamables, action:, target: broadcast_target_default, options: {}, **rendering)
+    Turbo::StreamsChannel.broadcast_action_to(*streamables, action: action, options: options, **extract_options_and_add_target(rendering, target: target)) unless suppressed_turbo_broadcasts?
   end
 
-  def broadcast_action(action, target: broadcast_target_default, attributes: {}, **rendering)
-    broadcast_action_to self, action: action, target: target, attributes: attributes, **rendering
+  def broadcast_action(action, target: broadcast_target_default, options: {}, **rendering)
+    broadcast_action_to self, action: action, target: target, options: options, **rendering
   end
 
   def broadcast_replace_later_to(*streamables, **rendering)
@@ -115,12 +115,12 @@ module Turbo::Broadcastable
     broadcast_refresh_later_to self
   end
 
-  def broadcast_action_later_to(*streamables, action:, target: broadcast_target_default, attributes: {}, **rendering)
-    Turbo::StreamsChannel.broadcast_action_later_to(*streamables, action: action, attributes: attributes, **extract_options_and_add_target(rendering, target: target)) unless suppressed_turbo_broadcasts?
+  def broadcast_action_later_to(*streamables, action:, target: broadcast_target_default, options: {}, **rendering)
+    Turbo::StreamsChannel.broadcast_action_later_to(*streamables, action: action, options: options, **extract_options_and_add_target(rendering, target: target)) unless suppressed_turbo_broadcasts?
   end
 
-  def broadcast_action_later(action:, target: broadcast_target_default, attributes: {}, **rendering)
-    broadcast_action_later_to self, action: action, target: target, attributes: attributes, **rendering
+  def broadcast_action_later(action:, target: broadcast_target_default, options: {}, **rendering)
+    broadcast_action_later_to self, action: action, target: target, options: options, **rendering
   end
 
   private
