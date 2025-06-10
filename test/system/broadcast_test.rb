@@ -40,7 +40,7 @@ class BroadcastsTest < ApplicationSystemTestCase
     visit messages_path
 
     assert_broadcasts_text "Message 1", to: :messages do |text, target|
-      Message.create(content: text).broadcast_action_to(target, action: :append, attributes: { "data-foo": "bar" })
+      Message.create(content: text).broadcast_action_to(target, action: :append, options: { "data-foo": "bar" })
     end
   end
 
@@ -48,7 +48,7 @@ class BroadcastsTest < ApplicationSystemTestCase
     visit messages_path
 
     assert_forwards_turbo_stream_tag_attribute attr_key: "data-foo", attr_value: "bar", to: :messages do |attr_key, attr_value, target|
-      Message.create(content: text).broadcast_action_to(target, action: :test, attributes: { attr_key => attr_value })
+      Message.create(content: text).broadcast_action_to(target, action: :test, options: { attr_key => attr_value })
     end
   end
 
@@ -57,7 +57,7 @@ class BroadcastsTest < ApplicationSystemTestCase
 
     perform_enqueued_jobs do
       assert_broadcasts_text "Message 1", to: :messages do |text, target|
-        Message.create(content: text).broadcast_action_later_to(target, action: :append, attributes: { "data-foo": "bar" })
+        Message.create(content: text).broadcast_action_later_to(target, action: :append, options: { "data-foo": "bar" })
       end
     end
   end
@@ -68,7 +68,7 @@ class BroadcastsTest < ApplicationSystemTestCase
 
     perform_enqueued_jobs do
       assert_forwards_turbo_stream_tag_attribute attr_key: "data-foo", attr_value: "bar", to: :messages do |attr_key, attr_value, target|
-        Message.create(content: text).broadcast_action_later_to(target, action: :test, attributes: { attr_key => attr_value })
+        Message.create(content: text).broadcast_action_later_to(target, action: :test, options: { attr_key => attr_value })
       end
     end
   end

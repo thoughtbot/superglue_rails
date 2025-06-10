@@ -21,9 +21,9 @@ module Turbo::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: turbo_stream_refresh_tag)
   end
 
-  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, attributes: {}, **rendering)
+  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
     broadcast_stream_to(*streamables, content: turbo_stream_action_tag(
-      action, target: target, targets: targets, template: render_broadcast_action(rendering), **attributes)
+      action, target: target, targets: targets, template: render_broadcast_action(rendering), **options)
     )
   end
 
@@ -51,7 +51,7 @@ module Turbo::Streams::Broadcasts
     end
   end
 
-  def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, attributes: {}, **rendering)
+  def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, options: {}, **rendering)
     streamables.flatten!
     streamables.compact_blank!
 
@@ -59,7 +59,7 @@ module Turbo::Streams::Broadcasts
       target = convert_to_turbo_stream_dom_id(target)
       targets = convert_to_turbo_stream_dom_id(targets, include_selector: true)
       Turbo::Streams::ActionBroadcastJob.perform_later \
-        stream_name_from(streamables), action: action, target: target, targets: targets, attributes: attributes, **rendering
+        stream_name_from(streamables), action: action, target: target, targets: targets, options: options, **rendering
     end
   end
 
