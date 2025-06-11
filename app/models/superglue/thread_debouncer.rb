@@ -1,15 +1,15 @@
-class Turbo::ThreadDebouncer
+class Superglue::ThreadDebouncer
   delegate :wait, to: :debouncer
 
-  def self.for(key, delay: Turbo::Debouncer::DEFAULT_DELAY)
+  def self.for(key, delay: Superglue::Debouncer::DEFAULT_DELAY)
     Thread.current[key] ||= new(key, Thread.current, delay: delay)
   end
 
   private_class_method :new
 
-  def initialize(key, thread, delay: )
+  def initialize(key, thread, delay:)
     @key = key
-    @debouncer = Turbo::Debouncer.new(delay: delay)
+    @debouncer = Superglue::Debouncer.new(delay: delay)
     @thread = thread
   end
 
@@ -22,5 +22,6 @@ class Turbo::ThreadDebouncer
   end
 
   private
-    attr_reader :key, :debouncer, :thread
+
+  attr_reader :key, :debouncer, :thread
 end

@@ -1,0 +1,10 @@
+json.disable_deferments!
+
+json.data do
+  yield
+end
+
+json.fragments json.fragments!
+json.type "fragment"
+
+json.flash flash.to_h

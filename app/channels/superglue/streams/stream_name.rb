@@ -1,10 +1,10 @@
-module Turbo::Streams::StreamName
+module Superglue::Streams::StreamName
   def verified_stream_name(signed_stream_name)
-    Turbo.signed_stream_verifier.verified signed_stream_name
+    Superglue.signed_stream_verifier.verified signed_stream_name
   end
 
   def signed_stream_name(streamables)
-    Turbo.signed_stream_verifier.generate stream_name_from(streamables)
+    Superglue.signed_stream_verifier.generate stream_name_from(streamables)
   end
 
   module ClassMethods
@@ -14,11 +14,12 @@ module Turbo::Streams::StreamName
   end
 
   private
-    def stream_name_from(streamables)
-      if streamables.is_a?(Array)
-        streamables.map  { |streamable| stream_name_from(streamable) }.join(":")
-      else
-        streamables.then { |streamable| streamable.try(:to_gid_param) || streamable.to_param }
-      end
+
+  def stream_name_from(streamables)
+    if streamables.is_a?(Array)
+      streamables.map { |streamable| stream_name_from(streamable) }.join(":")
+    else
+      streamables.then { |streamable| streamable.try(:to_gid_param) || streamable.to_param }
     end
+  end
 end
