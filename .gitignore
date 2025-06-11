@@ -14,3 +14,8 @@ breezy/build/**/*.js
 props_template/performance/**/*.png
 .tool-versions
 testapp/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.rdb
+test/dummy/app/assets/builds

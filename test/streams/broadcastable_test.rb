@@ -2,8 +2,17 @@ require "test_helper"
 require "action_cable"
 require "minitest/mock"
 
-class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
-  include ActiveJob::TestHelper, Turbo::Streams::ActionHelper
+def render_refresh(request_id = nil)
+  JSON.generate({
+    type: "message",
+    action: "refresh",
+    requestId: request_id,
+    options: {}
+  })
+end
+
+class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
+  include ActiveJob::TestHelper
 
   class MessageThatRendersError < Message
     def to_partial_path
@@ -34,61 +43,61 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting replace to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("replace", target: "message_1", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("replace", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_replace_to "stream"
     end
   end
 
   test "broadcasting replace now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("replace", target: "message_1", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("replace", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_replace
     end
   end
 
   test "broadcasting append to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("append", target: "messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("append", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_append_to "stream"
     end
   end
 
   test "broadcasting append to stream with custom target now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("append", target: "board_messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("append", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_append_to "stream", target: "board_messages"
     end
   end
 
   test "broadcasting append now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("append", target: "messages", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_append
     end
   end
 
   test "broadcasting prepend to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_prepend_to "stream"
     end
   end
 
   test "broadcasting prepend to stream with custom target now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("prepend", target: "board_messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("prepend", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_prepend_to "stream", target: "board_messages"
     end
   end
 
   test "broadcasting prepend now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_prepend
     end
   end
 
   test "broadcasting refresh to stream now" do
-    assert_broadcast_on "stream", turbo_stream_refresh_tag do
+    assert_broadcast_on "stream", render_refresh do
       @message.broadcast_refresh_to "stream"
     end
   end
 
   test "broadcasting refresh now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_refresh_tag do
+    assert_broadcast_on @message.to_gid_param, render_refresh do
       @message.broadcast_refresh
     end
   end
@@ -96,19 +105,19 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting refresh does not render contents" do
     message = MessageThatRendersError.new(id: 1)
 
-    assert_broadcast_on message.to_gid_param, turbo_stream_action_tag("refresh") do
+    assert_broadcast_on message.to_gid_param, render_refresh do
       message.broadcast_refresh
     end
   end
 
   test "broadcasting refresh later is debounced" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_refresh_tag do
+    assert_broadcast_on @message.to_gid_param, render_refresh do
       assert_broadcasts(@message.to_gid_param, 1) do
         perform_enqueued_jobs do
           assert_no_changes -> { Thread.current.keys.size } do
             # Not leaking thread variables once the debounced code executes
             3.times { @message.broadcast_refresh_later }
-            Turbo::StreamsChannel.refresh_debouncer_for(@message).wait
+            Superglue::StreamsChannel.refresh_debouncer_for(@message).wait
           end
         end
       end
@@ -116,35 +125,35 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting action to stream now" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_action_to "stream", action: "prepend"
     end
   end
 
   test "broadcasting action now" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("prepend", target: "messages", template: render(@message)) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_action "prepend"
     end
   end
 
   test "broadcasting action with attributes" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("prepend", target: "messages", template: render(@message), "data-foo" => "bar") do
-      @message.broadcast_action "prepend", target: "messages", options: { "data-foo" => "bar" }
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
+      @message.broadcast_action "prepend", target: "messages", options: {"data-foo" => "bar"}
     end
   end
 
   test "broadcasting action to with attributes" do
-    assert_broadcast_on "stream", turbo_stream_action_tag("prepend", target: "messages", template: render(@message), "data-foo" => "bar") do
-      @message.broadcast_action_to "stream", action: "prepend", options: { "data-foo" => "bar" }
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
+      @message.broadcast_action_to "stream", action: "prepend", options: {"data-foo" => "bar"}
     end
   end
 
   test "broadcasting action later to with attributes" do
     @message.save!
 
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("prepend", target: "messages", template: render(@message), "data-foo" => "bar") do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
       perform_enqueued_jobs do
-        @message.broadcast_action_later_to @message, action: "prepend", target: "messages", options: { "data-foo" => "bar" }
+        @message.broadcast_action_later_to @message, action: "prepend", target: "messages", options: {"data-foo" => "bar"}
       end
     end
   end
@@ -152,51 +161,52 @@ class Turbo::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting action later with attributes" do
     @message.save!
 
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("prepend", target: "messages", template: render(@message), "data-foo" => "bar") do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
       perform_enqueued_jobs do
-        @message.broadcast_action_later action: "prepend", target: "messages", options: { "data-foo" => "bar" }
+        @message.broadcast_action_later action: "prepend", target: "messages", options: {"data-foo" => "bar"}
       end
     end
   end
 
   test "render correct local name in partial for namespaced models" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, turbo_stream_action_tag("replace", target: "users_profile_1", template: "<p>Ryan</p>\n") do
+    assert_broadcast_on @profile.to_param, render_props("replace", target: "users_profile_1", partial: @profile.to_partial_path, locals: {profile: @profile}) do
       @profile.broadcast_replace
     end
   end
 
   test "local variables don't get overwritten if they collide with the template name" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, turbo_stream_action_tag("replace", target: "users_profile_1", template: render(@message)) do
-      @profile.broadcast_replace partial: 'messages/message', locals: { message: @message }
+    assert_broadcast_on @profile.to_param, render_props("replace", target: "users_profile_1", partial: @message.to_partial_path, locals: {message: @message}) do
+      @profile.broadcast_replace partial: "messages/message", locals: {message: @message}
     end
   end
 
   test "broadcast_append to targets" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("append", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_append targets: ".message_1"
+    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_append targets: ["message_1"]
     end
   end
 
   test "broadcast_append targets" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("append", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_append targets: ".message_1"
+    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_append targets: ["message_1"]
     end
   end
 
   test "broadcast_prepend targets" do
-    assert_broadcast_on @message.to_gid_param, turbo_stream_action_tag("prepend", targets: ".message_1", template: render(@message)) do
-      @message.broadcast_prepend targets: ".message_1"
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", targets: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_prepend targets: ["message_1"]
     end
   end
 end
 
-class Turbo::BroadcastableArticleTest < ActionCable::Channel::TestCase
-  include ActiveJob::TestHelper, Turbo::Streams::ActionHelper
+class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
+  include Superglue::Streams::ActionHelper
+  include ActiveJob::TestHelper
 
   test "creating an article broadcasts to the overriden target with a string" do
-    assert_broadcast_on "overriden-stream", turbo_stream_action_tag("append", target: "overriden-target", template: "<p>Body</p>\n") do
+    assert_broadcast_on "overriden-stream", render_props("append", target: "overriden-target", partial: "articles/article", locals: {article: Article.new(body: "Body")}) do
       perform_enqueued_jobs do
         Article.create!(body: "Body")
       end
@@ -206,24 +216,17 @@ class Turbo::BroadcastableArticleTest < ActionCable::Channel::TestCase
   test "updating an article broadcasts" do
     article = Article.create!(body: "Hey")
 
-    assert_broadcast_on "ho", turbo_stream_action_tag("replace", target: "article_#{article.id}", template: "<p>Ho</p>\n") do
+    assert_broadcast_on "ho", render_props("replace", target: "article_#{article.id}", partial: "articles/article", locals: {article: Article.new(body: "Ho")}) do
       perform_enqueued_jobs do
         article.update!(body: "Ho")
       end
     end
   end
-
-  test "destroying an article broadcasts" do
-    article = Article.create!(body: "Hey")
-
-    assert_broadcast_on "hey", turbo_stream_action_tag("remove", target: "article_#{article.id}") do
-      article.destroy!
-    end
-  end
 end
 
-class Turbo::BroadcastableCommentTest < ActionCable::Channel::TestCase
-  include ActiveJob::TestHelper, Turbo::Streams::ActionHelper
+class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
+  include Superglue::Streams::ActionHelper
+  include ActiveJob::TestHelper
 
   setup { @article = Article.create!(body: "Body") }
 
@@ -231,7 +234,7 @@ class Turbo::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "article_#{@article.id}_comments"
 
-    assert_broadcast_on stream, turbo_stream_action_tag("append", target: target, template: %(<p class="different">comment</p>\n)) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "comment")
       end
@@ -242,13 +245,13 @@ class Turbo::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "article_#{@article.id}_comments"
 
-    assert_broadcast_on stream, turbo_stream_action_tag("append", target: target, template: %(<p class="different">comment</p>\n)) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "comment")
       end
     end
 
-    assert_broadcast_on stream, turbo_stream_action_tag("append", target: target, template: %(<p class="different">another comment</p>\n)) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "another comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "another comment")
       end
@@ -260,7 +263,7 @@ class Turbo::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "comment_#{comment.id}"
 
-    assert_broadcast_on stream, turbo_stream_action_tag("replace", target: target, template: %(<p class="different">precise</p>\n)) do
+    assert_broadcast_on stream, render_props("replace", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "precise")}) do
       perform_enqueued_jobs do
         comment.update!(body: "precise")
       end
@@ -268,44 +271,46 @@ class Turbo::BroadcastableCommentTest < ActionCable::Channel::TestCase
   end
 end
 
-class Turbo::BroadcastableBoardTest < ActionCable::Channel::TestCase
-  include ActiveJob::TestHelper, Turbo::Streams::ActionHelper
+class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
+  include Superglue::Streams::ActionHelper
+  include ActiveJob::TestHelper
 
   test "creating a board broadcasts refreshes to a channel using models plural name when creating" do
-    assert_broadcast_on "boards", turbo_stream_action_tag("refresh") do
+    assert_broadcast_on "boards", render_refresh do
       perform_enqueued_jobs do
         Board.create!(name: "Board")
-        Turbo::StreamsChannel.refresh_debouncer_for(["boards"]).wait
+        Superglue::StreamsChannel.refresh_debouncer_for(["boards"]).wait
       end
     end
   end
 
   test "updating a board broadcasts to the models channel" do
-    board = Board.suppressing_turbo_broadcasts do
+    board = Board.suppressing_superglue_broadcasts do
       Board.create!(name: "Hey")
     end
 
-    assert_broadcast_on board.to_gid_param, turbo_stream_action_tag("refresh") do
+    assert_broadcast_on board.to_gid_param, render_refresh do
       perform_enqueued_jobs do
         board.update!(name: "Ho")
-        Turbo::StreamsChannel.refresh_debouncer_for(board).wait
+        Superglue::StreamsChannel.refresh_debouncer_for(board).wait
       end
     end
   end
 
   test "destroying a board broadcasts refreshes to the model channel" do
-    board = Board.suppressing_turbo_broadcasts do
-        Board.create!(name: "Hey")
+    board = Board.suppressing_superglue_broadcasts do
+      Board.create!(name: "Hey")
     end
 
-    assert_broadcast_on board.to_gid_param, turbo_stream_action_tag("refresh") do
+    assert_broadcast_on board.to_gid_param, render_refresh do
       board.destroy!
     end
   end
 end
 
-class Turbo::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
-  include ActiveJob::TestHelper, Turbo::Streams::ActionHelper
+class Superglue::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
+  include Superglue::Streams::ActionHelper
+  include ActiveJob::TestHelper
 
   setup { @message = Message.new(id: 1, content: "Hello!") }
 
@@ -418,19 +423,20 @@ class Turbo::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   end
 
   private
-    def assert_no_broadcasts_when_suppressing
-      assert_no_broadcasts @message.to_gid_param do
-        Message.suppressing_turbo_broadcasts do
-          yield
-        end
-      end
-    end
 
-    def assert_no_broadcasts_later_when_supressing
-      assert_no_broadcasts_when_suppressing do
-        assert_no_enqueued_jobs do
-          yield
-        end
+  def assert_no_broadcasts_when_suppressing
+    assert_no_broadcasts @message.to_gid_param do
+      Message.suppressing_superglue_broadcasts do
+        yield
       end
     end
+  end
+
+  def assert_no_broadcasts_later_when_supressing
+    assert_no_broadcasts_when_suppressing do
+      assert_no_enqueued_jobs do
+        yield
+      end
+    end
+  end
 end

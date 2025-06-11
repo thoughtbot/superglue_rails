@@ -1,0 +1,15 @@
+json.disable_deferments!
+ 
+if local_assigns[:broadcast_json]
+  json.data broadcast_json
+else
+  json.data do
+    yield
+  end
+end
+
+json.fragments json.fragments!
+json.type "message"
+json.action broadcast_action
+json.targets broadcast_targets
+json.options broadcast_options

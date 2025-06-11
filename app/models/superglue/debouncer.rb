@@ -1,4 +1,4 @@
-class Turbo::Debouncer
+class Superglue::Debouncer
   attr_reader :delay, :scheduled_task
 
   DEFAULT_DELAY = 0.5
@@ -18,7 +18,8 @@ class Turbo::Debouncer
   end
 
   private
-    def wait_timeout
-      delay + 1
-    end
+
+  def wait_timeout
+    delay + 1
+  end
 end

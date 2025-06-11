@@ -1,6 +1,7 @@
-class Turbo::StreamsChannel < ActionCable::Channel::Base
-  extend Turbo::Streams::Broadcasts, Turbo::Streams::StreamName
-  include Turbo::Streams::StreamName::ClassMethods
+class Superglue::StreamsChannel < ActionCable::Channel::Base
+  extend Superglue::Streams::StreamName
+  extend Superglue::Streams::Broadcasts
+  include Superglue::Streams::StreamName::ClassMethods
 
   def subscribed
     if stream_name = verified_stream_name_from_params
