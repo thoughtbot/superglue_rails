@@ -199,6 +199,70 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
       @message.broadcast_prepend fragments: ["message_1"]
     end
   end
+
+  test "broadcasting append to stream with save_as option" do
+    assert_broadcast_on "stream", render_props("append", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_2"}) do
+      @message.broadcast_append_to "stream", fragment: "board_messages", save_as: "message_2"
+    end
+  end
+
+  test "broadcasting append with save_as option" do
+    assert_broadcast_on @message.to_gid_param, render_props("append", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_message"}) do
+      @message.broadcast_append save_as: "custom_message"
+    end
+  end
+
+  test "broadcasting prepend to stream with save_as option" do
+    assert_broadcast_on "stream", render_props("prepend", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_3"}) do
+      @message.broadcast_prepend_to "stream", fragment: "board_messages", save_as: "message_3"
+    end
+  end
+
+  test "broadcasting prepend with save_as option" do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_prepend_message"}) do
+      @message.broadcast_prepend save_as: "custom_prepend_message"
+    end
+  end
+
+  test "broadcasting append later to stream with save_as option" do
+    @message.save!
+
+    assert_broadcast_on "stream", render_props("append", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_later_2"}) do
+      perform_enqueued_jobs do
+        @message.broadcast_append_later_to "stream", fragment: "board_messages", save_as: "message_later_2"
+      end
+    end
+  end
+
+  test "broadcasting append later with save_as option" do
+    @message.save!
+
+    assert_broadcast_on @message.to_gid_param, render_props("append", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_later_message"}) do
+      perform_enqueued_jobs do
+        @message.broadcast_append_later save_as: "custom_later_message"
+      end
+    end
+  end
+
+  test "broadcasting prepend later to stream with save_as option" do
+    @message.save!
+
+    assert_broadcast_on "stream", render_props("prepend", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_later_3"}) do
+      perform_enqueued_jobs do
+        @message.broadcast_prepend_later_to "stream", fragment: "board_messages", save_as: "message_later_3"
+      end
+    end
+  end
+
+  test "broadcasting prepend later with save_as option" do
+    @message.save!
+
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_later_prepend"}) do
+      perform_enqueued_jobs do
+        @message.broadcast_prepend_later save_as: "custom_later_prepend"
+      end
+    end
+  end
 end
 
 class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase

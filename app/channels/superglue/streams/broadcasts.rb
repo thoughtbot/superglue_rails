@@ -22,12 +22,16 @@ module Superglue::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: content)
   end
 
-  def broadcast_action_to(*streamables, action:, fragment: nil, fragments: nil, options: {}, **rendering)
+  def broadcast_action_to(*streamables, action:, fragment: nil, fragments: nil, save_as: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}
     fragments = (fragment ? [fragment] : fragments)
 
     fragments = fragments.map do |item|
       convert_to_superglue_fragment_id(item)
+    end
+
+    if save_as
+      options[:save_as] = convert_to_superglue_fragment_id(save_as)
     end
 
     locals[:broadcast_targets] = fragments
@@ -42,7 +46,7 @@ module Superglue::Streams::Broadcasts
     broadcast_action_later_to(*streamables, action: :replace, **opts)
   end
 
-  #todo convert_to_turbo_stream_dom_id ican use this as the fragment name!
+  # todo convert_to_turbo_stream_dom_id ican use this as the fragment name!
 
   def broadcast_append_later_to(*streamables, **opts)
     broadcast_action_later_to(*streamables, action: :append, **opts)
@@ -67,7 +71,7 @@ module Superglue::Streams::Broadcasts
     end
   end
 
-  def broadcast_action_later_to(*streamables, action:, fragment: nil, fragments: nil, options: {}, **rendering)
+  def broadcast_action_later_to(*streamables, action:, fragment: nil, fragments: nil, save_as: nil, options: {}, **rendering)
     streamables.flatten!
     streamables.compact_blank!
 
@@ -75,6 +79,10 @@ module Superglue::Streams::Broadcasts
 
     fragments = (fragment ? [fragment] : fragments).map do |item|
       convert_to_superglue_fragment_id(item)
+    end
+
+    if save_as
+      options[:save_as] = convert_to_superglue_fragment_id(save_as)
     end
 
     Superglue::Streams::ActionBroadcastJob.perform_later \

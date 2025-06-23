@@ -20,6 +20,9 @@ class BroadcastsTest < ApplicationSystemTestCase
     end
   end
 
+  # todo
+  # change fragment to something
+  # for append and prepend. always give it a fragment name?
   test "Message broadcasts with extra attributes to turbo stream tag" do
     visit messages_path
 
