@@ -138,18 +138,12 @@ module Superglue::Broadcastable
 
   def broadcast_rendering_with_defaults(options)
     options.tap do |o|
-
       # Add the current instance into the locals with the element name (which is the un-namespaced name)
       # as the key. This parallels how the ActionView::ObjectRenderer would create a local variable.
       o[:locals] = (o[:locals] || {}).reverse_merge(model_name.element.to_sym => self).compact
 
-      # todo, allow only partial? and remove renderable
-      if o[:template] || o[:renderable]
-        o[:layout] = false
-      else
-        # if none of these options are passed in, it will set a partial from #to_partial_path
-        o[:partial] ||= to_partial_path
-      end
+      # if none of these options are passed in, it will set a partial from #to_partial_path
+      o[:partial] ||= to_partial_path
     end
   end
 end
