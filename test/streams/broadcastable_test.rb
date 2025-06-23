@@ -202,7 +202,6 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
 end
 
 class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
-  include Superglue::Streams::ActionHelper
   include ActiveJob::TestHelper
 
   test "creating an article broadcasts to the overriden target with a string" do
@@ -225,7 +224,6 @@ class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
 end
 
 class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
-  include Superglue::Streams::ActionHelper
   include ActiveJob::TestHelper
 
   setup { @article = Article.create!(body: "Body") }
@@ -272,7 +270,6 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
 end
 
 class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
-  include Superglue::Streams::ActionHelper
   include ActiveJob::TestHelper
 
   test "creating a board broadcasts refreshes to a channel using models plural name when creating" do
@@ -309,7 +306,6 @@ class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
 end
 
 class Superglue::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
-  include Superglue::Streams::ActionHelper
   include ActiveJob::TestHelper
 
   setup { @message = Message.new(id: 1, content: "Hello!") }
