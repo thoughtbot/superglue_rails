@@ -111,19 +111,13 @@ module Superglue::Streams::Broadcasts
   end
 
   def render_broadcast_action(rendering)
-    render = rendering.delete(:render)
     json = rendering.delete(:json)
 
-    # todo: remove
-    if render == false
-      nil
-    elsif rendering.present?
-      if json
-        rendering[:locals] ||= {}
-        rendering[:locals][:broadcast_json] = json
-      end
-
-      render_format(:json, **rendering)
+    if json
+      rendering[:locals] ||= {}
+      rendering[:locals][:broadcast_json] = json
     end
+
+    render_format(:json, **rendering)
   end
 end
