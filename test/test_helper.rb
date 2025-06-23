@@ -26,15 +26,15 @@ class ActionCable::Channel::TestCase
   include ActionViewTestCaseExtensions
 end
 
-def render_props(action, partial:, locals: {}, target: nil, targets: nil, options: {})
-  targets = target ? [target] : targets
+def render_props(action, partial:, locals: {}, fragment: nil, fragments: nil, options: {})
+  fragments = fragment ? [fragment] : fragments
   if locals[:json]
     json = locals.delete(:json)
     render({
       partial: "superglue/layouts/stream_message",
       locals: locals.merge({
         broadcast_json: json,
-        broadcast_targets: targets,
+        broadcast_targets: fragments,
         broadcast_action: action,
         broadcast_options: options
       })
@@ -45,7 +45,7 @@ def render_props(action, partial:, locals: {}, target: nil, targets: nil, option
       partial: partial,
       layout: "superglue/layouts/stream_message",
       locals: locals.merge({
-        broadcast_targets: targets,
+        broadcast_targets: fragments,
         broadcast_action: action,
         broadcast_options: options
       })

@@ -11,5 +11,5 @@ end
 json.fragments json.fragments!
 json.type "message"
 json.action broadcast_action
-json.fragments broadcast_fragments
+json.targets broadcast_targets
 json.options broadcast_options

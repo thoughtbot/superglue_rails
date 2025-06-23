@@ -30,7 +30,7 @@ module Superglue::Streams::Broadcasts
       convert_to_superglue_fragment_id(item)
     end
 
-    locals[:broadcast_fragments] = fragments
+    locals[:broadcast_targets] = fragments
     locals[:broadcast_action] = action
     locals[:broadcast_options] = options
     rendering[:locals] = locals
