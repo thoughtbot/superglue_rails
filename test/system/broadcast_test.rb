@@ -1,8 +1,30 @@
 require "application_system_test_case"
+require "json"
 
 class BroadcastsTest < ApplicationSystemTestCase
   include ActiveJob::TestHelper
   extend Superglue::Streams::StreamName
+
+  def self.setup_superglue_dependency
+    package_path = Rails.root.join("package.json")
+    return unless File.exist?(package_path)
+
+    package = JSON.parse(File.read(package_path))
+    superglue_path = ENV["SUPERGLUEJS_PATH"] || "^1.0.0"
+
+    if package.dig("dependencies", "@thoughtbot/superglue") != superglue_path
+      package["dependencies"] ||= {}
+      package["dependencies"]["@thoughtbot/superglue"] = superglue_path
+      File.write(package_path, JSON.pretty_generate(package))
+
+      # Run npm install to update dependencies
+      system("cd #{Rails.root} && npm install")
+    end
+  end
+
+  setup do
+    self.class.setup_superglue_dependency
+  end
 
   test "Message broadcasts Turbo Streams" do
     visit messages_path
