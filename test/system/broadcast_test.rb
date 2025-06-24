@@ -20,9 +20,6 @@ class BroadcastsTest < ApplicationSystemTestCase
     end
   end
 
-  # todo
-  # change fragment to something
-  # for append and prepend. always give it a fragment name?
   test "Message broadcasts with extra attributes to turbo stream tag" do
     visit messages_path
 
@@ -30,6 +27,8 @@ class BroadcastsTest < ApplicationSystemTestCase
     within(:element, id: "messages") { assert_no_text body }
     within(:element, id: "spotlight") { assert_no_text body }
 
+    # todo: change options[:fragment] to option[:save_as]
+    # when the js library is updated
     Message.create(content: body).broadcast_action_to("messages", action: :append, options: {fragment: "message-1"})
 
     within(:element, id: "messages") { assert_text body }
@@ -44,6 +43,8 @@ class BroadcastsTest < ApplicationSystemTestCase
       within(:element, id: "messages") { assert_no_text body }
       within(:element, id: "spotlight") { assert_no_text body }
 
+      # todo: change options[:fragment] to option[:save_as]
+      # when the js library is updated
       Message.create(content: body).broadcast_action_later_to("messages", action: :append, options: {fragment: "message-1"})
 
       within(:element, id: "messages") { assert_text body }

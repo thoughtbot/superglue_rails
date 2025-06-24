@@ -31,7 +31,9 @@ module Superglue::Streams::Broadcasts
     end
 
     if save_as
-      options[:save_as] = convert_to_superglue_fragment_id(save_as)
+      # todo: change options[:fragment] to option[:save_as]
+      # when the js library is updated
+      options[:fragment] = convert_to_superglue_fragment_id(save_as)
     end
 
     locals[:broadcast_targets] = fragments
@@ -45,8 +47,6 @@ module Superglue::Streams::Broadcasts
   def broadcast_replace_later_to(*streamables, **opts)
     broadcast_action_later_to(*streamables, action: :replace, **opts)
   end
-
-  # todo convert_to_turbo_stream_dom_id ican use this as the fragment name!
 
   def broadcast_append_later_to(*streamables, **opts)
     broadcast_action_later_to(*streamables, action: :append, **opts)

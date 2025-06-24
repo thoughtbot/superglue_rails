@@ -106,7 +106,6 @@ module Superglue::Broadcastable
     Superglue::StreamsChannel.broadcast_prepend_later_to(*streamables, save_as: save_as, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  # todo save_as: nil right now, but we can just change **rendering to **rest instead
   def broadcast_prepend_later(fragment: broadcast_fragment_default, save_as: nil, **rendering)
     broadcast_prepend_later_to self, fragment: fragment, save_as: save_as, **rendering
   end
