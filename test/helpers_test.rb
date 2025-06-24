@@ -60,4 +60,73 @@ class StreamsHelperTest < ActiveSupport::TestCase
   test "fragment_id handles nil values" do
     assert_equal "", fragment_id(nil)
   end
+
+  test "stream_from_props returns attributes with signed stream name" do
+    message = Message.new(id: 1)
+    result = stream_from_props(message)
+
+    assert_equal "Superglue::StreamsChannel", result[:channel]
+    assert result[:signed_stream_name].present?
+    assert_kind_of String, result[:signed_stream_name]
+  end
+
+  test "stream_from_props accepts custom channel" do
+    message = Message.new(id: 1)
+    result = stream_from_props(message, channel: "CustomChannel")
+
+    assert_equal "CustomChannel", result[:channel]
+  end
+
+  test "stream_from_props accepts symbol channel" do
+    message = Message.new(id: 1)
+    result = stream_from_props(message, channel: :MyChannel)
+
+    assert_equal "MyChannel", result[:channel]
+  end
+
+  test "stream_from_props handles multiple streamables" do
+    message1 = Message.new(id: 1)
+    message2 = Message.new(id: 2)
+    result = stream_from_props(message1, message2)
+
+    assert_equal "Superglue::StreamsChannel", result[:channel]
+    assert result[:signed_stream_name].present?
+  end
+
+  test "stream_from_props handles string streamables" do
+    result = stream_from_props("my_stream")
+
+    assert_equal "Superglue::StreamsChannel", result[:channel]
+    assert result[:signed_stream_name].present?
+  end
+
+  test "stream_from_props raises error for blank streamables" do
+    assert_raises ArgumentError, "streamables can't be blank" do
+      stream_from_props
+    end
+  end
+
+  test "stream_from_props raises error for all blank streamables" do
+    assert_raises ArgumentError, "streamables can't be blank" do
+      stream_from_props(nil, "", "  ")
+    end
+  end
+
+  test "stream_from_props filters out blank streamables" do
+    message = Message.new(id: 1)
+    result = stream_from_props(message, nil, "", "  ")
+
+    assert_equal "Superglue::StreamsChannel", result[:channel]
+    assert result[:signed_stream_name].present?
+  end
+
+  test "stream_from_props passes through additional attributes" do
+    message = Message.new(id: 1)
+    result = stream_from_props(message, foo: "bar", class: "my-class")
+
+    assert_equal "Superglue::StreamsChannel", result[:channel]
+    assert_equal "bar", result[:foo]
+    assert_equal "my-class", result[:class]
+    assert result[:signed_stream_name].present?
+  end
 end
