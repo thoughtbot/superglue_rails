@@ -78,7 +78,7 @@ class BroadcastsTest < ApplicationSystemTestCase
     visit users_profiles_path
 
     assert_broadcasts_text "Profile 1", to: :users_profiles do |text, channel|
-      Users::Profile.new(id: 1, name: text).broadcast_replace_to(channel, fragment: "profile")
+      Users::Profile.new(id: 1, name: text).broadcast_save_to(channel, fragment: "profile")
     end
   end
 

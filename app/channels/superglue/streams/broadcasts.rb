@@ -1,6 +1,6 @@
 module Superglue::Streams::Broadcasts
-  def broadcast_replace_to(*streamables, **opts)
-    broadcast_action_to(*streamables, action: :replace, **opts)
+  def broadcast_save_to(*streamables, **opts)
+    broadcast_action_to(*streamables, action: :save, **opts)
   end
 
   def broadcast_append_to(*streamables, **opts)
@@ -44,8 +44,8 @@ module Superglue::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: render_broadcast_action(rendering))
   end
 
-  def broadcast_replace_later_to(*streamables, **opts)
-    broadcast_action_later_to(*streamables, action: :replace, **opts)
+  def broadcast_save_later_to(*streamables, **opts)
+    broadcast_action_later_to(*streamables, action: :save, **opts)
   end
 
   def broadcast_append_later_to(*streamables, **opts)
