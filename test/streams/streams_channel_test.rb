@@ -15,13 +15,13 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     {partial: "messages/message", locals: {message: @message}}
   end
 
-  test "broadcasting replace now" do
-    assert_broadcast_on "stream", render_props("replace", fragment: "message_1", **rendering) do
-      Superglue::StreamsChannel.broadcast_replace_to "stream", fragment: "message_1", **rendering
+  test "broadcasting save now" do
+    assert_broadcast_on "stream", render_props("save", fragment: "message_1", **rendering) do
+      Superglue::StreamsChannel.broadcast_save_to "stream", fragment: "message_1", **rendering
     end
 
-    assert_broadcast_on "stream", render_props("replace", fragments: ["message_1"], **rendering) do
-      Superglue::StreamsChannel.broadcast_replace_to "stream", fragments: ["message_1"], **rendering
+    assert_broadcast_on "stream", render_props("save", fragments: ["message_1"], **rendering) do
+      Superglue::StreamsChannel.broadcast_save_to "stream", fragments: ["message_1"], **rendering
     end
   end
 
@@ -61,16 +61,16 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting replace later" do
-    assert_broadcast_on "stream", render_props("replace", fragment: "message_1", **rendering) do
+  test "broadcasting save later" do
+    assert_broadcast_on "stream", render_props("save", fragment: "message_1", **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_replace_later_to "stream", fragment: "message_1", **rendering
+        Superglue::StreamsChannel.broadcast_save_later_to "stream", fragment: "message_1", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_props("replace", fragments: ["message_1"], **rendering) do
+    assert_broadcast_on "stream", render_props("save", fragments: ["message_1"], **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_replace_later_to "stream", fragments: ["message_1"], **rendering
+        Superglue::StreamsChannel.broadcast_save_later_to "stream", fragments: ["message_1"], **rendering
       end
     end
   end

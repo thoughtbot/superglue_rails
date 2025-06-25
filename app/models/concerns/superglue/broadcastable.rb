@@ -9,12 +9,12 @@ module Superglue::Broadcastable
   module ClassMethods
     def broadcasts_to(stream, inserts_by: :append, fragment: broadcast_fragment_default, save_as: nil, **rendering)
       after_create_commit -> { broadcast_action_later_to(stream.try(:call, self) || send(stream), action: inserts_by, fragment: fragment.try(:call, self) || fragment, save_as: save_as&.try(:call, self), **rendering) }
-      after_update_commit -> { broadcast_replace_later_to(stream.try(:call, self) || send(stream), **rendering) }
+      after_update_commit -> { broadcast_save_later_to(stream.try(:call, self) || send(stream), **rendering) }
     end
 
     def broadcasts(stream = model_name.plural, inserts_by: :append, fragment: broadcast_fragment_default, save_as: nil, **rendering)
       after_create_commit -> { broadcast_action_later_to(stream, action: inserts_by, fragment: fragment.try(:call, self) || fragment, save_as: save_as&.try(:call, self), **rendering) }
-      after_update_commit -> { broadcast_replace_later(**rendering) }
+      after_update_commit -> { broadcast_save_later(**rendering) }
     end
 
     def broadcasts_refreshes_to(stream)
@@ -44,12 +44,12 @@ module Superglue::Broadcastable
   end
 
   # add fragment?
-  def broadcast_replace_to(*streamables, **rendering)
-    Superglue::StreamsChannel.broadcast_replace_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: self)) unless suppressed_superglue_broadcasts?
+  def broadcast_save_to(*streamables, **rendering)
+    Superglue::StreamsChannel.broadcast_save_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: self)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_replace(**rendering)
-    broadcast_replace_to self, **rendering
+  def broadcast_save(**rendering)
+    broadcast_save_to self, **rendering
   end
 
   # todo save_as: true
@@ -86,12 +86,12 @@ module Superglue::Broadcastable
     broadcast_action_to self, action: action, fragment: fragment, options: options, **rest
   end
 
-  def broadcast_replace_later_to(*streamables, **rendering)
-    Superglue::StreamsChannel.broadcast_replace_later_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: self)) unless suppressed_superglue_broadcasts?
+  def broadcast_save_later_to(*streamables, **rendering)
+    Superglue::StreamsChannel.broadcast_save_later_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: self)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_replace_later(**rendering)
-    broadcast_replace_later_to self, **rendering
+  def broadcast_save_later(**rendering)
+    broadcast_save_later_to self, **rendering
   end
 
   def broadcast_append_later_to(*streamables, fragment: broadcast_fragment_default, save_as: nil, **rendering)
