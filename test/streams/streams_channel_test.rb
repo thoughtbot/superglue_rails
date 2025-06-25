@@ -16,89 +16,89 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting replace now" do
-    assert_broadcast_on "stream", render_props("replace", target: "message_1", **rendering) do
-      Superglue::StreamsChannel.broadcast_replace_to "stream", target: "message_1", **rendering
+    assert_broadcast_on "stream", render_props("replace", fragment: "message_1", **rendering) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", fragment: "message_1", **rendering
     end
 
-    assert_broadcast_on "stream", render_props("replace", targets: ["message_1"], **rendering) do
-      Superglue::StreamsChannel.broadcast_replace_to "stream", targets: ["message_1"], **rendering
+    assert_broadcast_on "stream", render_props("replace", fragments: ["message_1"], **rendering) do
+      Superglue::StreamsChannel.broadcast_replace_to "stream", fragments: ["message_1"], **rendering
     end
   end
 
   test "broadcasting append now" do
-    assert_broadcast_on "stream", render_props("append", target: "messages", **rendering) do
-      Superglue::StreamsChannel.broadcast_append_to "stream", target: "messages", **rendering
+    assert_broadcast_on "stream", render_props("append", fragment: "messages", **rendering) do
+      Superglue::StreamsChannel.broadcast_append_to "stream", fragment: "messages", **rendering
     end
 
-    assert_broadcast_on "stream", render_props("append", targets: ["messages"], **rendering) do
-      Superglue::StreamsChannel.broadcast_append_to "stream", targets: ["messages"], **rendering
+    assert_broadcast_on "stream", render_props("append", fragments: ["messages"], **rendering) do
+      Superglue::StreamsChannel.broadcast_append_to "stream", fragments: ["messages"], **rendering
     end
   end
 
   test "broadcasting prepend now" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
-      Superglue::StreamsChannel.broadcast_prepend_to "stream", target: "messages", **rendering
+    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", **rendering) do
+      Superglue::StreamsChannel.broadcast_prepend_to "stream", fragment: "messages", **rendering
     end
 
-    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
-      Superglue::StreamsChannel.broadcast_prepend_to "stream", targets: ["messages"], **rendering
+    assert_broadcast_on "stream", render_props("prepend", fragments: ["messages"], **rendering) do
+      Superglue::StreamsChannel.broadcast_prepend_to "stream", fragments: ["messages"], **rendering
     end
   end
 
   test "broadcasting action now" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
-      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", target: "messages", **rendering
+    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", **rendering) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", fragment: "messages", **rendering
     end
 
-    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
-      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ["messages"], **rendering
+    assert_broadcast_on "stream", render_props("prepend", fragments: ["messages"], **rendering) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", fragments: ["messages"], **rendering
     end
 
     assert_broadcast_on "stream",
-      render_props("prepend", targets: ["messages"], **rendering.merge({locals: {json: {body: "test"}}})) do
-      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", targets: ["messages"],
+      render_props("prepend", fragments: ["messages"], **rendering.merge({locals: {json: {body: "test"}}})) do
+      Superglue::StreamsChannel.broadcast_action_to "stream", action: "prepend", fragments: ["messages"],
         json: {body: "test"}, **rendering
     end
   end
 
   test "broadcasting replace later" do
-    assert_broadcast_on "stream", render_props("replace", target: "message_1", **rendering) do
+    assert_broadcast_on "stream", render_props("replace", fragment: "message_1", **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_replace_later_to "stream", target: "message_1", **rendering
+        Superglue::StreamsChannel.broadcast_replace_later_to "stream", fragment: "message_1", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_props("replace", targets: ["message_1"], **rendering) do
+    assert_broadcast_on "stream", render_props("replace", fragments: ["message_1"], **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_replace_later_to "stream", targets: ["message_1"], **rendering
+        Superglue::StreamsChannel.broadcast_replace_later_to "stream", fragments: ["message_1"], **rendering
       end
     end
   end
 
   test "broadcasting append later" do
-    assert_broadcast_on "stream", render_props("append", target: "messages", **rendering) do
+    assert_broadcast_on "stream", render_props("append", fragment: "messages", **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_append_later_to "stream", target: "messages", **rendering
+        Superglue::StreamsChannel.broadcast_append_later_to "stream", fragment: "messages", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_props("append", targets: ["messages"], **rendering) do
+    assert_broadcast_on "stream", render_props("append", fragments: ["messages"], **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_append_later_to "stream", targets: ["messages"], **rendering
+        Superglue::StreamsChannel.broadcast_append_later_to "stream", fragments: ["messages"], **rendering
       end
     end
   end
 
   test "broadcasting prepend later" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
+    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", target: "messages", **rendering
+        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", fragment: "messages", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
+    assert_broadcast_on "stream", render_props("prepend", fragments: ["messages"], **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", targets: ["messages"], **rendering
+        Superglue::StreamsChannel.broadcast_prepend_later_to "stream", fragments: ["messages"], **rendering
       end
     end
   end
@@ -180,42 +180,42 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting action later" do
-    assert_broadcast_on "stream", render_props("prepend", target: "messages", **rendering) do
+    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", **rendering) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
-          "stream", action: "prepend", target: "messages", **rendering
+          "stream", action: "prepend", fragment: "messages", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_props("prepend", targets: ["messages"], **rendering) do
+    assert_broadcast_on "stream", render_props("prepend", fragments: ["messages"], **rendering) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
-          "stream", action: "prepend", targets: ["messages"], **rendering
+          "stream", action: "prepend", fragments: ["messages"], **rendering
       end
     end
   end
 
-  test "broadcasting action later with ActiveModel array target" do
+  test "broadcasting action later with ActiveModel array fragment" do
     message = Message.new(id: 42)
-    target = [message, "opt"]
+    fragment = [message, "opt"]
 
-    assert_broadcast_on "stream", render_props("prepend", target: "opt_message_42", **rendering) do
+    assert_broadcast_on "stream", render_props("prepend", fragment: "opt_message_42", **rendering) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
-          "stream", action: "prepend", target: target, **rendering
+          "stream", action: "prepend", fragment: fragment, **rendering
       end
     end
   end
 
-  test "broadcasting action later with multiple ActiveModel targets" do
+  test "broadcasting action later with multiple ActiveModel fragments" do
     one = Message.new(id: 1)
     two = Message.new(id: 2)
-    targets = [[one, "msg"], [two, "msg"]]
+    fragments = [[one, "msg"], [two, "msg"]]
 
-    assert_broadcast_on "stream", render_props("prepend", targets: ["msg_message_1", "msg_message_2"], **rendering) do
+    assert_broadcast_on "stream", render_props("prepend", fragments: ["msg_message_1", "msg_message_2"], **rendering) do
       perform_enqueued_jobs do
         Superglue::StreamsChannel.broadcast_action_later_to \
-          "stream", action: "prepend", targets: targets, **rendering
+          "stream", action: "prepend", fragments: fragments, **rendering
       end
     end
   end

@@ -7,13 +7,13 @@ module Superglue::Broadcastable
   end
 
   module ClassMethods
-    def broadcasts_to(stream, inserts_by: :append, target: broadcast_target_default, **rendering)
-      after_create_commit -> { broadcast_action_later_to(stream.try(:call, self) || send(stream), action: inserts_by, target: target.try(:call, self) || target, **rendering) }
+    def broadcasts_to(stream, inserts_by: :append, fragment: broadcast_fragment_default, **rendering)
+      after_create_commit -> { broadcast_action_later_to(stream.try(:call, self) || send(stream), action: inserts_by, fragment: fragment.try(:call, self) || fragment, **rendering) }
       after_update_commit -> { broadcast_replace_later_to(stream.try(:call, self) || send(stream), **rendering) }
     end
 
-    def broadcasts(stream = model_name.plural, inserts_by: :append, target: broadcast_target_default, **rendering)
-      after_create_commit -> { broadcast_action_later_to(stream, action: inserts_by, target: target.try(:call, self) || target, **rendering) }
+    def broadcasts(stream = model_name.plural, inserts_by: :append, fragment: broadcast_fragment_default, **rendering)
+      after_create_commit -> { broadcast_action_later_to(stream, action: inserts_by, fragment: fragment.try(:call, self) || fragment, **rendering) }
       after_update_commit -> { broadcast_replace_later(**rendering) }
     end
 
@@ -27,7 +27,7 @@ module Superglue::Broadcastable
       after_destroy_commit -> { broadcast_refresh }
     end
 
-    def broadcast_target_default
+    def broadcast_fragment_default
       model_name.plural
     end
 
@@ -45,27 +45,27 @@ module Superglue::Broadcastable
 
   # add target?
   def broadcast_replace_to(*streamables, **rendering)
-    Superglue::StreamsChannel.broadcast_replace_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_superglue_broadcasts?
+    Superglue::StreamsChannel.broadcast_replace_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: self)) unless suppressed_superglue_broadcasts?
   end
 
   def broadcast_replace(**rendering)
     broadcast_replace_to self, **rendering
   end
 
-  def broadcast_append_to(*streamables, target: broadcast_target_default, **rendering)
-    Superglue::StreamsChannel.broadcast_append_to(*streamables, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
+  def broadcast_append_to(*streamables, fragment: broadcast_fragment_default, **rendering)
+    Superglue::StreamsChannel.broadcast_append_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_append(target: broadcast_target_default, **rendering)
-    broadcast_append_to self, target: target, **rendering
+  def broadcast_append(fragment: broadcast_fragment_default, **rendering)
+    broadcast_append_to self, fragment: fragment, **rendering
   end
 
-  def broadcast_prepend_to(*streamables, target: broadcast_target_default, **rendering)
-    Superglue::StreamsChannel.broadcast_prepend_to(*streamables, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
+  def broadcast_prepend_to(*streamables, fragment: broadcast_fragment_default, **rendering)
+    Superglue::StreamsChannel.broadcast_prepend_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_prepend(target: broadcast_target_default, **rendering)
-    broadcast_prepend_to self, target: target, **rendering
+  def broadcast_prepend(fragment: broadcast_fragment_default, **rendering)
+    broadcast_prepend_to self, fragment: fragment, **rendering
   end
 
   def broadcast_refresh_to(*streamables)
@@ -76,36 +76,36 @@ module Superglue::Broadcastable
     broadcast_refresh_to self
   end
 
-  def broadcast_action_to(*streamables, action:, target: broadcast_target_default, options: {}, **rendering)
-    Superglue::StreamsChannel.broadcast_action_to(*streamables, action: action, options: options, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
+  def broadcast_action_to(*streamables, action:, fragment: broadcast_fragment_default, options: {}, **rendering)
+    Superglue::StreamsChannel.broadcast_action_to(*streamables, action: action, options: options, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_action(action, target: broadcast_target_default, options: {}, **rendering)
-    broadcast_action_to self, action: action, target: target, options: options, **rendering
+  def broadcast_action(action, fragment: broadcast_fragment_default, options: {}, **rendering)
+    broadcast_action_to self, action: action, fragment: fragment, options: options, **rendering
   end
 
   def broadcast_replace_later_to(*streamables, **rendering)
-    Superglue::StreamsChannel.broadcast_replace_later_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_superglue_broadcasts?
+    Superglue::StreamsChannel.broadcast_replace_later_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: self)) unless suppressed_superglue_broadcasts?
   end
 
   def broadcast_replace_later(**rendering)
     broadcast_replace_later_to self, **rendering
   end
 
-  def broadcast_append_later_to(*streamables, target: broadcast_target_default, **rendering)
-    Superglue::StreamsChannel.broadcast_append_later_to(*streamables, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
+  def broadcast_append_later_to(*streamables, fragment: broadcast_fragment_default, **rendering)
+    Superglue::StreamsChannel.broadcast_append_later_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_append_later(target: broadcast_target_default, **rendering)
-    broadcast_append_later_to self, target: target, **rendering
+  def broadcast_append_later(fragment: broadcast_fragment_default, **rendering)
+    broadcast_append_later_to self, fragment: fragment, **rendering
   end
 
-  def broadcast_prepend_later_to(*streamables, target: broadcast_target_default, **rendering)
-    Superglue::StreamsChannel.broadcast_prepend_later_to(*streamables, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
+  def broadcast_prepend_later_to(*streamables, fragment: broadcast_fragment_default, **rendering)
+    Superglue::StreamsChannel.broadcast_prepend_later_to(*streamables, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_prepend_later(target: broadcast_target_default, **rendering)
-    broadcast_prepend_later_to self, target: target, **rendering
+  def broadcast_prepend_later(fragment: broadcast_fragment_default, **rendering)
+    broadcast_prepend_later_to self, fragment: fragment, **rendering
   end
 
   def broadcast_refresh_later_to(*streamables)
@@ -116,23 +116,23 @@ module Superglue::Broadcastable
     broadcast_refresh_later_to self
   end
 
-  def broadcast_action_later_to(*streamables, action:, target: broadcast_target_default, options: {}, **rendering)
-    Superglue::StreamsChannel.broadcast_action_later_to(*streamables, action: action, options: options, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
+  def broadcast_action_later_to(*streamables, action:, fragment: broadcast_fragment_default, options: {}, **rendering)
+    Superglue::StreamsChannel.broadcast_action_later_to(*streamables, action: action, options: options, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_action_later(action:, target: broadcast_target_default, options: {}, **rendering)
-    broadcast_action_later_to self, action: action, target: target, options: options, **rendering
+  def broadcast_action_later(action:, fragment: broadcast_fragment_default, options: {}, **rendering)
+    broadcast_action_later_to self, action: action, fragment: fragment, options: options, **rendering
   end
 
   private
 
-  def broadcast_target_default
-    self.class.broadcast_target_default
+  def broadcast_fragment_default
+    self.class.broadcast_fragment_default
   end
 
-  def extract_options_and_add_target(rendering = {}, target: broadcast_target_default)
+  def extract_options_and_add_fragment(rendering = {}, fragment: broadcast_fragment_default)
     broadcast_rendering_with_defaults(rendering).tap do |options|
-      options[:target] = target if !options.key?(:target) && !options.key?(:targets)
+      options[:fragment] = fragment if !options.key?(:fragment) && !options.key?(:fragments)
     end
   end
 
