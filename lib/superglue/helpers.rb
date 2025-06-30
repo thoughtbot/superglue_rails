@@ -29,7 +29,6 @@ module Superglue
           .squeeze(".")
           .split(".")
 
-        # Raise error if depth exceeds security limit
         if path_array.length > MAX_DIG_DEPTH
           raise DigPathTooDeepError.new(path_array.length, MAX_DIG_DEPTH)
         end

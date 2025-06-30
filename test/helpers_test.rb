@@ -16,7 +16,6 @@ class HelpersTest < ActiveSupport::TestCase
   end
 
   test "raises error when depth exceeds limit" do
-    # Create a string with 51 levels (1 over the 50 limit)
     deep_path = (1..51).map(&:to_s).join(".")
     
     error = assert_raises(Superglue::Helpers::DigPathTooDeepError) do
@@ -28,7 +27,6 @@ class HelpersTest < ActiveSupport::TestCase
   end
   
   test "allows paths at the depth limit" do
-    # Create a string with exactly 50 levels
     exact_limit_path = (1..50).map(&:to_s).join(".")
     result = param_to_dig_path(exact_limit_path)
     
