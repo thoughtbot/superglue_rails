@@ -77,7 +77,7 @@ module Superglue::Broadcastable
     broadcast_refresh_to self
   end
 
-  # todo rename options to additionalOptions or js_options
+  # todo rename options to js_options
   def broadcast_action_to(*streamables, action:, fragment: broadcast_fragment_default, options: {}, **rendering)
     Superglue::StreamsChannel.broadcast_action_to(*streamables, action: action, options: options, **extract_options_and_add_fragment(rendering, fragment: fragment)) unless suppressed_superglue_broadcasts?
   end

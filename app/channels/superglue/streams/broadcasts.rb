@@ -31,12 +31,10 @@ module Superglue::Streams::Broadcasts
     end
 
     if save_as
-      # todo: change options[:fragment] to option[:save_as]
-      # when the js library is updated
-      options[:fragment] = convert_to_superglue_fragment_id(save_as)
+      options[:saveAs] = convert_to_superglue_fragment_id(save_as)
     end
 
-    locals[:broadcast_targets] = fragments
+    locals[:broadcast_fragment_keys] = fragments
     locals[:broadcast_action] = action
     locals[:broadcast_options] = options
     rendering[:locals] = locals
@@ -82,7 +80,7 @@ module Superglue::Streams::Broadcasts
     end
 
     if save_as
-      options[:save_as] = convert_to_superglue_fragment_id(save_as)
+      options[:saveAs] = convert_to_superglue_fragment_id(save_as)
     end
 
     Superglue::Streams::ActionBroadcastJob.perform_later \
@@ -104,7 +102,6 @@ module Superglue::Streams::Broadcasts
 
   private
 
-  # todo expose this as view helper
   def convert_to_superglue_fragment_id(fragment)
     fragment_array = Array.wrap(fragment)
     if fragment_array.any? { |value| value.respond_to?(:to_key) }

@@ -5,7 +5,7 @@ import { useContent, useStreamSource, useFragment } from '@thoughtbot/superglue'
 
 export default function ProfileIndex() {
   const { streamFromMessages } = useContent()
-  const profile = useFragment('profile')
+  const [profile] = useFragment('profile')
 
   useStreamSource(streamFromMessages)
 

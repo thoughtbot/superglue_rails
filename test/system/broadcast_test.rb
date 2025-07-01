@@ -18,7 +18,7 @@ class BroadcastsTest < ApplicationSystemTestCase
       File.write(package_path, JSON.pretty_generate(package))
 
       # Run npm install to update dependencies
-      system("cd #{Rails.root} && npm install")
+      system("cd #{Rails.root} && npm install && npm run build")
     end
   end
 
@@ -49,9 +49,7 @@ class BroadcastsTest < ApplicationSystemTestCase
     within(:element, id: "messages") { assert_no_text body }
     within(:element, id: "spotlight") { assert_no_text body }
 
-    # todo: change options[:fragment] to option[:save_as]
-    # when the js library is updated
-    Message.create(content: body).broadcast_action_to("messages", action: :append, options: {fragment: "message-1"})
+    Message.create(content: body).broadcast_action_to("messages", action: :append, options: {saveAs: "message-1"})
 
     within(:element, id: "messages") { assert_text body }
     within(:element, id: "spotlight") { assert_text body }
@@ -65,9 +63,7 @@ class BroadcastsTest < ApplicationSystemTestCase
       within(:element, id: "messages") { assert_no_text body }
       within(:element, id: "spotlight") { assert_no_text body }
 
-      # todo: change options[:fragment] to option[:save_as]
-      # when the js library is updated
-      Message.create(content: body).broadcast_action_later_to("messages", action: :append, options: {fragment: "message-1"})
+      Message.create(content: body).broadcast_action_later_to("messages", action: :append, options: {saveAs: "message-1"})
 
       within(:element, id: "messages") { assert_text body }
       within(:element, id: "spotlight") { assert_text body }

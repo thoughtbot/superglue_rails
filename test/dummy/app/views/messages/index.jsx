@@ -6,7 +6,7 @@ const isFragment = (data) => "__id" in data
 const Message = ({body}) => <p>{body}</p>
 
 const MessageFragment = ({fragment}) => {
-  const {body} = useFragment(fragment)
+  const [{body}] = useFragment(fragment)
   return <p>{body}</p>
 }
 
@@ -16,8 +16,8 @@ export default function MessagesIndex() {
     streamFromMessages,
     messages: messagesFragment
   } = useContent()
-  const spotlight = useFragment('message-1')
-  const messages = useFragment(messagesFragment)
+  const [spotlight] = useFragment('message-1')
+  const [messages] = useFragment(messagesFragment)
   useStreamSource(streamFromMessages)
 
   return (
