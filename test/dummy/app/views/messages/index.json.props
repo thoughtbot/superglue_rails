@@ -1,0 +1,5 @@
+json.header "Messages"
+
+json.streamFromMessages stream_from_props("messages")
+json.messages(partial: "message_list", fragment: "messages") do
+end

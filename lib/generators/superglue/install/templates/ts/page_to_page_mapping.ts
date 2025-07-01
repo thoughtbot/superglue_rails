@@ -1,4 +1,4 @@
-// import your page component #todo fix output of new lines
+// import your page component
 // e.g import PostsEdit from '../views/posts/edit'
 
 // Mapping between your props template to Component, you must add to this
@@ -28,7 +28,6 @@
 // }
 // ```
 //
-const pageIdentifierToPageComponent = {
-};
+const pageIdentifierToPageComponent = {};
 
-export { pageIdentifierToPageComponent }
+export { pageIdentifierToPageComponent };

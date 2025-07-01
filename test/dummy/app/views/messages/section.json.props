@@ -1,0 +1,5 @@
+json.header "Messages in a section"
+
+json.streamFromMessages stream_from_props("messages", channel: SectionChannel, section: "important")
+json.messages(partial: "message_list_section", fragment: "messages") do
+end
