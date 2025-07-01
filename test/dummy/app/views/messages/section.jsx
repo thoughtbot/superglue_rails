@@ -9,7 +9,7 @@ export default function SectionIndex() {
     streamFromMessages,
     messages: messagesFragment
   } = useContent()
-  const messages = useFragment(messagesFragment)
+  const [messages] = useFragment(messagesFragment)
   useStreamSource(streamFromMessages)
 
   return (
