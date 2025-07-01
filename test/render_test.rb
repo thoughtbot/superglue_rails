@@ -10,11 +10,13 @@ class ReprodTest < ActionController::TestCase
     rendered = <<~HTML
       <html>
         <body>
-          <script>{"data":{"author":"john smith"}}</script>
-        </body>
+          <script type="text/javascript">
+        window.SUPERGLUE_INITIAL_PAGE_STATE={"data":{"author":"john smith"}};
+      </script>
+
+      <div id="app"></div>  </body>
       </html>
     HTML
-
     assert_equal rendered, @response.body
     assert_equal "text/html", @response.media_type
   end
@@ -62,8 +64,11 @@ class RenderTest < ActionController::TestCase
     rendered = <<~HTML
       <html>
         <body>
-          <script>{"data":{"author":"john smith"}}</script>
-        </body>
+          <script type="text/javascript">
+        window.SUPERGLUE_INITIAL_PAGE_STATE={"data":{"author":"john smith"}};
+      </script>
+
+      <div id="app"></div>  </body>
       </html>
     HTML
 
@@ -86,11 +91,13 @@ class RenderTest < ActionController::TestCase
     rendered = <<~HTML
       <html>
         <body>
-          <script>{"data":{}}</script>
-        </body>
+          <script type="text/javascript">
+        window.SUPERGLUE_INITIAL_PAGE_STATE={"data":{}};
+      </script>
+
+      <div id="app"></div>  </body>
       </html>
     HTML
-
     assert_equal rendered, @response.body
     assert_equal "text/html", @response.media_type
   end
