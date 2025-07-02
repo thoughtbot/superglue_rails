@@ -1,5 +1,13 @@
 module Superglue
   module Helpers
+    class DigPathTooDeepError < StandardError
+      def initialize(depth, max_depth)
+        super("Parameter dig path too deep: #{depth} levels (maximum allowed: #{max_depth})")
+      end
+    end
+
+    MAX_DIG_DEPTH = 50
+
     def redirect_back_with_props_at(opts)
       if request.referrer && params[:props_at]
         referrer_url = URI.parse(request.referrer)
@@ -16,10 +24,16 @@ module Superglue
 
     def param_to_dig_path(param)
       if param
-        param
+        path_array = param
           .gsub(/[^\da-zA-Z_=.]+/, "")
           .squeeze(".")
           .split(".")
+
+        if path_array.length > MAX_DIG_DEPTH
+          raise DigPathTooDeepError.new(path_array.length, MAX_DIG_DEPTH)
+        end
+
+        path_array
       end
     end
   end

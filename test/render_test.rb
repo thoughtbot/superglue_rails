@@ -281,3 +281,15 @@ class RenderTest < ActionController::TestCase
     }
   end
 end
+
+class SecurityTest < ActionController::TestCase
+  tests RenderController
+
+  test "deep props_at parameter raises security error when processed" do
+    deep_props_at = (1..60).map(&:to_s).join(".")
+
+    assert_raises(Superglue::Helpers::DigPathTooDeepError) do
+      @controller.param_to_dig_path(deep_props_at)
+    end
+  end
+end
