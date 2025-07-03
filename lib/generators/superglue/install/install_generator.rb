@@ -30,6 +30,9 @@ module Superglue
         say "Copying application.json.props"
         copy_file "#{__dir__}/templates/application.json.props", "app/views/layouts/application.json.props"
 
+        say "Copying stream.json.props"
+        copy_file "#{__dir__}/templates/stream.json.props", "app/views/layouts/stream.json.props"
+
         say "Adding required member methods to ApplicationRecord"
         add_member_methods
 
