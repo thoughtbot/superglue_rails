@@ -34,6 +34,10 @@ module Superglue::StreamsHelper
   end
 
   def broadcast_save_props(model: nil, partial: nil, fragment: nil, options: {}, **rendering)
+    if model && !fragment
+      fragment = fragment_id(model)
+    end
+
     broadcast_action_props(action: "save", model:, fragment:, options:, **rendering)
   end
 
@@ -56,8 +60,8 @@ module Superglue::StreamsHelper
     json = instance_variable_get(:@__json)
 
     json.child! do
-      json.fragmentKeys [fragment]
-      json.action action
+      json.fragmentIds [fragment]
+      json.handler action
       json.options(options)
       json.data(partial: [partial, rendering]) do
       end

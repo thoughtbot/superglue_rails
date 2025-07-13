@@ -5,6 +5,6 @@ json.data do
 end
 
 json.fragments json.fragments!
-json.type "fragment"
+json.action "handleStreamResponse"
 
 json.flash flash.to_h

@@ -12,4 +12,4 @@ if protect_against_forgery?
   json.csrfToken form_authenticity_token
 end
 
-json.action "stream"
+json.action "handleStreamResponse"
