@@ -169,8 +169,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message:}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "prepend",
+        fragmentIds: ["messages"],
+        handler: "prepend",
         options: {},
         data: {
           body: "Hello!"
@@ -190,8 +190,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "prepend",
+        fragmentIds: ["messages"],
+        handler: "prepend",
         options: {saveAs: "custom_fragment"},
         data: {
           body: "Hello!"
@@ -211,8 +211,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "append",
+        fragmentIds: ["messages"],
+        handler: "append",
         options: {},
         data: {
           body: "Hello!"
@@ -232,8 +232,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "append",
+        fragmentIds: ["messages"],
+        handler: "append",
         options: {saveAs: "message_1"},
         data: {
           body: "Hello!"
@@ -242,7 +242,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_save_props with model" do
+  test "broadcast_save_props with model uses the fragment_id of the model" do
     template_content = <<~PROPS
       json.array! do
         broadcast_save_props(model: @message)
@@ -253,8 +253,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "save",
+        fragmentIds: ["message_1"],
+        handler: "save",
         options: {},
         data: {
           body: "Hello!"
@@ -274,8 +274,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["custom_frag"],
-        action: "replace",
+        fragmentIds: ["custom_frag"],
+        handler: "replace",
         options: {},
         data: {
           body: "Hello!"
@@ -295,8 +295,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["msg_123"],
-        action: "update",
+        fragmentIds: ["msg_123"],
+        handler: "update",
         options: {},
         data: {
           body: "Hello!"
@@ -330,8 +330,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "prepend",
+        fragmentIds: ["messages"],
+        handler: "prepend",
         options: {target: "#messages", position: "afterbegin"},
         data: {
           body: "Hello!"
@@ -351,8 +351,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["messages"],
-        action: "append",
+        fragmentIds: ["messages"],
+        handler: "append",
         options: {},
         data: {
           body: "Hello!"
@@ -377,8 +377,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {custom_model:}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["custom_messages"],
-        action: "prepend",
+        fragmentIds: ["custom_messages"],
+        handler: "prepend",
         options: {},
         data: {
           body: "Custom"
@@ -398,8 +398,8 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentKeys: ["explicit_fragment"],
-        action: "append",
+        fragmentIds: ["explicit_fragment"],
+        handler: "append",
         options: {},
         data: {
           body: "Hello!"
@@ -409,20 +409,22 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
   end
 
   test "broadcast_action_props handles model without broadcast_fragment_default method" do
-    # Create a plain object that doesn't have broadcast_fragment_default
-    plain_model = OpenStruct.new(id: 1, content: "Plain", model_name: OpenStruct.new(element: "plain"))
+    plain_model = Struct
+      .new(:id, :content, :model_name)
+      .new(id: 1, content: "Plain", model_name: OpenStruct.new(element: "plain"))
+
     def plain_model.to_partial_path
       "messages/message"
     end
 
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "save", model: @plain_model)
+        broadcast_action_props(action: "save", model: @plain_model, locals: {message: @plain_model})
       end
     PROPS
 
     with_json_template(template_content) do
-      assert_raises NoMethodError do
+      assert_raises(ActionView::Template::Error) do
         @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {plain_model:})
       end
     end

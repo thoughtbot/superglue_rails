@@ -126,11 +126,11 @@ module Superglue::Broadcastable
     broadcast_action_later_to self, action: action, fragment: fragment, options: options, **rendering
   end
 
-  private
-
   def broadcast_fragment_default
     self.class.broadcast_fragment_default
   end
+  
+  private
 
   def extract_options_and_add_fragment(rendering = {}, fragment: broadcast_fragment_default)
     broadcast_rendering_with_defaults(rendering).tap do |options|

@@ -1,4 +1,5 @@
 import MessagesIndex from "@views/messages";
+import MessagesShow from "@views/messages/show";
 import ProfileIndex from "@views/users/profiles";
 import SectionIndex from "@views/messages/section"
 // import your page component
@@ -33,6 +34,7 @@ import SectionIndex from "@views/messages/section"
 //
 const pageIdentifierToPageComponent = {
     'messages/index': MessagesIndex,
+    'messages/show': MessagesShow,
     'users/profiles/index': ProfileIndex,
     'messages/section': SectionIndex,
 };

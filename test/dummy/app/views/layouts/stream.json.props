@@ -5,11 +5,11 @@ json.data do
     yield json
   end
 end
-# json.fragments json.fragments!
-# json.assets [ asset_path('application.js') ]
+json.fragments json.fragments!
+json.assets [ asset_path('application.js') ]
 
-# if protect_against_forgery?
-#   json.csrfToken form_authenticity_token
-# end
+if protect_against_forgery?
+  json.csrfToken form_authenticity_token
+end
 
-# json.action "stream"
+json.action "handleStreamResponse"

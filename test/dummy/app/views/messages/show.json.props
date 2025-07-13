@@ -1,0 +1,12 @@
+json.message(partial: [
+  "message",
+  fragment: fragment_id(@message),
+  locals: {message: @message}
+]) do
+end
+
+json.updateMessageForm do
+  form_props(model: @message) do |f|
+    f.submit
+  end
+end

@@ -11,7 +11,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  get ":controller(/:action)"
   resource :request_id
 
   resources :messages do
@@ -23,4 +22,6 @@ Rails.application.routes.draw do
   namespace :users do
     resources :profiles
   end
+
+  get ":controller(/:action)"
 end
