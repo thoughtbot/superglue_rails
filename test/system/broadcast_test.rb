@@ -5,10 +5,6 @@ class BroadcastsTest < ApplicationSystemTestCase
   include ActiveJob::TestHelper
   extend Superglue::Streams::StreamName
 
-  setup do
-    setup_superglue_dependency
-  end
-
   test "Message broadcasts Turbo Streams" do
     visit messages_path
 
