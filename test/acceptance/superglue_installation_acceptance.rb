@@ -63,24 +63,23 @@ class SuperglueInstallationTest < Minitest::Test
   end
 
   def install_superglue
-    Dir.chdir(ROOT_DIR) do
-      successfully "rm -rf ./superglue"
-      Git.clone("https://github.com/thoughtbot/superglue.git")
-    end
+    # Dir.chdir(ROOT_DIR) do
+    #   successfully "rm -rf ./superglue"
+    #   Git.clone("https://github.com/thoughtbot/superglue.git")
+    # end
 
-    Dir.chdir(SUPERGLUE_SUPERGLUE_PATH) do
-      successfully "npm install"
-      successfully "npm run build"
-      successfully "npm pack"
-    end
-    successfully "echo \"gem 'props_template'\" >> Gemfile"
+    # Dir.chdir(SUPERGLUE_SUPERGLUE_PATH) do
+    #   successfully "npm install"
+    #   successfully "npm run build"
+    #   successfully "npm pack"
+    # end
     successfully "echo \"gem 'superglue', path: '#{SUPERGLUE_RAILS_PATH}'\" >> Gemfile"
     successfully "bundle install"
 
     FileUtils.rm_f("app/javascript/application.js")
 
     successfully "bundle exec rails generate superglue:install"
-    update_package_json
+    # update_package_json
     successfully "yarn install --cache-folder /tmp/.junk; rm -rf /tmp/.junk"
   end
 
