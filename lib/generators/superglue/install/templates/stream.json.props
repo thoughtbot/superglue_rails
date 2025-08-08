@@ -13,3 +13,7 @@ if protect_against_forgery?
 end
 
 json.action "handleStreamResponse"
+
+json.slices do
+  json.flash flash.to_h
+end
