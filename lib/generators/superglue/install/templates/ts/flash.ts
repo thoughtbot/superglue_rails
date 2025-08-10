@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { saveResponse, beforeVisit } from "@thoughtbot/superglue";
+import { receiveResponse, beforeVisit } from "@thoughtbot/superglue";
 
-type FlashState = Record<string, any>
+type FlashState = Record<string, any>;
 
 const initialState: FlashState = {};
 
@@ -32,13 +32,17 @@ export const flashSlice = createSlice({
     builder.addCase(beforeVisit, (_state, _action) => {
       return {};
     });
-    builder.addCase(saveResponse, (state, action) => {
-      const { page } = action.payload;
+    builder.addCase(receiveResponse, (state, action) => {
+      const { response } = action.payload;
 
-      return {
-        ...state,
-        ...(page.slices.flash as FlashState),
-      };
+      if (response.slices) {
+        return {
+          ...state,
+          ...(response.slices.flash as FlashState),
+        };
+      } else {
+        return state;
+      }
     });
   },
 });
