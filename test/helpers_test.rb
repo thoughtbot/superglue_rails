@@ -179,10 +179,10 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_prepend_props with save_as option" do
+  test "broadcast_prepend_props with save_target option" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_prepend_props(model: @message, save_as: "custom_target")
+        broadcast_prepend_props(model: @message, save_target: "custom_target")
       end
     PROPS
 
@@ -221,10 +221,10 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_append_props with save_as option using model" do
+  test "broadcast_append_props with save_target option using model" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_append_props(model: @message, save_as: @message)
+        broadcast_append_props(model: @message, save_target: @message)
       end
     PROPS
 

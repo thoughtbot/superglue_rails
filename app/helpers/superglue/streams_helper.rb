@@ -17,17 +17,17 @@ module Superglue::StreamsHelper
     end
   end
 
-  def broadcast_prepend_props(model: nil, target: nil, save_as: nil, options: {}, **rendering)
-    if save_as
-      options[:saveAs] ||= fragment_id(save_as)
+  def broadcast_prepend_props(model: nil, target: nil, save_target: nil, options: {}, **rendering)
+    if save_target
+      options[:saveAs] ||= fragment_id(save_target)
     end
 
     broadcast_action_props(action: "prepend", model:, target:, options:, **rendering)
   end
 
-  def broadcast_append_props(model: nil, target: nil, save_as: nil, options: {}, **rendering)
-    if save_as
-      options[:saveAs] ||= fragment_id(save_as)
+  def broadcast_append_props(model: nil, target: nil, save_target: nil, options: {}, **rendering)
+    if save_target
+      options[:saveAs] ||= fragment_id(save_target)
     end
 
     broadcast_action_props(action: "append", model:, target:, options:, **rendering)

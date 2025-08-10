@@ -28,8 +28,8 @@ end
 
 def render_props(action, partial:, locals: {}, target: nil, targets: nil, options: {})
   targets = target ? [target] : targets
-  if options[:save_as]
-    options[:saveAs] = options.delete(:save_as)
+  if options[:save_target]
+    options[:saveAs] = options.delete(:save_target)
   end
 
   if locals[:json]

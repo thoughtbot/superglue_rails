@@ -22,7 +22,7 @@ module Superglue::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: content)
   end
 
-  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, save_as: nil, options: {}, **rendering)
+  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, save_target: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}
     targets = (target ? [target] : targets)
 
@@ -30,8 +30,8 @@ module Superglue::Streams::Broadcasts
       convert_to_superglue_fragment_id(item)
     end
 
-    if save_as
-      options[:saveAs] = convert_to_superglue_fragment_id(save_as)
+    if save_target
+      options[:saveAs] = convert_to_superglue_fragment_id(save_target)
     end
 
     locals[:broadcast_target_keys] = targets
@@ -69,7 +69,7 @@ module Superglue::Streams::Broadcasts
     end
   end
 
-  def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, save_as: nil, options: {}, **rendering)
+  def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, save_target: nil, options: {}, **rendering)
     streamables.flatten!
     streamables.compact_blank!
 
@@ -79,8 +79,8 @@ module Superglue::Streams::Broadcasts
       convert_to_superglue_fragment_id(item)
     end
 
-    if save_as
-      options[:saveAs] = convert_to_superglue_fragment_id(save_as)
+    if save_target
+      options[:saveAs] = convert_to_superglue_fragment_id(save_target)
     end
 
     Superglue::Streams::ActionBroadcastJob.perform_later \
