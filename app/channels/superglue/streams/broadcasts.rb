@@ -22,11 +22,11 @@ module Superglue::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: content)
   end
 
-  def broadcast_action_to(*streamables, action:, fragment: nil, fragments: nil, save_as: nil, options: {}, **rendering)
+  def broadcast_action_to(*streamables, action:, target: nil, targets: nil, save_as: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}
-    fragments = (fragment ? [fragment] : fragments)
+    targets = (target ? [target] : targets)
 
-    fragments = fragments.map do |item|
+    targets = targets.map do |item|
       convert_to_superglue_fragment_id(item)
     end
 
@@ -34,7 +34,7 @@ module Superglue::Streams::Broadcasts
       options[:saveAs] = convert_to_superglue_fragment_id(save_as)
     end
 
-    locals[:broadcast_fragment_keys] = fragments
+    locals[:broadcast_target_keys] = targets
     locals[:broadcast_action] = action
     locals[:broadcast_options] = options
     rendering[:locals] = locals
@@ -69,13 +69,13 @@ module Superglue::Streams::Broadcasts
     end
   end
 
-  def broadcast_action_later_to(*streamables, action:, fragment: nil, fragments: nil, save_as: nil, options: {}, **rendering)
+  def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, save_as: nil, options: {}, **rendering)
     streamables.flatten!
     streamables.compact_blank!
 
     return unless streamables.present?
 
-    fragments = (fragment ? [fragment] : fragments).map do |item|
+    targets = (target ? [target] : targets).map do |item|
       convert_to_superglue_fragment_id(item)
     end
 
@@ -84,7 +84,7 @@ module Superglue::Streams::Broadcasts
     end
 
     Superglue::Streams::ActionBroadcastJob.perform_later \
-      stream_name_from(streamables), action: action, fragments: fragments, options: options, **rendering
+      stream_name_from(streamables), action: action, targets: targets, options: options, **rendering
   end
 
   def broadcast_stream_to(*streamables, content:)
@@ -102,12 +102,12 @@ module Superglue::Streams::Broadcasts
 
   private
 
-  def convert_to_superglue_fragment_id(fragment)
-    fragment_array = Array.wrap(fragment)
-    if fragment_array.any? { |value| value.respond_to?(:to_key) }
-      ActionView::RecordIdentifier.dom_id(*fragment_array)
+  def convert_to_superglue_fragment_id(target)
+    target_array = Array.wrap(target)
+    if target_array.any? { |value| value.respond_to?(:to_key) }
+      ActionView::RecordIdentifier.dom_id(*target_array)
     else
-      fragment
+      target
     end
   end
 

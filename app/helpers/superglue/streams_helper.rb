@@ -10,40 +10,40 @@ module Superglue::StreamsHelper
   def fragment_id(value)
     if value.respond_to?(:to_key)
       ActionView::RecordIdentifier.dom_id(value)
-    elsif value.respond_to?(:broadcast_fragment_default)
-      value.broadcast_fragment_default
+    elsif value.respond_to?(:broadcast_target_default)
+      value.broadcast_target_default
     else
       value.to_s
     end
   end
 
-  def broadcast_prepend_props(model: nil, fragment: nil, save_as: nil, options: {}, **rendering)
+  def broadcast_prepend_props(model: nil, target: nil, save_as: nil, options: {}, **rendering)
     if save_as
       options[:saveAs] ||= fragment_id(save_as)
     end
 
-    broadcast_action_props(action: "prepend", model:, fragment:, options:, **rendering)
+    broadcast_action_props(action: "prepend", model:, target:, options:, **rendering)
   end
 
-  def broadcast_append_props(model: nil, fragment: nil, save_as: nil, options: {}, **rendering)
+  def broadcast_append_props(model: nil, target: nil, save_as: nil, options: {}, **rendering)
     if save_as
       options[:saveAs] ||= fragment_id(save_as)
     end
 
-    broadcast_action_props(action: "append", model:, fragment:, options:, **rendering)
+    broadcast_action_props(action: "append", model:, target:, options:, **rendering)
   end
 
-  def broadcast_save_props(model: nil, partial: nil, fragment: nil, options: {}, **rendering)
-    if model && !fragment
-      fragment = fragment_id(model)
+  def broadcast_save_props(model: nil, partial: nil, target: nil, options: {}, **rendering)
+    if model && !target
+      target = fragment_id(model)
     end
 
-    broadcast_action_props(action: "save", model:, fragment:, options:, **rendering)
+    broadcast_action_props(action: "save", model:, target:, options:, **rendering)
   end
 
-  def broadcast_action_props(action:, partial: nil, model: nil, fragment: nil, options: {}, **rendering)
+  def broadcast_action_props(action:, partial: nil, model: nil, target: nil, options: {}, **rendering)
     if model
-      fragment = model.broadcast_fragment_default if !fragment
+      target = model.broadcast_target_default if !target
 
       if model.respond_to?(:to_partial_path)
         rendering[:locals] = (rendering[:locals] || {}).reverse_merge(model.model_name.element.to_sym => model).compact
@@ -51,7 +51,7 @@ module Superglue::StreamsHelper
       end
     end
 
-    fragment = fragment_id(fragment)
+    target = fragment_id(target)
 
     if !partial
       raise StandardError, "A partial is needed to render a stream"
@@ -60,7 +60,7 @@ module Superglue::StreamsHelper
     json = instance_variable_get(:@__json)
 
     json.child! do
-      json.fragmentIds [fragment]
+      json.fragmentIds [target]
       json.handler action
       json.options(options)
       json.data(partial: [partial, rendering]) do

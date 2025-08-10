@@ -8,16 +8,16 @@ class BroadcastsTest < ApplicationSystemTestCase
   test "Message broadcasts Turbo Streams" do
     visit messages_path
 
-    assert_broadcasts_text "Message 1", to: :messages do |text, fragment|
-      Message.create(content: text).broadcast_append_to(fragment)
+    assert_broadcasts_text "Message 1", to: :messages do |text, target|
+      Message.create(content: text).broadcast_append_to(target)
     end
   end
 
   test "Message broadcasts with html: render option" do
     visit messages_path
 
-    assert_broadcasts_text "Hello, with json: option", to: :messages do |text, fragment|
-      Message.create(content: "Ignored").broadcast_append_to(fragment, json: {body: text})
+    assert_broadcasts_text "Hello, with json: option", to: :messages do |text, target|
+      Message.create(content: "Ignored").broadcast_append_to(target, json: {body: text})
     end
   end
 
@@ -53,7 +53,7 @@ class BroadcastsTest < ApplicationSystemTestCase
     visit users_profiles_path
 
     assert_broadcasts_text "Profile 1", to: :users_profiles do |text, channel|
-      Users::Profile.new(id: 1, name: text).broadcast_save_to(channel, fragment: "profile")
+      Users::Profile.new(id: 1, name: text).broadcast_save_to(channel, target: "profile")
     end
   end
 

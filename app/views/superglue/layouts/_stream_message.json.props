@@ -11,5 +11,5 @@ end
 json.fragments json.fragments!
 json.action "handleStreamMessage"
 json.handler broadcast_action
-json.fragmentIds broadcast_fragment_keys
+json.fragmentIds broadcast_target_keys
 json.options broadcast_options

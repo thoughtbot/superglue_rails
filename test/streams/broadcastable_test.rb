@@ -43,49 +43,49 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting save to stream now" do
-    assert_broadcast_on "stream", render_props("save", fragment: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on "stream", render_props("save", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_save_to "stream"
     end
   end
 
   test "broadcasting save now" do
-    assert_broadcast_on @message.to_gid_param, render_props("save", fragment: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on @message.to_gid_param, render_props("save", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_save
     end
   end
 
   test "broadcasting append to stream now" do
-    assert_broadcast_on "stream", render_props("append", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on "stream", render_props("append", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_append_to "stream"
     end
   end
 
-  test "broadcasting append to stream with custom fragment now" do
-    assert_broadcast_on "stream", render_props("append", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_append_to "stream", fragment: "board_messages"
+  test "broadcasting append to stream with custom target now" do
+    assert_broadcast_on "stream", render_props("append", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_append_to "stream", target: "board_messages"
     end
   end
 
   test "broadcasting append now" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_append
     end
   end
 
   test "broadcasting prepend to stream now" do
-    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_prepend_to "stream"
     end
   end
 
-  test "broadcasting prepend to stream with custom fragment now" do
-    assert_broadcast_on "stream", render_props("prepend", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_prepend_to "stream", fragment: "board_messages"
+  test "broadcasting prepend to stream with custom target now" do
+    assert_broadcast_on "stream", render_props("prepend", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_prepend_to "stream", target: "board_messages"
     end
   end
 
   test "broadcasting prepend now" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_prepend
     end
   end
@@ -125,25 +125,25 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasting action to stream now" do
-    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_action_to "stream", action: "prepend"
     end
   end
 
   test "broadcasting action now" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_action "prepend"
     end
   end
 
   test "broadcasting action with attributes" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
-      @message.broadcast_action "prepend", fragment: "messages", options: {"data-foo" => "bar"}
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
+      @message.broadcast_action "prepend", target: "messages", options: {"data-foo" => "bar"}
     end
   end
 
   test "broadcasting action to with attributes" do
-    assert_broadcast_on "stream", render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
+    assert_broadcast_on "stream", render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
       @message.broadcast_action_to "stream", action: "prepend", options: {"data-foo" => "bar"}
     end
   end
@@ -151,9 +151,9 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting action later to with attributes" do
     @message.save!
 
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
       perform_enqueued_jobs do
-        @message.broadcast_action_later_to @message, action: "prepend", fragment: "messages", options: {"data-foo" => "bar"}
+        @message.broadcast_action_later_to @message, action: "prepend", target: "messages", options: {"data-foo" => "bar"}
       end
     end
   end
@@ -161,65 +161,65 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting action later with attributes" do
     @message.save!
 
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {"data-foo" => "bar"}) do
       perform_enqueued_jobs do
-        @message.broadcast_action_later action: "prepend", fragment: "messages", options: {"data-foo" => "bar"}
+        @message.broadcast_action_later action: "prepend", target: "messages", options: {"data-foo" => "bar"}
       end
     end
   end
 
   test "render correct local name in partial for namespaced models" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, render_props("save", fragment: "users_profile_1", partial: @profile.to_partial_path, locals: {profile: @profile}) do
+    assert_broadcast_on @profile.to_param, render_props("save", target: "users_profile_1", partial: @profile.to_partial_path, locals: {profile: @profile}) do
       @profile.broadcast_save
     end
   end
 
   test "local variables don't get overwritten if they collide with the template name" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, render_props("save", fragment: "users_profile_1", partial: @message.to_partial_path, locals: {message: @message}) do
+    assert_broadcast_on @profile.to_param, render_props("save", target: "users_profile_1", partial: @message.to_partial_path, locals: {message: @message}) do
       @profile.broadcast_save partial: "messages/message", locals: {message: @message}
     end
   end
 
-  test "broadcast_append to fragments" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", fragments: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_append fragments: ["message_1"]
+  test "broadcast_append to targets" do
+    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_append targets: ["message_1"]
     end
   end
 
-  test "broadcast_append fragments" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", fragments: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_append fragments: ["message_1"]
+  test "broadcast_append targets" do
+    assert_broadcast_on @message.to_gid_param, render_props("append", targets: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_append targets: ["message_1"]
     end
   end
 
-  test "broadcast_prepend fragments" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragments: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_prepend fragments: ["message_1"]
+  test "broadcast_prepend targets" do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", targets: ["message_1"], partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_prepend targets: ["message_1"]
     end
   end
 
   test "broadcasting append to stream with save_as option" do
-    assert_broadcast_on "stream", render_props("append", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_2"}) do
-      @message.broadcast_append_to "stream", fragment: "board_messages", save_as: "message_2"
+    assert_broadcast_on "stream", render_props("append", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_2"}) do
+      @message.broadcast_append_to "stream", target: "board_messages", save_as: "message_2"
     end
   end
 
   test "broadcasting append with save_as option" do
-    assert_broadcast_on @message.to_gid_param, render_props("append", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_message"}) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_message"}) do
       @message.broadcast_append save_as: "custom_message"
     end
   end
 
   test "broadcasting prepend to stream with save_as option" do
-    assert_broadcast_on "stream", render_props("prepend", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_3"}) do
-      @message.broadcast_prepend_to "stream", fragment: "board_messages", save_as: "message_3"
+    assert_broadcast_on "stream", render_props("prepend", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_3"}) do
+      @message.broadcast_prepend_to "stream", target: "board_messages", save_as: "message_3"
     end
   end
 
   test "broadcasting prepend with save_as option" do
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_prepend_message"}) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_prepend_message"}) do
       @message.broadcast_prepend save_as: "custom_prepend_message"
     end
   end
@@ -227,9 +227,9 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting append later to stream with save_as option" do
     @message.save!
 
-    assert_broadcast_on "stream", render_props("append", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_later_2"}) do
+    assert_broadcast_on "stream", render_props("append", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_later_2"}) do
       perform_enqueued_jobs do
-        @message.broadcast_append_later_to "stream", fragment: "board_messages", save_as: "message_later_2"
+        @message.broadcast_append_later_to "stream", target: "board_messages", save_as: "message_later_2"
       end
     end
   end
@@ -237,7 +237,7 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting append later with save_as option" do
     @message.save!
 
-    assert_broadcast_on @message.to_gid_param, render_props("append", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_later_message"}) do
+    assert_broadcast_on @message.to_gid_param, render_props("append", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_later_message"}) do
       perform_enqueued_jobs do
         @message.broadcast_append_later save_as: "custom_later_message"
       end
@@ -247,9 +247,9 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting prepend later to stream with save_as option" do
     @message.save!
 
-    assert_broadcast_on "stream", render_props("prepend", fragment: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_later_3"}) do
+    assert_broadcast_on "stream", render_props("prepend", target: "board_messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "message_later_3"}) do
       perform_enqueued_jobs do
-        @message.broadcast_prepend_later_to "stream", fragment: "board_messages", save_as: "message_later_3"
+        @message.broadcast_prepend_later_to "stream", target: "board_messages", save_as: "message_later_3"
       end
     end
   end
@@ -257,7 +257,7 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting prepend later with save_as option" do
     @message.save!
 
-    assert_broadcast_on @message.to_gid_param, render_props("prepend", fragment: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_later_prepend"}) do
+    assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}, options: {save_as: "custom_later_prepend"}) do
       perform_enqueued_jobs do
         @message.broadcast_prepend_later save_as: "custom_later_prepend"
       end
@@ -268,8 +268,8 @@ end
 class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
   include ActiveJob::TestHelper
 
-  test "creating an article broadcasts to the overriden fragment with a string" do
-    assert_broadcast_on "overriden-stream", render_props("append", fragment: "overriden-fragment", partial: "articles/article", locals: {article: Article.new(body: "Body")}) do
+  test "creating an article broadcasts to the overriden target with a string" do
+    assert_broadcast_on "overriden-stream", render_props("append", target: "overriden-fragment", partial: "articles/article", locals: {article: Article.new(body: "Body")}) do
       perform_enqueued_jobs do
         Article.create!(body: "Body")
       end
@@ -279,7 +279,7 @@ class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
   test "updating an article broadcasts" do
     article = Article.create!(body: "Hey")
 
-    assert_broadcast_on "ho", render_props("save", fragment: "article_#{article.id}", partial: "articles/article", locals: {article: Article.new(body: "Ho")}) do
+    assert_broadcast_on "ho", render_props("save", target: "article_#{article.id}", partial: "articles/article", locals: {article: Article.new(body: "Ho")}) do
       perform_enqueued_jobs do
         article.update!(body: "Ho")
       end
@@ -292,11 +292,11 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
 
   setup { @article = Article.create!(body: "Body") }
 
-  test "creating a comment broadcasts to the overriden fragment with a lambda" do
+  test "creating a comment broadcasts to the overriden target with a lambda" do
     stream = "#{@article.to_gid_param}:comments"
-    fragment = "article_#{@article.id}_comments"
+    target = "article_#{@article.id}_comments"
 
-    assert_broadcast_on stream, render_props("append", fragment: fragment, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "comment")
       end
@@ -305,15 +305,15 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
 
   test "creating a second comment while using locals broadcasts the second comment" do
     stream = "#{@article.to_gid_param}:comments"
-    fragment = "article_#{@article.id}_comments"
+    target = "article_#{@article.id}_comments"
 
-    assert_broadcast_on stream, render_props("append", fragment: fragment, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "comment")
       end
     end
 
-    assert_broadcast_on stream, render_props("append", fragment: fragment, partial: "comments/different_comment", locals: {comment: Comment.new(body: "another comment")}) do
+    assert_broadcast_on stream, render_props("append", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "another comment")}) do
       perform_enqueued_jobs do
         @article.comments.create!(body: "another comment")
       end
@@ -323,9 +323,9 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
   test "updating a comment broadcasts" do
     comment = @article.comments.create!(body: "random")
     stream = "#{@article.to_gid_param}:comments"
-    fragment = "comment_#{comment.id}"
+    target = "comment_#{comment.id}"
 
-    assert_broadcast_on stream, render_props("save", fragment: fragment, partial: "comments/different_comment", locals: {comment: Comment.new(body: "precise")}) do
+    assert_broadcast_on stream, render_props("save", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "precise")}) do
       perform_enqueued_jobs do
         comment.update!(body: "precise")
       end

@@ -25,18 +25,18 @@ class StreamsHelperTest < ActiveSupport::TestCase
     assert_equal "message_1", fragment_id(message)
   end
 
-  test "fragment_id returns broadcast_fragment_default for classes that define it" do
+  test "fragment_id returns broadcast_target_default for classes that define it" do
     klass = Class.new do
-      def self.broadcast_fragment_default
-        "custom_fragment"
+      def self.broadcast_target_default
+        "custom_target"
       end
     end
 
-    assert_equal "custom_fragment", fragment_id(klass)
+    assert_equal "custom_target", fragment_id(klass)
   end
 
   test "fragment_id returns string representation for strings" do
-    assert_equal "my_fragment", fragment_id("my_fragment")
+    assert_equal "my_target", fragment_id("my_target")
   end
 
   test "fragment_id returns string representation for symbols" do
@@ -47,10 +47,10 @@ class StreamsHelperTest < ActiveSupport::TestCase
     assert_equal "123", fragment_id(123)
   end
 
-  test "fragment_id prioritizes to_key over broadcast_fragment_default" do
+  test "fragment_id prioritizes to_key over broadcast_target_default" do
     message = Message.new(id: 42, content: "test")
 
-    def message.broadcast_fragment_default
+    def message.broadcast_target_default
       "should_not_be_used"
     end
 
@@ -182,7 +182,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
   test "broadcast_prepend_props with save_as option" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_prepend_props(model: @message, save_as: "custom_fragment")
+        broadcast_prepend_props(model: @message, save_as: "custom_target")
       end
     PROPS
 
@@ -192,7 +192,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       assert_equal(result, [{
         fragmentIds: ["messages"],
         handler: "prepend",
-        options: {saveAs: "custom_fragment"},
+        options: {saveAs: "custom_target"},
         data: {
           body: "Hello!"
         }
@@ -263,10 +263,10 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_action_props with custom action and fragment" do
+  test "broadcast_action_props with custom action and target" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "replace", model: @message, fragment: "custom_frag")
+        broadcast_action_props(action: "replace", model: @message, target: "custom_frag")
       end
     PROPS
 
@@ -287,7 +287,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
   test "broadcast_action_props with partial and no model" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "update", partial: "messages/message", fragment: "msg_123", locals: {message: @message})
+        broadcast_action_props(action: "update", partial: "messages/message", target: "msg_123", locals: {message: @message})
       end
     PROPS
 
@@ -308,7 +308,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
   test "broadcast_action_props raises error when no partial can be determined" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "save", fragment: "some_fragment")
+        broadcast_action_props(action: "save", target: "some_target")
       end
     PROPS
 
@@ -361,9 +361,9 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_action_props uses model.broadcast_fragment_default when no fragment provided" do
+  test "broadcast_action_props uses model.broadcast_target_default when no target provided" do
     custom_model = Message.new(id: 1, content: "Custom")
-    def custom_model.broadcast_fragment_default
+    def custom_model.broadcast_target_default
       "custom_messages"
     end
 
@@ -387,10 +387,10 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_action_props explicit fragment overrides broadcast_fragment_default" do
+  test "broadcast_action_props explicit target overrides broadcast_target_default" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "append", model: @message, fragment: "explicit_fragment")
+        broadcast_action_props(action: "append", model: @message, target: "explicit_target")
       end
     PROPS
 
@@ -398,7 +398,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
       result = @controller.render_to_string("test_broadcast", format: :json, layout: false, assigns: {message: @message}).chomp
 
       assert_equal(result, [{
-        fragmentIds: ["explicit_fragment"],
+        fragmentIds: ["explicit_target"],
         handler: "append",
         options: {},
         data: {
@@ -408,7 +408,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_action_props handles model without broadcast_fragment_default method" do
+  test "broadcast_action_props handles model without broadcast_target_default method" do
     plain_model = Struct
       .new(:id, :content, :model_name)
       .new(id: 1, content: "Plain", model_name: OpenStruct.new(element: "plain"))

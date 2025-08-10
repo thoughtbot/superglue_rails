@@ -5,7 +5,7 @@ class Article < ApplicationRecord
 
   validates :body, presence: true
 
-  broadcasts "overriden-stream", fragment: "overriden-fragment"
+  broadcasts "overriden-stream", target: "overriden-fragment"
 
   def to_gid_param
     to_param
