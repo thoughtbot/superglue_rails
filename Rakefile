@@ -4,7 +4,7 @@ require "standard/rake"
 task :build_dummy_js do
   package_path = File.join(__FILE__, "test/dummy/package.json")
   puts package_path
-  superglue_version = ENV["SUPERGLUEJS_PATH"] || "^2.0.0-alpha.1"
+  superglue_version = ENV["SUPERGLUEJS_PATH"] || "^2.0.0-alpha.2"
 
   if File.exist?(package_path)
     package = JSON.parse(File.read(package_path))
