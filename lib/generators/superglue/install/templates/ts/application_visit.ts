@@ -18,7 +18,7 @@ export const buildVisitAndRemote: BuildVisitAndRemote = (
   ref,
   store: SuperglueStore
 ) => {
-  const appRemote: ApplicationRemote = (path, { dataset, ...options }) => {
+  const appRemote: ApplicationRemote = (path, { dataset, ...options } = {}) => {
     /**
      * You can make use of `dataset` to add custom UJS options.
      * If you are implementing a progress bar, you can selectively

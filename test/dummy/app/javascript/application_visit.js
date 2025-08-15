@@ -9,7 +9,7 @@ import { visit, remote } from "@thoughtbot/superglue/action_creators"
  * bar. This file also adds support for data-sg-remote.
  */
 export const buildVisitAndRemote = (ref, store) => {
-  const appRemote = (path, { dataset, ...options }) => {
+  const appRemote = (path, { dataset, ...options } = {}) => {
     /**
      * You can make use of `dataset` to add custom UJS options.
      * If you are implementing a progress bar, you can selectively
