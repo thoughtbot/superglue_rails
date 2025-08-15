@@ -5,7 +5,7 @@ import { buildVisitAndRemote } from "./application_visit"
 import { pageIdentifierToPageComponent } from "./page_to_page_mapping"
 import { store } from "./store"
 
-if (typeof window !== "undefined") {
+if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
   document.addEventListener("DOMContentLoaded", function() {
     const appEl = document.getElementById("app")
     const location = window.location

@@ -1,15 +1,17 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { Application, VisitResponse } from '@thoughtbot/superglue';
-import { buildVisitAndRemote } from './application_visit';
-import { pageIdentifierToPageComponent } from './page_to_page_mapping';
-import { store } from './store'
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Application, SaveResponse } from "@thoughtbot/superglue";
+import { buildVisitAndRemote } from "./application_visit";
+import { pageIdentifierToPageComponent } from "./page_to_page_mapping";
+import { store } from "./store";
 
 declare global {
-  interface Window { SUPERGLUE_INITIAL_PAGE_STATE: VisitResponse; }
+  interface Window {
+    SUPERGLUE_INITIAL_PAGE_STATE: SaveResponse;
+  }
 }
 
-if (typeof window !== "undefined") {
+if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
   document.addEventListener("DOMContentLoaded", function () {
     const appEl = document.getElementById("app");
     const location = window.location;
@@ -37,4 +39,3 @@ if (typeof window !== "undefined") {
     }
   });
 }
-
