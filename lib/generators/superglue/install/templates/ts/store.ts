@@ -8,7 +8,7 @@ import {
   rootReducer,
 } from "@thoughtbot/superglue";
 
-const { pages, superglue } = rootReducer;
+const { pages, superglue, fragments } = rootReducer;
 
 export const store = configureStore({
   devTools: process.env.NODE_ENV !== "production",
@@ -22,6 +22,7 @@ export const store = configureStore({
     superglue,
     pages,
     flash: flashSlice.reducer,
+    fragments,
   },
 });
 
