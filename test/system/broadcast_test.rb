@@ -8,7 +8,7 @@ class BroadcastsTest < ApplicationSystemTestCase
   include ActiveJob::TestHelper
   extend Superglue::Streams::StreamName
 
-  test "Message broadcasts Turbo Streams" do
+  test "Message broadcasts Super Turbo Streams" do
     visit messages_path
 
     assert_broadcasts_text "Message 1", to: :messages do |text, target|
