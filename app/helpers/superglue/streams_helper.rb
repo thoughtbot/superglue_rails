@@ -1,3 +1,6 @@
+# This file was ported from the amazing folks at turbo-rails
+# You can find its MIT License here: https://github.com/hotwired/turbo-rails/blob/main/MIT-LICENSE
+
 module Superglue::StreamsHelper
   def stream_from_props(*streamables, **attributes)
     raise ArgumentError, "streamables can't be blank" unless streamables.any?(&:present?)

@@ -1,3 +1,6 @@
+# This file was ported from the amazing folks at turbo-rails
+# You can find its MIT License here: https://github.com/hotwired/turbo-rails/blob/main/MIT-LICENSE
+
 module Superglue::Streams::StreamName
   def verified_stream_name(signed_stream_name)
     Superglue.signed_stream_verifier.verified signed_stream_name

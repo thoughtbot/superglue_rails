@@ -1,3 +1,6 @@
+# This file was ported from the amazing folks at turbo-rails
+# You can find its MIT License here: https://github.com/hotwired/turbo-rails/blob/main/MIT-LICENSE
+
 module Superglue::Streams::Broadcasts
   def broadcast_save_to(*streamables, **opts)
     broadcast_action_to(*streamables, action: :save, **opts)

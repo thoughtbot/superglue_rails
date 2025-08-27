@@ -1,3 +1,6 @@
+# This file was ported from the amazing folks at turbo-rails
+# You can find its MIT License here: https://github.com/hotwired/turbo-rails/blob/main/MIT-LICENSE
+
 module Superglue::Broadcastable
   extend ActiveSupport::Concern
 
@@ -129,7 +132,7 @@ module Superglue::Broadcastable
   def broadcast_target_default
     self.class.broadcast_target_default
   end
-  
+
   private
 
   def extract_options_and_add_target(rendering = {}, target: broadcast_target_default)
