@@ -16,6 +16,8 @@ end
 if path
   json.action 'graft'
   json.path params[:props_at]
+else
+  json.action 'savePage'
 end
 
 json.restoreStrategy 'fromCacheAndRevisitInBackground'
