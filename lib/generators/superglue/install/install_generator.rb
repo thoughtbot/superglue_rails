@@ -40,7 +40,7 @@ module Superglue
         insert_jsx_rendering_defaults
 
         say "Installing Superglue and friends"
-        run "yarn add react react-dom @reduxjs/toolkit react-redux @thoughtbot/superglue@2.0.0-alpha.2"
+        run "yarn add react react-dom @reduxjs/toolkit react-redux @thoughtbot/superglue@2.0.0-alpha.8"
 
         if use_typescript
           run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper"
