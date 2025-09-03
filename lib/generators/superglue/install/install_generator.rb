@@ -43,7 +43,7 @@ module Superglue
         run "yarn add react react-dom @reduxjs/toolkit react-redux @thoughtbot/superglue@2.0.0-alpha.8"
 
         if use_typescript
-          run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper"
+          run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper@0.0.4"
         end
 
         say "Superglue is Installed! 🎉", :green
