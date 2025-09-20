@@ -58,7 +58,10 @@ module Superglue
     end
 
     def _ensure_react_page!(template, prefixes)
-      lookup_context.find(template, prefixes, false, [], formats: [], handlers: [], variants: [], locale: [])
+      found_template = lookup_context.find(template, prefixes, false, [], formats: [], handlers: [], variants: [], locale: [])
+      ## This variable was created for props_template to pick up
+      @_active_template_virtual_path = found_template.virtual_path
+      found_template
     rescue ActionView::MissingTemplate => e
       raise ActionView::MissingTemplate.new(e.paths, e.path, e.prefixes, e.partial, "extension JSX or TSX")
     end

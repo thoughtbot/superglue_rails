@@ -196,3 +196,25 @@ class RenderTest < ActionController::TestCase
     }
   end
 end
+
+class PropsOnlyController < ApplicationController
+  require "action_view/testing/resolvers"
+  before_action :use_jsx_rendering_defaults
+
+  append_view_path(Superglue::Resolver.new("test/views"))
+  append_view_path "test/views"
+
+  def simple
+  end
+end
+
+class PropsRenderTest < ActionController::TestCase
+  tests PropsOnlyController
+
+  test "render with active template virtual path" do
+    get :simple
+
+    assert_response 200
+    assert_includes @response.body, 'virtualPath":"props_only/simple'
+  end
+end

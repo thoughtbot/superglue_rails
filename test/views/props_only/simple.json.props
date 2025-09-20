@@ -1,0 +1,2 @@
+json.author "john smith"
+json.virtualPath @_active_template_virtual_path
