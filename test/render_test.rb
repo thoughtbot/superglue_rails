@@ -119,7 +119,7 @@ class RenderTest < ActionController::TestCase
   end
 
   test "render with html only" do
-    exception = assert_raise(ActionView::MissingTemplate) {
+    exception = assert_raise(ActionView::MissingTemplate, match: /extension JSX or TSX/) {
       get :bad_single
     }
 
@@ -127,7 +127,7 @@ class RenderTest < ActionController::TestCase
   end
 
   test "render with bad pair of templates (html, json)" do
-    exception = assert_raise(ActionView::MissingTemplate) {
+    exception = assert_raise(ActionView::MissingTemplate, match: /extension JSX or TSX/) {
       get :bad_pair
     }
 
@@ -147,7 +147,7 @@ class RenderTest < ActionController::TestCase
   end
 
   test "non existant template" do
-    exception = assert_raise(ActionView::MissingTemplate) {
+    exception = assert_raise(ActionView::MissingTemplate, match: /extension JSX or TSX/) {
       get :render_does_not_exist
     }
     assert_match("Missing template jsx/does_not_exist", exception.message)

@@ -59,6 +59,8 @@ module Superglue
 
     def _ensure_react_page!(template, prefixes)
       lookup_context.find(template, prefixes, false, [], formats: [], handlers: [], variants: [], locale: [])
+    rescue ActionView::MissingTemplate => e
+      raise ActionView::MissingTemplate.new(e.paths, e.path, e.prefixes, e.partial, "extension JSX or TSX")
     end
 
     def default_render
