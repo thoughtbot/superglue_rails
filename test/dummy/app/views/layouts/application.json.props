@@ -15,7 +15,8 @@ end
 
 if path
   json.action 'graft'
-  json.path params[:props_at]
+  json.path json.found_path!
+  json.fragmentContext json.fragment_context!
 else
   json.action 'savePage'
 end
