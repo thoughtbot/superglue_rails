@@ -27,6 +27,7 @@ Documentation is hosted on [Github pages](https://thoughtbot.github.io/superglue
 
 ## Contributing
 
-Thank you, [contributors]!
+See the [CONTRIBUTING] document. Thank you, [contributors]!
 
+  [CONTRIBUTING]: CONTRIBUTING.md
   [contributors]: https://github.com/thoughtbot/superglue_rails/graphs/contributors
