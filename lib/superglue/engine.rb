@@ -26,6 +26,16 @@ module Superglue
       #{root}/app/jobs
     ]
 
+    # If the parent application does not use Action Cable, app/channels cannot
+    # be eager loaded, because it references the ActionCable constant.
+    # This approach was ported from the amazing folks at turbo-rails
+    # You can find its MIT License here: https://github.com/hotwired/turbo-rails/blob/main/MIT-LICENSE
+    initializer :"superglue.no_action_cable", before: :set_eager_load_paths do
+      unless defined?(ActionCable)
+        Rails.autoloaders.once.do_not_eager_load("#{root}/app/channels")
+      end
+    end
+
     initializer :superglue do |app|
       ActiveSupport.on_load(:action_controller) do
         next if self != ActionController::Base
