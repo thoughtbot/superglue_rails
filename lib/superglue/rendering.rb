@@ -25,13 +25,23 @@ module Superglue
         end
 
         @_render_options = options
-        _ensure_react_page!(options[:template], options[:prefixes])
+        _ensure_react_page!(options[:template], options[:prefixes]) if request.format.html?
 
-        html_template_exist = template_exists?(options[:template], options[:prefixes], false)
-        if !html_template_exist
+        target_template_exists = template_exists?(options[:template], options[:prefixes], false)
+
+        if request.format.html? && !target_template_exists
+          # this uses the default superglue html template, which is super basic so
+          # we don't' need to create a separate one for each view
           super(options.merge(
             template: _superglue_template,
             prefixes: []
+          ))
+        elsif request.format.json? && !target_template_exists
+          # This fixes an issue with rendering json direclty but teh template doesn't exist
+          # we still want ot see the layout rendered
+          super(options.merge(
+            inline: "",
+            layout: _layout_for_option(true)
           ))
         else
           super
@@ -54,7 +64,11 @@ module Superglue
     end
 
     def _jsx_defaults
-      @_use_jsx_rendering_defaults && request.format.html?
+      @_use_jsx_rendering_defaults && (request.format.html? || request.format.json?)
+    end
+
+    def _props_defaults
+      @_use_jsx_rendering_defaults && request.format.json?
     end
 
     def _ensure_react_page!(template, prefixes)
