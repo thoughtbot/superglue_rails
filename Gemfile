@@ -6,7 +6,7 @@ gem "selenium-webdriver"
 gem "props_template", path: "../props_template"
 gem "standard"
 gem "capybara"
-gem "minitest"
+gem "minitest", "~> 5.27"
 gem 'minitest-mock'
 gem "rake"
 gem "sqlite3", "~> 1.4"
