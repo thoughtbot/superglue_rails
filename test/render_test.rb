@@ -146,6 +146,37 @@ class RenderTest < ActionController::TestCase
     assert_equal "application/json", @response.media_type
   end
 
+  test "rendering props with a non existant template still renders the layout" do
+    get :no_json_template, format: :json
+
+    assert_response 200
+    rendered = <<~HTML
+      {"data":{}}
+    HTML
+
+    assert_equal rendered, @response.body
+    assert_equal "application/json", @response.media_type
+  end
+
+  test "rendering an action without a HTML template renders the fallback application/superglue" do
+    get :no_html_template, format: :html
+
+    assert_response 200
+    rendered = <<~HTML
+      <html>
+        <body>
+          <script type="text/javascript">
+        window.SUPERGLUE_INITIAL_PAGE_STATE={"data":{}};
+      </script>
+
+      <div id="app"></div>  </body>
+      </html>
+    HTML
+
+    assert_equal rendered, @response.body
+    assert_equal "text/html", @response.media_type
+  end
+
   test "non existant template" do
     exception = assert_raise(ActionView::MissingTemplate, match: /extension JSX or TSX/) {
       get :render_does_not_exist

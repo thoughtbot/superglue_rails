@@ -33,6 +33,12 @@ class JsxController < ApplicationController
   def bad_pair
   end
 
+  def no_json_template
+  end
+
+  def no_html_template
+  end
+
   def render_does_not_exist
     render :does_not_exist
   end
