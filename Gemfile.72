@@ -10,7 +10,7 @@ gem "minitest", "~> 5.27"
 gem 'minitest-mock'
 gem 'rake'
 gem 'sqlite3', '~> 1.4'
-gem 'git'
+gem 'git', '~> 4.3'
 gem 'cuprite'
 gem 'puma'
 gem 'propshaft'
