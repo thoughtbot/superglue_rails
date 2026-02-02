@@ -17,7 +17,7 @@ type ContentProps = {
   <%= js_plural_table_name %>Path: string
   <%= js_singular_table_name %>Form: FormProps<{
     <%- attributes.each do |attr| -%>
-    <%= attr.column_name.camelize(:lower)%>: <%= Railsjs_component(attr)%>Props
+    <%= attr.column_name.camelize(:lower)%>: Rails<%= js_component(attr)%>Props
     <%- end -%>
     submit: RailsSubmitButtonProps
   }>

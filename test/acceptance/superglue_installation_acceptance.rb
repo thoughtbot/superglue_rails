@@ -12,6 +12,8 @@ VERSION = File.read(File.expand_path("../../VERSION", __dir__)).strip
 
 SERVER_PORT = "3000"
 
+USE_TYPESCRIPT = ENV["USE_TYPESCRIPT"] == "1"
+
 Minitest.load_plugins
 
 class << Minitest
@@ -63,28 +65,28 @@ class SuperglueInstallationTest < Minitest::Test
   end
 
   def install_superglue
-    # Dir.chdir(ROOT_DIR) do
-    #   successfully "rm -rf ./superglue"
-    #   Git.clone("https://github.com/thoughtbot/superglue.git")
-    # end
+    Dir.chdir(ROOT_DIR) do
+      successfully "rm -rf ./superglue"
+      Git.clone("https://github.com/thoughtbot/superglue.git", nil, branch: "v2")
+    end
 
-    # Dir.chdir(SUPERGLUE_SUPERGLUE_PATH) do
-    #   successfully "npm install"
-    #   successfully "npm run build"
-    #   successfully "npm pack"
-    # end
+    Dir.chdir(SUPERGLUE_SUPERGLUE_PATH) do
+      successfully "npm install"
+      successfully "npm run build"
+      successfully "npm pack"
+    end
     successfully "echo \"gem 'superglue', path: '#{SUPERGLUE_RAILS_PATH}'\" >> Gemfile"
     successfully "bundle install"
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "bundle exec rails generate superglue:install"
-    # update_package_json
+    successfully "bundle exec rails generate superglue:install #{"--typescript" if USE_TYPESCRIPT}"
+    update_package_json
     successfully "yarn install --cache-folder /tmp/.junk; rm -rf /tmp/.junk"
   end
 
   def add_esbuild_cmd
-    build_script = "esbuild app/javascript/*.* --bundle --loader:.js=jsx --sourcemap --outdir=app/assets/builds --public-path=assets"
+    build_script = "node build.mjs"
     successfully %(npm pkg set scripts.build="#{build_script}")
   end
 
@@ -99,7 +101,7 @@ class SuperglueInstallationTest < Minitest::Test
   end
 
   def generate_scaffold
-    successfully "bundle exec rails generate superglue:scaffold post body:string --force"
+    successfully "bundle exec rails generate superglue:scaffold post body:string --force #{"--typescript" if USE_TYPESCRIPT}"
   end
 
   def reset_db

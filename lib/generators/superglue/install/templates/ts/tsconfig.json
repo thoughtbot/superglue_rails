@@ -7,7 +7,7 @@
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "allowJs": false,
     "target": "ES2021",
     "allowSyntheticDefaultImports": true,
@@ -24,4 +24,5 @@
     "app/javascript/**/*",
     "app/views/**/*"
   ],
+  "reflection": true
 }

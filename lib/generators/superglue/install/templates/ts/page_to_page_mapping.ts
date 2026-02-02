@@ -28,6 +28,8 @@
 // }
 // ```
 //
-const pageIdentifierToPageComponent = {};
+const pageIdentifierToPageComponent = {
+  // Add your mappings here
+};
 
 export { pageIdentifierToPageComponent };

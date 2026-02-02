@@ -43,7 +43,7 @@ module Superglue
         run "yarn add react react-dom @reduxjs/toolkit react-redux @thoughtbot/superglue@2.0.0-alpha.8"
 
         if use_typescript
-          run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper@0.0.4"
+          run "yarn add -D @types/react-dom @types/react @types/node @deepkit/type @deepkit/core @deepkit/type-compiler @thoughtbot/candy_wrapper@0.0.4 typescript"
         end
 
         say "Superglue is Installed! 🎉", :green
@@ -113,6 +113,12 @@ module Superglue
 
         say "Copying tsconfig.json file to #{app_js_path}"
         copy_file "#{__dir__}/templates/ts/tsconfig.json", "tsconfig.json"
+
+        say "Copying esbuild plugin for Deepkit"
+        copy_file "#{__dir__}/templates/esbuild/plugin.js", "deepkit.mjs"
+
+        say "Adding build.mjs for TypeScript compilation"
+        copy_file "#{__dir__}/templates/ts/build.mjs", "build.mjs"
       end
 
       def copy_js_files
@@ -138,6 +144,9 @@ module Superglue
 
         say "Copying jsconfig.json file to #{app_js_path}"
         copy_file "#{__dir__}/templates/js/jsconfig.json", "jsconfig.json"
+
+        say "Adding build.mjs for TypeScript compilation"
+        copy_file "#{__dir__}/templates/js/build.mjs", "build.mjs"
       end
 
       def add_member_methods

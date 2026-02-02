@@ -1,6 +1,5 @@
 name: Test superglue_rails
 on:
-  push:
   pull_request:
   workflow_dispatch:
 
@@ -37,6 +36,11 @@ jobs:
         run: bundle exec rake test
       - name: Run acceptance test
         run: BUNDLE_GEMFILE='' ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
+      - name: Kill orphaned processes
+        if: always()
+        run: lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+      - name: Run acceptance test w/ typescript
+        run: BUNDLE_GEMFILE='' USE_TYPESCRIPT=1 ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
