@@ -11,7 +11,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  resource :request_id
 
   resources :messages do
     collection do

@@ -41,7 +41,6 @@ module Superglue
         next if self != ActionController::Base
 
         include Controller
-        include Superglue::RequestIdTracking
 
         prepend_view_path(
           Superglue::Resolver.new(Rails.root.join("app/views"))

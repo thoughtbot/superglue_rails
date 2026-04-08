@@ -14,17 +14,6 @@ module Superglue::Streams::Broadcasts
     broadcast_action_to(*streamables, action: :prepend, **opts)
   end
 
-  def broadcast_refresh_to(*streamables, **opts)
-    request_id = Superglue.current_request_id
-    content = JSON.generate({
-      type: "message",
-      action: "refresh",
-      requestId: request_id,
-      options: opts
-    })
-    broadcast_stream_to(*streamables, content: content)
-  end
-
   def broadcast_action_to(*streamables, action:, target: nil, targets: nil, save_target: nil, options: {}, **rendering)
     locals = rendering[:locals] || {}
     targets = (target ? [target] : targets)
@@ -57,21 +46,6 @@ module Superglue::Streams::Broadcasts
     broadcast_action_later_to(*streamables, action: :prepend, **opts)
   end
 
-  def broadcast_refresh_later_to(*streamables, request_id: Superglue.current_request_id, **opts)
-    stream_name = stream_name_from(streamables)
-
-    refresh_debouncer_for(*streamables, request_id: request_id).debounce do
-      content = JSON.generate({
-        type: "message",
-        action: "refresh",
-        requestId: request_id,
-        options: opts
-      })
-
-      Superglue::Streams::BroadcastStreamJob.perform_later stream_name, content: content
-    end
-  end
-
   def broadcast_action_later_to(*streamables, action:, target: nil, targets: nil, save_target: nil, options: {}, **rendering)
     streamables.flatten!
     streamables.compact_blank!
@@ -97,10 +71,6 @@ module Superglue::Streams::Broadcasts
     return unless streamables.present?
 
     ActionCable.server.broadcast stream_name_from(streamables), content
-  end
-
-  def refresh_debouncer_for(*streamables, request_id: nil) # :nodoc:
-    Superglue::ThreadDebouncer.for("superglue-refresh-debouncer-#{stream_name_from(streamables.including(request_id))}")
   end
 
   private

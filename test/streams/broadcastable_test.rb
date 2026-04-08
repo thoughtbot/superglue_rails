@@ -5,15 +5,6 @@ require "test_helper"
 require "action_cable"
 require "minitest/mock"
 
-def render_refresh(request_id = nil)
-  JSON.generate({
-    type: "message",
-    action: "refresh",
-    requestId: request_id,
-    options: {}
-  })
-end
-
 class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   include ActiveJob::TestHelper
 
@@ -90,40 +81,6 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
   test "broadcasting prepend now" do
     assert_broadcast_on @message.to_gid_param, render_props("prepend", target: "messages", partial: @message.to_partial_path, locals: {message: @message}) do
       @message.broadcast_prepend
-    end
-  end
-
-  test "broadcasting refresh to stream now" do
-    assert_broadcast_on "stream", render_refresh do
-      @message.broadcast_refresh_to "stream"
-    end
-  end
-
-  test "broadcasting refresh now" do
-    assert_broadcast_on @message.to_gid_param, render_refresh do
-      @message.broadcast_refresh
-    end
-  end
-
-  test "broadcasting refresh does not render contents" do
-    message = MessageThatRendersError.new(id: 1)
-
-    assert_broadcast_on message.to_gid_param, render_refresh do
-      message.broadcast_refresh
-    end
-  end
-
-  test "broadcasting refresh later is debounced" do
-    assert_broadcast_on @message.to_gid_param, render_refresh do
-      assert_broadcasts(@message.to_gid_param, 1) do
-        perform_enqueued_jobs do
-          assert_no_changes -> { Thread.current.keys.size } do
-            # Not leaking thread variables once the debounced code executes
-            3.times { @message.broadcast_refresh_later }
-            Superglue::StreamsChannel.refresh_debouncer_for(@message).wait
-          end
-        end
-      end
     end
   end
 
@@ -336,42 +293,6 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
   end
 end
 
-class Superglue::BroadcastableBoardTest < ActionCable::Channel::TestCase
-  include ActiveJob::TestHelper
-
-  test "creating a board broadcasts refreshes to a channel using models plural name when creating" do
-    assert_broadcast_on "boards", render_refresh do
-      perform_enqueued_jobs do
-        Board.create!(name: "Board")
-        Superglue::StreamsChannel.refresh_debouncer_for(["boards"]).wait
-      end
-    end
-  end
-
-  test "updating a board broadcasts to the models channel" do
-    board = Board.suppressing_superglue_broadcasts do
-      Board.create!(name: "Hey")
-    end
-
-    assert_broadcast_on board.to_gid_param, render_refresh do
-      perform_enqueued_jobs do
-        board.update!(name: "Ho")
-        Superglue::StreamsChannel.refresh_debouncer_for(board).wait
-      end
-    end
-  end
-
-  test "destroying a board broadcasts refreshes to the model channel" do
-    board = Board.suppressing_superglue_broadcasts do
-      Board.create!(name: "Hey")
-    end
-
-    assert_broadcast_on board.to_gid_param, render_refresh do
-      board.destroy!
-    end
-  end
-end
-
 class Superglue::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   include ActiveJob::TestHelper
 
@@ -434,18 +355,6 @@ class Superglue::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
   test "suppressing broadcasting prepend to stream later" do
     assert_no_broadcasts_later_when_supressing do
       @message.broadcast_prepend_later_to "stream"
-    end
-  end
-
-  test "suppressing broadcasting refresh to stream now" do
-    assert_no_broadcasts_when_suppressing do
-      @message.broadcast_refresh_to "stream"
-    end
-  end
-
-  test "suppressing broadcasting refresh to stream later" do
-    assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_refresh_later_to "stream"
     end
   end
 

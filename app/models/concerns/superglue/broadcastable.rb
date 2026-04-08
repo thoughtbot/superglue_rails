@@ -20,16 +20,6 @@ module Superglue::Broadcastable
       after_update_commit -> { broadcast_save_later(**rendering) }
     end
 
-    def broadcasts_refreshes_to(stream)
-      after_commit -> { broadcast_refresh_later_to(stream.try(:call, self) || send(stream)) }
-    end
-
-    def broadcasts_refreshes(stream = model_name.plural)
-      after_create_commit -> { broadcast_refresh_later_to(stream) }
-      after_update_commit -> { broadcast_refresh_later }
-      after_destroy_commit -> { broadcast_refresh }
-    end
-
     def broadcast_target_default
       model_name.plural
     end
@@ -72,14 +62,6 @@ module Superglue::Broadcastable
     broadcast_prepend_to self, target: target, save_target: save_target, **rendering
   end
 
-  def broadcast_refresh_to(*streamables)
-    Superglue::StreamsChannel.broadcast_refresh_to(*streamables) unless suppressed_superglue_broadcasts?
-  end
-
-  def broadcast_refresh
-    broadcast_refresh_to self
-  end
-
   # todo rename options to js_options
   def broadcast_action_to(*streamables, action:, target: broadcast_target_default, options: {}, **rendering)
     Superglue::StreamsChannel.broadcast_action_to(*streamables, action: action, options: options, **extract_options_and_add_target(rendering, target: target)) unless suppressed_superglue_broadcasts?
@@ -111,14 +93,6 @@ module Superglue::Broadcastable
 
   def broadcast_prepend_later(target: broadcast_target_default, save_target: nil, **rendering)
     broadcast_prepend_later_to self, target: target, save_target: save_target, **rendering
-  end
-
-  def broadcast_refresh_later_to(*streamables)
-    Superglue::StreamsChannel.broadcast_refresh_later_to(*streamables, request_id: Superglue.current_request_id) unless suppressed_superglue_broadcasts?
-  end
-
-  def broadcast_refresh_later
-    broadcast_refresh_later_to self
   end
 
   def broadcast_action_later_to(*streamables, action:, target: broadcast_target_default, options: {}, **rendering)

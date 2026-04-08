@@ -12,10 +12,6 @@ end
 
 class ActiveSupport::TestCase
   include ActiveJob::TestHelper
-
-  setup do
-    Superglue.current_request_id = nil
-  end
 end
 
 class ActionDispatch::IntegrationTest
