@@ -1,8 +1,8 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useAppFlash } from '@javascript/flash'
 
 export const Layout = ({children}) => {
-  const flash = useSelector((state) => state.flash)
+  const flash = useAppFlash()
 
   return (
     <div>

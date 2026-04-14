@@ -1,6 +1,6 @@
 import React from 'react'
-import { 
-  Form, 
+import {
+  Form,
   FormProps,
   Layout,
   <%- attributes.each do |attr| -%>
@@ -11,7 +11,7 @@ import {
   RailsSubmitButtonProps
 } from '@javascript/components'
 import { useContent } from '@thoughtbot/superglue'
-import { useAppSelector } from '@javascript/store'
+import { useAppFlash } from '@javascript/flash'
 
 type ContentProps = {
   <%= js_plural_table_name %>Path: string
@@ -28,12 +28,13 @@ export default function <%= js_plural_table_name(:upper) %>New() {
     <%= js_singular_table_name %>Form,
     <%= js_plural_table_name %>Path,
   } = useContent<ContentProps>()
-  const { 
-    inputs, 
-    form, 
-    extras 
+  const {
+    inputs,
+    form,
+    extras
   } = <%= js_singular_table_name %>Form
-  const validationErrors = useAppSelector((state) => state.flash["<%= js_singular_table_name%>FormErrors"])
+  const flash = useAppFlash()
+  const validationErrors = flash["<%= js_singular_table_name%>FormErrors"]
 
   return (
     <Layout>

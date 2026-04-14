@@ -1,8 +1,8 @@
 import React, {ReactNode} from 'react'
-import { useAppSelector } from '@javascript/store'
+import { useAppFlash } from '@javascript/flash'
 
 export const Layout = ({children}: {children: ReactNode}) => {
-  const flash = useAppSelector((state) => state.flash)
+  const flash = useAppFlash()
 
   return (
     <div>

@@ -40,7 +40,7 @@ module Superglue
         insert_jsx_rendering_defaults
 
         say "Installing Superglue and friends"
-        run "yarn add react react-dom @reduxjs/toolkit react-redux @thoughtbot/superglue@2.0.0-alpha.8"
+        run "yarn add react react-dom @thoughtbot/superglue@2.0.0-alpha.8"
 
         if use_typescript
           run "yarn add -D @types/react-dom @types/react @types/node @deepkit/type @deepkit/core @deepkit/type-compiler @thoughtbot/candy_wrapper@0.0.4 typescript"
@@ -98,10 +98,7 @@ module Superglue
         copy_file "#{__dir__}/templates/ts/page_to_page_mapping.ts", "#{app_js_path}/page_to_page_mapping.ts"
 
         say "Copying flash.ts file to #{app_js_path}"
-        copy_file "#{__dir__}/templates/ts/flash.ts", "#{app_js_path}/slices/flash.ts"
-
-        say "Copying store.ts file to #{app_js_path}"
-        copy_file "#{__dir__}/templates/ts/store.ts", "#{app_js_path}/store.ts"
+        copy_file "#{__dir__}/templates/ts/flash.ts", "#{app_js_path}/flash.ts"
 
         say "Copying application_visit.ts file to #{app_js_path}"
         copy_file "#{__dir__}/templates/ts/application_visit.ts", "#{app_js_path}/application_visit.ts"
@@ -129,10 +126,7 @@ module Superglue
         copy_file "#{__dir__}/templates/js/page_to_page_mapping.js", "#{app_js_path}/page_to_page_mapping.js"
 
         say "Copying flash.js file to #{app_js_path}"
-        copy_file "#{__dir__}/templates/js/flash.js", "#{app_js_path}/slices/flash.js"
-
-        say "Copying store.js file to #{app_js_path}"
-        copy_file "#{__dir__}/templates/js/store.js", "#{app_js_path}/store.js"
+        copy_file "#{__dir__}/templates/js/flash.js", "#{app_js_path}/flash.js"
 
         say "Copying application_visit.js file to #{app_js_path}"
         copy_file "#{__dir__}/templates/js/application_visit.js", "#{app_js_path}/application_visit.js"

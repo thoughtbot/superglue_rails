@@ -25,6 +25,4 @@ json.restoreStrategy 'fromCacheAndRevisitInBackground'
 
 json.renderedAt Time.now.to_i
 
-json.slices do
-  json.flash flash.to_h
-end
+json.flash flash.to_h

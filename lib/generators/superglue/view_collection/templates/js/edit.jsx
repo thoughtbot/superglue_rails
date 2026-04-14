@@ -8,7 +8,7 @@ import {
   SubmitButton
 } from '@javascript/components'
 import { useContent } from '@thoughtbot/superglue'
-import { useAppSelector } from '@javascript/store'
+import { useAppFlash } from '@javascript/flash'
 
 export default function <%= js_plural_table_name(:upper) %>Edit() {
   const {
@@ -17,12 +17,13 @@ export default function <%= js_plural_table_name(:upper) %>Edit() {
     <%= js_plural_table_name %>Path,
   } = useContent()
 
-  const { 
-    inputs, 
-    form, 
-    extras 
+  const {
+    inputs,
+    form,
+    extras
   } = <%= js_singular_table_name %>Form
-  const validationErrors = useAppSelector((state) => state.flash["<%= js_singular_table_name%>FormErrors"])
+  const flash = useAppFlash()
+  const validationErrors = flash["<%= js_singular_table_name%>FormErrors"]
 
   return (
     <Layout>

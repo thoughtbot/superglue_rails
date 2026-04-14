@@ -1,9 +1,9 @@
 import React from 'react'
-import { useContent, useStreamSource } from '@thoughtbot/superglue'
+import { useContent, useFragment, useStreamSource } from '@thoughtbot/superglue'
 
 export default function ProfileIndex() {
   const { streamFromMessages} = useContent()
-  const profile = useContent('profile', {optional: true})
+  const profile = useFragment('profile', {optional: true})
 
   useStreamSource(streamFromMessages)
 
