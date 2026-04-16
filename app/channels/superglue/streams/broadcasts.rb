@@ -2,8 +2,8 @@
 # You can find its MIT License here: https://github.com/hotwired/turbo-rails/blob/main/MIT-LICENSE
 
 module Superglue::Streams::Broadcasts
-  def broadcast_save_to(*streamables, **opts)
-    broadcast_action_to(*streamables, action: :save, **opts)
+  def broadcast_update_to(*streamables, **opts)
+    broadcast_action_to(*streamables, action: :update, **opts)
   end
 
   def broadcast_append_to(*streamables, **opts)
@@ -34,8 +34,8 @@ module Superglue::Streams::Broadcasts
     broadcast_stream_to(*streamables, content: render_broadcast_action(rendering))
   end
 
-  def broadcast_save_later_to(*streamables, **opts)
-    broadcast_action_later_to(*streamables, action: :save, **opts)
+  def broadcast_update_later_to(*streamables, **opts)
+    broadcast_action_later_to(*streamables, action: :update, **opts)
   end
 
   def broadcast_append_later_to(*streamables, **opts)

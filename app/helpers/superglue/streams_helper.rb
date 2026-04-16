@@ -36,12 +36,12 @@ module Superglue::StreamsHelper
     broadcast_action_props(action: "append", model:, target:, options:, **rendering)
   end
 
-  def broadcast_save_props(model: nil, target: nil, options: {}, **rendering)
+  def broadcast_update_props(model: nil, target: nil, options: {}, **rendering)
     if model && !target
       target = fragment_id(model)
     end
 
-    broadcast_action_props(action: "save", model:, target:, options:, **rendering)
+    broadcast_action_props(action: "update", model:, target:, options:, **rendering)
   end
 
   def broadcast_action_props(action:, partial: nil, model: nil, target: nil, options: {}, **rendering)

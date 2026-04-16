@@ -10,7 +10,7 @@ class Superglue::StreamsControllerTest < ActionDispatch::IntegrationTest
       [
         {
           "fragmentIds" => ["message_1"],
-          "handler" => "save",
+          "handler" => "update",
           "options" => {},
           "data" => {
             "body" => "My message"

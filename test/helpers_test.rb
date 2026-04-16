@@ -242,10 +242,10 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
     end
   end
 
-  test "broadcast_save_props with model uses the fragment_id of the model" do
+  test "broadcast_update_props with model uses the fragment_id of the model" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_save_props(model: @message)
+        broadcast_update_props(model: @message)
       end
     PROPS
 
@@ -254,7 +254,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
 
       assert_equal(result, [{
         fragmentIds: ["message_1"],
-        handler: "save",
+        handler: "update",
         options: {},
         data: {
           body: "Hello!"
@@ -308,7 +308,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
   test "broadcast_action_props raises error when no partial can be determined" do
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "save", target: "some_target")
+        broadcast_action_props(action: "update", target: "some_target")
       end
     PROPS
 
@@ -419,7 +419,7 @@ class BroadcastViewHelpersTest < ActiveSupport::TestCase
 
     template_content = <<~PROPS
       json.array! do
-        broadcast_action_props(action: "save", model: @plain_model, locals: {message: @plain_model})
+        broadcast_action_props(action: "update", model: @plain_model, locals: {message: @plain_model})
       end
     PROPS
 

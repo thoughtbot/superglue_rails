@@ -12,12 +12,12 @@ module Superglue::Broadcastable
   module ClassMethods
     def broadcasts_to(stream, inserts_by: :append, target: broadcast_target_default, save_target: nil, **rendering)
       after_create_commit -> { broadcast_action_later_to(stream.try(:call, self) || send(stream), action: inserts_by, target: target.try(:call, self) || target, save_target: save_target&.try(:call, self), **rendering) }
-      after_update_commit -> { broadcast_save_later_to(stream.try(:call, self) || send(stream), **rendering) }
+      after_update_commit -> { broadcast_update_later_to(stream.try(:call, self) || send(stream), **rendering) }
     end
 
     def broadcasts(stream = model_name.plural, inserts_by: :append, target: broadcast_target_default, save_target: nil, **rendering)
       after_create_commit -> { broadcast_action_later_to(stream, action: inserts_by, target: target.try(:call, self) || target, save_target: save_target&.try(:call, self), **rendering) }
-      after_update_commit -> { broadcast_save_later(**rendering) }
+      after_update_commit -> { broadcast_update_later(**rendering) }
     end
 
     def broadcast_target_default
@@ -37,12 +37,12 @@ module Superglue::Broadcastable
   end
 
   # add target?
-  def broadcast_save_to(*streamables, **rendering)
-    Superglue::StreamsChannel.broadcast_save_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_superglue_broadcasts?
+  def broadcast_update_to(*streamables, **rendering)
+    Superglue::StreamsChannel.broadcast_update_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_save(**rendering)
-    broadcast_save_to self, **rendering
+  def broadcast_update(**rendering)
+    broadcast_update_to self, **rendering
   end
 
   # todo save_target: true
@@ -71,12 +71,12 @@ module Superglue::Broadcastable
     broadcast_action_to self, action: action, target: target, options: options, **rest
   end
 
-  def broadcast_save_later_to(*streamables, **rendering)
-    Superglue::StreamsChannel.broadcast_save_later_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_superglue_broadcasts?
+  def broadcast_update_later_to(*streamables, **rendering)
+    Superglue::StreamsChannel.broadcast_update_later_to(*streamables, **extract_options_and_add_target(rendering, target: self)) unless suppressed_superglue_broadcasts?
   end
 
-  def broadcast_save_later(**rendering)
-    broadcast_save_later_to self, **rendering
+  def broadcast_update_later(**rendering)
+    broadcast_update_later_to self, **rendering
   end
 
   def broadcast_append_later_to(*streamables, target: broadcast_target_default, save_target: nil, **rendering)

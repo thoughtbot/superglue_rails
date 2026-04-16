@@ -18,13 +18,13 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     {partial: "messages/message", locals: {message: @message}}
   end
 
-  test "broadcasting save now" do
-    assert_broadcast_on "stream", render_props("save", target: "message_1", **rendering) do
-      Superglue::StreamsChannel.broadcast_save_to "stream", target: "message_1", **rendering
+  test "broadcasting update now" do
+    assert_broadcast_on "stream", render_props("update", target: "message_1", **rendering) do
+      Superglue::StreamsChannel.broadcast_update_to "stream", target: "message_1", **rendering
     end
 
-    assert_broadcast_on "stream", render_props("save", targets: ["message_1"], **rendering) do
-      Superglue::StreamsChannel.broadcast_save_to "stream", targets: ["message_1"], **rendering
+    assert_broadcast_on "stream", render_props("update", targets: ["message_1"], **rendering) do
+      Superglue::StreamsChannel.broadcast_update_to "stream", targets: ["message_1"], **rendering
     end
   end
 
@@ -64,16 +64,16 @@ class Superglue::StreamsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting save later" do
-    assert_broadcast_on "stream", render_props("save", target: "message_1", **rendering) do
+  test "broadcasting update later" do
+    assert_broadcast_on "stream", render_props("update", target: "message_1", **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_save_later_to "stream", target: "message_1", **rendering
+        Superglue::StreamsChannel.broadcast_update_later_to "stream", target: "message_1", **rendering
       end
     end
 
-    assert_broadcast_on "stream", render_props("save", targets: ["message_1"], **rendering) do
+    assert_broadcast_on "stream", render_props("update", targets: ["message_1"], **rendering) do
       perform_enqueued_jobs do
-        Superglue::StreamsChannel.broadcast_save_later_to "stream", targets: ["message_1"], **rendering
+        Superglue::StreamsChannel.broadcast_update_later_to "stream", targets: ["message_1"], **rendering
       end
     end
   end

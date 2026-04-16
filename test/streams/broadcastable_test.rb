@@ -36,15 +36,15 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "broadcasting save to stream now" do
-    assert_broadcast_on "stream", render_props("save", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_save_to "stream"
+  test "broadcasting update to stream now" do
+    assert_broadcast_on "stream", render_props("update", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_update_to "stream"
     end
   end
 
-  test "broadcasting save now" do
-    assert_broadcast_on @message.to_gid_param, render_props("save", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
-      @message.broadcast_save
+  test "broadcasting update now" do
+    assert_broadcast_on @message.to_gid_param, render_props("update", target: "message_1", partial: @message.to_partial_path, locals: {message: @message}) do
+      @message.broadcast_update
     end
   end
 
@@ -130,15 +130,15 @@ class Superglue::BroadcastableTest < ActionCable::Channel::TestCase
 
   test "render correct local name in partial for namespaced models" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, render_props("save", target: "users_profile_1", partial: @profile.to_partial_path, locals: {profile: @profile}) do
-      @profile.broadcast_save
+    assert_broadcast_on @profile.to_param, render_props("update", target: "users_profile_1", partial: @profile.to_partial_path, locals: {profile: @profile}) do
+      @profile.broadcast_update
     end
   end
 
   test "local variables don't get overwritten if they collide with the template name" do
     @profile = Users::Profile.new(id: 1, name: "Ryan")
-    assert_broadcast_on @profile.to_param, render_props("save", target: "users_profile_1", partial: @message.to_partial_path, locals: {message: @message}) do
-      @profile.broadcast_save partial: "messages/message", locals: {message: @message}
+    assert_broadcast_on @profile.to_param, render_props("update", target: "users_profile_1", partial: @message.to_partial_path, locals: {message: @message}) do
+      @profile.broadcast_update partial: "messages/message", locals: {message: @message}
     end
   end
 
@@ -239,7 +239,7 @@ class Superglue::BroadcastableArticleTest < ActionCable::Channel::TestCase
   test "updating an article broadcasts" do
     article = Article.create!(body: "Hey")
 
-    assert_broadcast_on "ho", render_props("save", target: "article_#{article.id}", partial: "articles/article", locals: {article: Article.new(body: "Ho")}) do
+    assert_broadcast_on "ho", render_props("update", target: "article_#{article.id}", partial: "articles/article", locals: {article: Article.new(body: "Ho")}) do
       perform_enqueued_jobs do
         article.update!(body: "Ho")
       end
@@ -285,7 +285,7 @@ class Superglue::BroadcastableCommentTest < ActionCable::Channel::TestCase
     stream = "#{@article.to_gid_param}:comments"
     target = "comment_#{comment.id}"
 
-    assert_broadcast_on stream, render_props("save", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "precise")}) do
+    assert_broadcast_on stream, render_props("update", target: target, partial: "comments/different_comment", locals: {comment: Comment.new(body: "precise")}) do
       perform_enqueued_jobs do
         comment.update!(body: "precise")
       end
@@ -298,27 +298,27 @@ class Superglue::SuppressingBroadcastsTest < ActionCable::Channel::TestCase
 
   setup { @message = Message.new(id: 1, content: "Hello!") }
 
-  test "suppressing broadcasting save to stream now" do
+  test "suppressing broadcasting update to stream now" do
     assert_no_broadcasts_when_suppressing do
-      @message.broadcast_save_to "stream"
+      @message.broadcast_update_to "stream"
     end
   end
 
-  test "suppressing broadcasting save to stream later" do
+  test "suppressing broadcasting update to stream later" do
     assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_save_later_to "stream"
+      @message.broadcast_update_later_to "stream"
     end
   end
 
-  test "suppressing broadcasting save now" do
+  test "suppressing broadcasting update now" do
     assert_no_broadcasts_when_suppressing do
-      @message.broadcast_save
+      @message.broadcast_update
     end
   end
 
-  test "suppressing broadcasting save later" do
+  test "suppressing broadcasting update later" do
     assert_no_broadcasts_later_when_supressing do
-      @message.broadcast_save_later
+      @message.broadcast_update_later
     end
   end
 

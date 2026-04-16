@@ -1,1 +1,1 @@
-broadcast_save_props(model: @message)
+broadcast_update_props(model: @message)
