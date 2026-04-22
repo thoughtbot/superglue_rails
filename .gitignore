@@ -19,3 +19,4 @@ testapp/
 *.sqlite3-wal
 *.rdb
 test/dummy/app/assets/builds
+.env

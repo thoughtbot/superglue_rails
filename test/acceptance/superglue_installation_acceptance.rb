@@ -3,6 +3,7 @@ require "capybara"
 require "capybara/minitest"
 require "selenium-webdriver"
 require "git"
+require "dotenv/load"
 
 ROOT_DIR = File.expand_path("../../../", __FILE__)
 TMP_DIR = File.join(ROOT_DIR, "tmp")
@@ -64,25 +65,39 @@ class SuperglueInstallationTest < Minitest::Test
     File.open("package.json", "w") { |file| file.puts content }
   end
 
-  def install_superglue
-    Dir.chdir(ROOT_DIR) do
-      successfully "rm -rf ./superglue"
-      Git.clone("https://github.com/thoughtbot/superglue.git", nil, branch: "v2")
+  def build_superglue_package
+    superglue_dir = ENV["SUPERGLUE_DIR"] || SUPERGLUE_SUPERGLUE_PATH
+
+    if !ENV["SUPERGLUE_DIR"] && !File.exist?(File.join(superglue_dir, "package.json"))
+      Dir.chdir(ROOT_DIR) do
+        successfully "git submodule update --init"
+      end
     end
 
-    Dir.chdir(SUPERGLUE_SUPERGLUE_PATH) do
+    Dir.chdir(superglue_dir) do
       successfully "npm install"
       successfully "npm run build"
       successfully "npm pack"
     end
+
+    tgz = Dir.glob("#{superglue_dir}/thoughtbot-superglue-*.tgz").max_by { |f| File.mtime(f) }
+    raise "No .tgz found in #{superglue_dir}" unless tgz
+
+    tgz
+  end
+
+  def install_superglue
+    tgz = build_superglue_package
+
     successfully "echo \"gem 'superglue', path: '#{SUPERGLUE_RAILS_PATH}'\" >> Gemfile"
     successfully "bundle install"
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "bundle exec rails generate superglue:install #{"--typescript" if USE_TYPESCRIPT}"
-    update_package_json
-    successfully "yarn install --cache-folder /tmp/.junk; rm -rf /tmp/.junk"
+    successfully "TEST_SUPERGLUEJS_PKG='file:#{tgz}' bundle exec rails generate superglue:install --bundler=esbuild --no-deepkit #{"--typescript" if USE_TYPESCRIPT}"
+    successfully "rm -rf node_modules/@thoughtbot/superglue"
+    successfully "yarn cache clean"
+    successfully "yarn add --force file:#{tgz}"
   end
 
   def add_esbuild_cmd

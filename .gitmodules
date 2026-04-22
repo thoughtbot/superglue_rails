@@ -1,0 +1,4 @@
+[submodule "superglue"]
+	path = superglue
+	url = https://github.com/thoughtbot/superglue.git
+	branch = v2

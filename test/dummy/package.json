@@ -8,7 +8,7 @@
     "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets"
   },
   "dependencies": {
-    "@thoughtbot/superglue": "file:/Users/johnyho/superglue_workspace/superglue/superglue/thoughtbot-superglue-2.0.0-dev.101.tgz",
+    "@thoughtbot/superglue": "^2.0.0-alpha.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   }

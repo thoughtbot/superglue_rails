@@ -1,10 +1,25 @@
 require "rake/testtask"
 require "standard/rake"
+require "dotenv/load"
+
+def build_superglue_tgz(superglue_dir)
+  system("cd #{superglue_dir} && npm install && npm run build && npm pack") or abort("superglue build failed")
+
+  tgz = Dir.glob("#{superglue_dir}/thoughtbot-superglue-*.tgz").max_by { |f| File.mtime(f) }
+  abort("No .tgz found in #{superglue_dir}") unless tgz
+
+  "file:#{tgz}"
+end
 
 task :build_dummy_js do
   package_path = File.join(__FILE__, "test/dummy/package.json")
   puts package_path
-  superglue_version = ENV["SUPERGLUEJS_PATH"] || "^2.0.0-alpha.8"
+
+  superglue_version = if ENV["SUPERGLUE_DIR"]
+    build_superglue_tgz(ENV["SUPERGLUE_DIR"])
+  else
+    "^2.0.0-alpha.11"
+  end
 
   if File.exist?(package_path)
     package = JSON.parse(File.read(package_path))
