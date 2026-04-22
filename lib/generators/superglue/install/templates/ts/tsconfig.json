@@ -23,6 +23,5 @@
   "include": [
     "app/javascript/**/*",
     "app/views/**/*"
-  ],
-  "reflection": true
+  ]
 }
