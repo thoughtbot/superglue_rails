@@ -113,8 +113,7 @@ module Superglue
           raise Thor::Error, "No bundler found. Install one via jsbundling-rails and re-run this generator."
         end
 
-        answer = ask("Which bundler are you using?", limited_to: BUNDLERS, default: detected)
-        answer
+        ask("Which bundler are you using?", limited_to: BUNDLERS, default: detected)
       end
 
       def ask_deepkit
@@ -152,26 +151,26 @@ module Superglue
             copy_file "#{__dir__}/templates/js/build.mjs", "build.mjs"
           end
         when "bun"
-          if @use_typescript
-            config_template = @use_deepkit ? "bun/bun.config.deepkit.js" : "bun/bun.config.ts.js"
+          config_template = if @use_typescript
+            @use_deepkit ? "bun/bun.config.deepkit.js" : "bun/bun.config.ts.js"
           else
-            config_template = "bun/bun.config.js"
+            "bun/bun.config.js"
           end
           say "Overwriting bun.config.js with Superglue configuration"
           copy_file "#{__dir__}/templates/#{config_template}", "bun.config.js"
         when "webpack"
-          if @use_typescript
-            config_template = @use_deepkit ? "webpack/webpack.config.deepkit.js" : "webpack/webpack.config.ts.js"
+          config_template = if @use_typescript
+            @use_deepkit ? "webpack/webpack.config.deepkit.js" : "webpack/webpack.config.ts.js"
           else
-            config_template = "webpack/webpack.config.js"
+            "webpack/webpack.config.js"
           end
           say "Overwriting webpack.config.js with Superglue configuration"
           copy_file "#{__dir__}/templates/#{config_template}", "webpack.config.js"
         when "rollup"
-          if @use_typescript
-            config_template = @use_deepkit ? "rollup/rollup.config.deepkit.js" : "rollup/rollup.config.ts.js"
+          config_template = if @use_typescript
+            @use_deepkit ? "rollup/rollup.config.deepkit.js" : "rollup/rollup.config.ts.js"
           else
-            config_template = "rollup/rollup.config.js"
+            "rollup/rollup.config.js"
           end
           say "Overwriting rollup.config.js with Superglue configuration"
           copy_file "#{__dir__}/templates/#{config_template}", "rollup.config.js"
@@ -198,7 +197,7 @@ module Superglue
 
       def install_packages
         say "Installing Superglue and friends"
-        superglue_pkg = ENV.fetch("TEST_SUPERGLUEJS_PKG", "@thoughtbot/superglue@2.0.0-alpha.11")
+        superglue_pkg = ENV.fetch("TEST_SUPERGLUEJS_PKG", "@thoughtbot/superglue@2.0.0-beta.1")
         run "yarn add react react-dom #{superglue_pkg}"
 
         if @use_typescript
