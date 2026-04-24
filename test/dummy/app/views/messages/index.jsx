@@ -1,5 +1,5 @@
 import React from 'react'
-import { useContent, useFragment, unproxy, useStreamSource } from '@thoughtbot/superglue'
+import { useContent, toFragmentRef, useFragment, unproxy, useStreamSource } from '@thoughtbot/superglue'
 
 const isFragment = (data) => "__id" in data
 
@@ -17,7 +17,7 @@ export default function MessagesIndex() {
     streamFromMessages,
   } = content
 
-  const spotlight = useFragment('message-1', {optional: true})
+  const spotlight = useFragment(toFragmentRef('message-1'), {optional: true})
   useStreamSource(streamFromMessages)
   const messages = unproxy(content.messages)
 

@@ -1,1 +1,4 @@
 json.streamFromMessages stream_from_props("users_profiles")
+
+profile = Users::Profile.new(id: 1, name: "Initial")
+json.profile with.partial("profile", locals: {profile: profile}).fragment("profile")

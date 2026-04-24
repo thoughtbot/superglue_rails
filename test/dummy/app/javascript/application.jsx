@@ -19,6 +19,7 @@ if (typeof window !== "undefined") {
         buildVisitAndRemote,
         mapping: pageIdentifierToPageComponent,
         cable: createConsumer(),
+        devTools: true
       })
 
       const root = createRoot(appEl)
