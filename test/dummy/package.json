@@ -2,13 +2,14 @@
   "name": "app",
   "private": true,
   "devDependencies": {
+    "@rails/actioncable": "^8.1.300",
     "esbuild": "^0.25.5"
   },
   "scripts": {
     "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets"
   },
   "dependencies": {
-    "@thoughtbot/superglue": "^2.0.0-alpha.11",
+    "@thoughtbot/superglue": "^2.0.0-beta.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   }

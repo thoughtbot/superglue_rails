@@ -197,7 +197,7 @@ module Superglue
 
       def install_packages
         say "Installing Superglue and friends"
-        superglue_pkg = ENV.fetch("TEST_SUPERGLUEJS_PKG", "@thoughtbot/superglue@2.0.0-beta.1")
+        superglue_pkg = ENV.fetch("TEST_SUPERGLUEJS_PKG", "@thoughtbot/superglue@2.0.0-beta.2")
         run "yarn add react react-dom #{superglue_pkg}"
 
         if @use_typescript

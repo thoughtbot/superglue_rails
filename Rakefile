@@ -18,7 +18,7 @@ task :build_dummy_js do
   superglue_version = if ENV["SUPERGLUE_DIR"]
     build_superglue_tgz(ENV["SUPERGLUE_DIR"])
   else
-    "^2.0.0-alpha.11"
+    "^2.0.0-beta.2"
   end
 
   if File.exist?(package_path)
