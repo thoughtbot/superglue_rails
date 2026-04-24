@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.4", "3.3", "3.2"]
+        ruby: ["3.4", "3.3"]
         version: ["72", "80", "81"]
     runs-on: "ubuntu-latest"
 
