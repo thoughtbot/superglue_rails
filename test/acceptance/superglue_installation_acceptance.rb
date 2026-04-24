@@ -87,17 +87,19 @@ class SuperglueInstallationTest < Minitest::Test
   end
 
   def install_superglue
-    tgz = build_superglue_package
+    build_superglue_package
 
     successfully "echo \"gem 'superglue', path: '#{SUPERGLUE_RAILS_PATH}'\" >> Gemfile"
     successfully "bundle install"
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "TEST_SUPERGLUEJS_PKG='file:#{tgz}' bundle exec rails generate superglue:install --bundler=esbuild --no-deepkit #{"--typescript" if USE_TYPESCRIPT}"
-    successfully "rm -rf node_modules/@thoughtbot/superglue"
+    successfully "bundle exec rails generate superglue:install --bundler=esbuild --no-deepkit #{"--typescript" if USE_TYPESCRIPT}"
+    update_package_json
+    successfully "rm -rf node_modules"
     successfully "yarn cache clean"
-    successfully "yarn add --force file:#{tgz}"
+    successfully "rm -f yarn.lock"
+    successfully "yarn install"
   end
 
   def add_esbuild_cmd
