@@ -18,8 +18,7 @@ if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
 
     if (appEl) {
       const { Provider, Outlet, ujs } = createApp({
-        // The base url prefixed to all calls made by the `visit`
-        // and `remote` thunks.
+        // The base url prefixed to all calls made by `visit` and `remote`.
         baseUrl: location.origin,
         // The global var SUPERGLUE_INITIAL_PAGE_STATE is set by your erb
         // template, e.g., index.html.erb
@@ -40,7 +39,7 @@ if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
               <Outlet />
             </Layout>
           </Provider>
-        </div>
+        </div>,
       );
     }
   });
