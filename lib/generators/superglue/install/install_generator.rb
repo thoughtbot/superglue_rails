@@ -197,7 +197,7 @@ module Superglue
 
       def install_packages
         say "Installing Superglue and friends"
-        run "yarn add react react-dom @thoughtbot/superglue@2.0.0-beta.2"
+        run "yarn add react react-dom @thoughtbot/superglue@^2.0.0-beta.11"
 
         if @use_typescript
           run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper@0.0.4 typescript"
