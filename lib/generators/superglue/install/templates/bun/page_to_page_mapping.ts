@@ -1,4 +1,4 @@
-import { asObject as pages } from '../views/**/*.tsx'
+import { asObject as pages } from '../views/**/*.html.tsx'
 
 const pageIdentifierToPageComponent: Record<string, React.ComponentType> = {}
 
