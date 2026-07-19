@@ -41,11 +41,19 @@ module Superglue
         next if self != ActionController::Base
 
         include Controller
-
-        prepend_view_path(
-          Superglue::Resolver.new(Rails.root.join("app/views"))
-        )
       end
+    end
+
+    initializer "superglue.template_handlers" do
+      handler = ->(template, source) {
+        <<~RUBY
+          controller.instance_variable_set(:@_active_template_virtual_path, "#{template.virtual_path}")
+          ""
+        RUBY
+      }
+
+      ActionView::Template.register_template_handler :tsx, handler
+      ActionView::Template.register_template_handler :jsx, handler
     end
 
     initializer "superglue.helpers" do

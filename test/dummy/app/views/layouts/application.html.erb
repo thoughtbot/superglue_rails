@@ -22,6 +22,10 @@
   </head>
 
   <body>
-    <%= yield %>
+    <script type="text/javascript">
+      window.SUPERGLUE_INITIAL_PAGE_STATE=<%= render_props %>;
+    </script>
+
+    <div id="app"><%= yield -%></div>
   </body>
 </html>

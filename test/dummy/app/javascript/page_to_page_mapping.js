@@ -1,9 +1,9 @@
-import MessagesIndex from "@views/messages";
-import MessagesShow from "@views/messages/show";
-import ProfileIndex from "@views/users/profiles";
-import SectionIndex from "@views/messages/section"
+import MessagesIndex from "@views/messages/index.html.jsx";
+import MessagesShow from "@views/messages/show.html.jsx";
+import ProfileIndex from "@views/users/profiles/index.html.jsx";
+import SectionIndex from "@views/messages/section.html.jsx"
 // import your page component
-// e.g import PostsEdit from '../views/posts/edit'
+// e.g import PostsEdit from '../views/posts/edit.html.jsx'
 
 // Mapping between your props template to Component, you must add to this
 // to register any new page level component you create. If you are using the
@@ -22,7 +22,7 @@ import SectionIndex from "@views/messages/section"
 //
 // ```
 // const pageIdentifierToPageComponent = {}
-// const pages = import.meta.glob('../views/**/*.jsx', {eager: true})
+// const pages = import.meta.glob('../views/**/*.html.jsx', {eager: true})
 //
 // for (const key in pages) {
 //   if (pages.hasOwnProperty(key)) {
@@ -40,4 +40,3 @@ const pageIdentifierToPageComponent = {
 };
 
 export { pageIdentifierToPageComponent }
-
