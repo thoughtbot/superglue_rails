@@ -1,6 +1,5 @@
 require 'superglue/helpers'
 require 'superglue/rendering'
-require 'superglue/resolver'
 require 'superglue/engine'
 require 'props_template'
 require 'form_props'

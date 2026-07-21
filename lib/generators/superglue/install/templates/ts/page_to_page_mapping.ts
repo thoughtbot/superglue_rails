@@ -1,5 +1,5 @@
 // import your page component
-// e.g import PostsEdit from '../views/posts/edit'
+// e.g import PostsEdit from '../views/posts/edit.html.tsx'
 
 // Mapping between your props template to Component, you must add to this
 // to register any new page level component you create. If you are using the
@@ -18,7 +18,7 @@
 //
 // ```
 // const pageIdentifierToPageComponent = {}
-// const pages = import.meta.glob('../views/**/*.tsx', {eager: true})
+// const pages = import.meta.glob('../views/**/*.html.tsx', {eager: true})
 //
 // for (const key in pages) {
 //   if (pages.hasOwnProperty(key)) {

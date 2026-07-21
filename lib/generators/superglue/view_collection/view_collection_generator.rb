@@ -54,9 +54,11 @@ module Superglue
 
           component_name = [plural_table_name, action].map(&:camelcase).join
 
+          js_ext = options["typescript"] ? "html.tsx" : "html.jsx"
+
           if match_file(app_js, /pageIdentifierToPageComponent = {$/)
             prepend_to_file app_js do
-              "import #{component_name} from '#{view_path}/#{controller_file_path}/#{action}'\n"
+              "import #{component_name} from '#{view_path}/#{controller_file_path}/#{action}.#{js_ext}'\n"
             end
 
             inject_into_file app_js, after: /pageIdentifierToPageComponent = {$/ do
@@ -141,11 +143,11 @@ module Superglue
       end
 
       def filename_with_jsx_extensions(name)
-        [name, :jsx].join(".")
+        [name, :html, :jsx].join(".")
       end
 
       def filename_with_tsx_extensions(name)
-        [name, :tsx].join(".")
+        [name, :html, :tsx].join(".")
       end
 
       def filename_with_html_extensions(name)
