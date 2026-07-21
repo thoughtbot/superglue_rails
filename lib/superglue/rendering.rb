@@ -4,6 +4,16 @@ module Superglue
   module Rendering
     extend ActiveSupport::Concern
 
+    included do |base|
+      base.class_attribute :_ssr_context_block, instance_accessor: true, default: nil
+    end
+
+    class_methods do
+      def ssr_context(&block)
+        self._ssr_context_block = block
+      end
+    end
+
     def default_render
       if request.format.json? && !template_exists?(action_name, _prefixes, false)
         render inline: "", layout: true

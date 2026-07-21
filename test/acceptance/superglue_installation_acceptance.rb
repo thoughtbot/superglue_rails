@@ -4,11 +4,13 @@ require "capybara/minitest"
 require "selenium-webdriver"
 require "git"
 require "dotenv/load"
+require "mini_racer"
+require "humid"
 
 ROOT_DIR = File.expand_path("../../../", __FILE__)
 TMP_DIR = File.join(ROOT_DIR, "tmp")
 SUPERGLUE_RAILS_PATH = ROOT_DIR
-SUPERGLUE_SUPERGLUE_PATH = File.join(ROOT_DIR, "superglue/superglue")
+SUPERGLUE_SUPERGLUE_PATH = File.expand_path("../superglue", ROOT_DIR)
 VERSION = File.read(File.expand_path("../../VERSION", __dir__)).strip
 
 SERVER_PORT = "3000"
@@ -86,7 +88,7 @@ class SuperglueInstallationTest < Minitest::Test
     tgz
   end
 
-  def install_superglue
+  def install_superglue(bundler: "esbuild")
     build_superglue_package
 
     successfully "echo \"gem 'superglue', path: '#{SUPERGLUE_RAILS_PATH}'\" >> Gemfile"
@@ -94,7 +96,7 @@ class SuperglueInstallationTest < Minitest::Test
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "bundle exec rails generate superglue:install --bundler=esbuild --no-deepkit #{"--typescript" if USE_TYPESCRIPT}"
+    successfully "bundle exec rails generate superglue:install --bundler=#{bundler} --no-deepkit #{"--typescript" if USE_TYPESCRIPT}"
     update_package_json
     successfully "rm -rf node_modules"
     successfully "yarn cache clean"
@@ -107,14 +109,18 @@ class SuperglueInstallationTest < Minitest::Test
     successfully %(npm pkg set scripts.build="#{build_script}")
   end
 
-  def generate_test_app_7(app_name)
+  def generate_test_app(app_name, bundler: "esbuild")
     successfully "rails new #{app_name} \
-       --javascript=esbuild \
+       --javascript=#{bundler} \
        --skip-git \
        --skip-hotwire \
        --skip-spring \
        --no-rc \
        --skip_bootsnap"
+  end
+
+  def generate_test_app_7(app_name)
+    generate_test_app(app_name, bundler: "esbuild")
   end
 
   def generate_scaffold
@@ -185,5 +191,71 @@ class SuperglueInstallationTest < Minitest::Test
       Process.kill "TERM", pid
       Process.wait pid
     end
+  end
+
+  def write_hello_world_ssr
+    ext = USE_TYPESCRIPT ? "tsx" : "jsx"
+    File.write("app/javascript/server_rendering.#{ext}", <<~JSX)
+      import React from "react";
+      import { renderToString } from "react-dom/server";
+
+      setHumidRenderer((json, baseUrl, path) => {
+        return renderToString(<h1>hello world</h1>);
+      });
+    JSX
+  end
+
+  def assert_ssr_renders_hello_world(app_dir)
+    bundle_path = File.join(app_dir, "app/assets/builds/server_rendering.js")
+    map_path = File.join(app_dir, "app/assets/builds/server_rendering.js.map")
+
+    ctx = MiniRacer::Context.new(timeout: 10_000)
+    ctx.eval("var exports = {}; var module = { exports: exports };")
+    Humid.prepare(ctx, application_path: bundle_path, source_map_path: map_path)
+    result = Humid.render(ctx, "{}", "http://localhost:3000", "/")
+
+    assert_includes result, "<h1>hello world</h1>"
+  ensure
+    ctx&.dispose
+  end
+
+  def setup_ssr_test_app(app_name, bundler:)
+    Dir.mkdir(TMP_DIR) unless Dir.exist?(TMP_DIR)
+    Dir.chdir(TMP_DIR) do
+      FileUtils.rm_rf(app_name)
+      generate_test_app(app_name, bundler: bundler)
+      Dir.chdir(app_name) do
+        successfully "bundle install"
+        successfully "yarn add react react-dom @babel/preset-react"
+
+        FileUtils.rm_f("public/index.html")
+        install_superglue(bundler: bundler)
+        write_hello_world_ssr
+
+        successfully "yarn run build"
+
+        app_dir = File.join(TMP_DIR, app_name)
+        assert File.exist?("app/assets/builds/server_rendering.js"), "SSR bundle was not created for #{bundler}"
+        assert File.exist?("app/assets/builds/server_rendering.js.map"), "SSR source map was not created for #{bundler}"
+
+        assert_ssr_renders_hello_world(app_dir)
+      end
+    end
+  end
+
+  def test_ssr_with_esbuild
+    setup_ssr_test_app("testapp_ssr_esbuild", bundler: "esbuild")
+  end
+
+  def test_ssr_with_bun
+    setup_ssr_test_app("testapp_ssr_bun", bundler: "bun")
+  end
+
+  def test_ssr_with_rollup
+    setup_ssr_test_app("testapp_ssr_rollup", bundler: "rollup")
+  end
+
+  def test_ssr_with_webpack
+    setup_ssr_test_app("testapp_ssr_webpack", bundler: "webpack")
   end
 end

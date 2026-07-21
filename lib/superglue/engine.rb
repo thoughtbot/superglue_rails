@@ -46,10 +46,23 @@ module Superglue
 
     initializer "superglue.template_handlers" do
       handler = ->(template, source) {
-        <<~RUBY
-          controller.instance_variable_set(:@_active_template_virtual_path, "#{template.virtual_path}")
-          ""
-        RUBY
+        if template.format == :html
+          <<~RUBY
+            controller.instance_variable_set(:@_active_template_virtual_path, "#{template.virtual_path}")
+            ctx = controller._ssr_context_block&.call
+            if ctx
+              controller.response.set_header("X-Superglue-SSR", "1")
+              render(partial: "humid", locals: { ssr_context: ctx }).strip.html_safe
+            else
+              if Rails.env.local?
+                Rails.logger.warn "[Superglue] #{template.virtual_path}.html.#{template.handler} rendered without SSR. Set ssr_context in your controller to enable it."
+              end
+              ""
+            end
+          RUBY
+        else
+          "''"
+        end
       }
 
       ActionView::Template.register_template_handler :tsx, handler
