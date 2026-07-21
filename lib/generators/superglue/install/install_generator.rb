@@ -43,6 +43,11 @@ module Superglue
         say "Copying Superglue initializer"
         copy_file "#{__dir__}/templates/initializer.rb", "config/initializers/superglue.rb"
 
+        say "Copying Humid initializer"
+        copy_file "#{__dir__}/templates/humid_initializer.rb", "config/initializers/humid.rb"
+
+        copy_ssr_files
+
         say "Copying application.json.props"
         copy_file "#{__dir__}/templates/application.json.props", "app/views/layouts/application.json.props"
 
@@ -212,11 +217,14 @@ module Superglue
           run "yarn add -D esbuild-loader"
         when "rollup"
           say "Installing rollup plugins for JSX and glob support"
-          run "yarn add -D @rollup/plugin-babel @babel/core @babel/preset-react @rollup/plugin-commonjs @rollup/plugin-alias rollup-plugin-import-meta-glob"
+          run "yarn add -D @rollup/plugin-babel @babel/core @babel/preset-react @rollup/plugin-commonjs @rollup/plugin-alias @rollup/plugin-replace rollup-plugin-import-meta-glob"
           if @use_typescript
             run "yarn add -D @babel/preset-typescript"
           end
         end
+
+        say "Installing SSR dependencies"
+        run "yarn add -D source-map-support npm-run-all"
       end
 
       def copy_ts_files
@@ -280,6 +288,59 @@ module Superglue
   end
           RUBY
         end
+      end
+
+      def copy_ssr_files
+        say "Adding enable_ssr to ApplicationController"
+        inject_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::Base\n" do
+          "  before_action -> { enable_ssr(context: MINI_RACER_CONTEXT) }, if: -> { Rails.env.local? }\n"
+        end
+
+        say "Copying SSR shims"
+        copy_file "#{__dir__}/templates/ssr/shim.js", "shim.js"
+
+        ssr_ext = @use_typescript ? "tsx" : "jsx"
+
+        say "Copying SSR build script for #{@bundler}"
+        case @bundler
+        when "esbuild"
+          copy_file "#{__dir__}/templates/ssr/esbuild.build_ssr.mjs", "build_ssr.mjs"
+          gsub_file "build_ssr.mjs", "server_rendering.jsx", "server_rendering.#{ssr_ext}"
+          run %(npm pkg set scripts.build:ssr="node build_ssr.mjs")
+        when "bun"
+          copy_file "#{__dir__}/templates/ssr/bun.build_ssr.js", "build_ssr.js"
+          gsub_file "build_ssr.js", "server_rendering.jsx", "server_rendering.#{ssr_ext}"
+          run %(npm pkg set scripts.build:ssr="bun run build_ssr.js")
+        when "webpack"
+          copy_file "#{__dir__}/templates/ssr/webpack.build_ssr.js", "webpack.config.ssr.js"
+          gsub_file "webpack.config.ssr.js", "server_rendering.jsx", "server_rendering.#{ssr_ext}"
+          run %(npm pkg set scripts.build:ssr="webpack --config webpack.config.ssr.js")
+        when "rollup"
+          copy_file "#{__dir__}/templates/ssr/rollup.build_ssr.config.js", "rollup.config.ssr.js"
+          gsub_file "rollup.config.ssr.js", "server_rendering.jsx", "server_rendering.#{ssr_ext}"
+          run %(npm pkg set scripts.build:ssr="rollup -c rollup.config.ssr.js")
+        end
+
+        if @use_typescript
+          say "Copying server_rendering.tsx"
+          copy_file "#{__dir__}/templates/ssr/server_rendering.tsx", "#{app_js_path}/server_rendering.tsx"
+        else
+          say "Copying server_rendering.jsx"
+          copy_file "#{__dir__}/templates/ssr/server_rendering.jsx", "#{app_js_path}/server_rendering.jsx"
+        end
+
+        say "Adding build:web, build:dev, and build:watch scripts"
+        web_build = case @bundler
+        when "esbuild" then "node build.mjs"
+        when "bun" then "bun run bun.config.js"
+        when "webpack" then "webpack --config webpack.config.js"
+        when "rollup" then "rollup -c rollup.config.js"
+        end
+
+        run %(npm pkg set scripts.build:web="#{web_build}")
+        run %(npm pkg set scripts.build="NODE_ENV=production run-p build:web build:ssr")
+        run %(npm pkg set scripts.build:dev="run-p build:web build:ssr")
+        run %(npm pkg set scripts.build:watch="run-p -l \\"build:web --watch\\" \\"build:ssr --watch\\"")
       end
 
       def app_js_path

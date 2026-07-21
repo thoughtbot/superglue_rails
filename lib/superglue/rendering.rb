@@ -4,6 +4,21 @@ module Superglue
   module Rendering
     extend ActiveSupport::Concern
 
+    def enable_ssr(context: nil)
+      response.set_header("X-Superglue-SSR", "1")
+
+      return unless context
+
+      is_prepared = context.respond_to?(:humid_prepared?) && context.humid_prepared?
+
+      if !is_prepared && Rails.env.local?
+        Humid.prepare(context)
+      end
+
+      @_ssr_enabled = true
+      @_ssr_context = context
+    end
+
     def default_render
       if request.format.json? && !template_exists?(action_name, _prefixes, false)
         render inline: "", layout: true

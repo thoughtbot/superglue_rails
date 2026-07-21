@@ -48,7 +48,11 @@ module Superglue
       handler = ->(template, source) {
         <<~RUBY
           controller.instance_variable_set(:@_active_template_virtual_path, "#{template.virtual_path}")
-          ""
+          if controller.instance_variable_get(:@_ssr_enabled) && controller.instance_variable_get(:@_ssr_context)
+            render(partial: "humid", locals: { ssr_context: controller.instance_variable_get(:@_ssr_context) }).strip.html_safe
+          else
+            ""
+          end
         RUBY
       }
 

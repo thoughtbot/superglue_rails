@@ -4,6 +4,7 @@ gemspec
 gem 'rails', git: 'https://github.com/rails/rails', ref: 'main'
 gem 'selenium-webdriver'
 gem 'props_template'
+gem 'humid', '~> 0.6.0'
 gem 'standard'
 gem 'capybara'
 gem 'minitest'
