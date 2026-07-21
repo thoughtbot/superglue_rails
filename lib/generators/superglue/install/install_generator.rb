@@ -23,12 +23,18 @@ module Superglue
         required: false,
         desc: "Enable Deepkit runtime type validation (experimental). Skips interactive prompt."
 
+      class_option :svgr,
+        type: :boolean,
+        required: false,
+        desc: "Enable SVGR to import SVGs as React components. Skips interactive prompt."
+
       def create_files
         remove_file "#{app_js_path}/application.js"
 
         @use_typescript = options["typescript"]
         @bundler = ask_bundler
         @use_deepkit = @use_typescript && ask_deepkit
+        @use_svgr = ask_svgr
 
         if @use_typescript
           copy_ts_files
@@ -58,6 +64,10 @@ module Superglue
         add_member_methods
 
         install_packages
+
+        if @use_svgr
+          configure_svgr
+        end
 
         say "Superglue is Installed! 🎉", :green
       end
@@ -126,6 +136,18 @@ module Superglue
         say "Superglue includes an experimental Deepkit integration for runtime type"
         say "validation during development. This is optional and can be added later."
         yes?("Would you like to enable Deepkit runtime type validation? (experimental) [y/N]")
+      end
+
+      def ask_svgr
+        unless options["svgr"].nil?
+          say "SVGR: #{options["svgr"] ? "enabled" : "disabled"}", :green
+          return options["svgr"]
+        end
+
+        say ""
+        say "SVGR lets you import SVGs as React components."
+        say "e.g., import Logo from '@images/logo.svg'"
+        yes?("Would you like to enable SVGR? [y/N]")
       end
 
       def update_build_script
@@ -363,6 +385,61 @@ module Superglue
               end
             RUBY
           end
+        end
+      end
+
+      def configure_svgr
+        say "Configuring SVGR"
+
+        case @bundler
+        when "esbuild"
+          run "yarn add -D esbuild-plugin-svgr"
+          inject_svgr_esbuild("build.mjs")
+          inject_svgr_esbuild("build_ssr.mjs")
+        when "bun"
+          run "yarn add -D esbuild-plugin-svgr"
+          inject_svgr_bun
+        when "webpack"
+          run "yarn add -D @svgr/webpack"
+          inject_svgr_webpack("webpack.config.js")
+          inject_svgr_webpack("webpack.config.ssr.js")
+        when "rollup"
+          run "yarn add -D @svgr/rollup"
+          inject_svgr_rollup("rollup.config.js")
+          inject_svgr_rollup("rollup.config.ssr.js")
+        end
+      end
+
+      def inject_svgr_esbuild(file)
+        inject_into_file file, "import svgr from 'esbuild-plugin-svgr'\n", before: /^const /
+        gsub_file file, "plugins: []", "plugins: [svgr()]"
+        gsub_file file, "plugins:  process.env.NODE_ENV === 'production' ? [] : []", "plugins: [svgr()]"
+      end
+
+      def inject_svgr_bun
+        inject_into_file "bun.config.js", after: /plugins: \[/ do
+          "globImportPlugin(), "
+        end
+        # bun uses esbuild-plugin-svgr since its plugin API is compatible
+        inject_into_file "bun.config.js", "import svgr from 'esbuild-plugin-svgr'\n", before: /^const /
+        gsub_file "bun.config.js", "plugins: [globImportPlugin()]", "plugins: [globImportPlugin(), svgr()]"
+      end
+
+      def inject_svgr_webpack(file)
+        inject_into_file file, after: /rules: \[\n/ do
+          <<-JS
+      {
+        test: /\\.svg$/,
+        use: ["@svgr/webpack"]
+      },
+          JS
+        end
+      end
+
+      def inject_svgr_rollup(file)
+        inject_into_file file, "import svgr from \"@svgr/rollup\"\n", before: /^export default/
+        inject_into_file file, after: /plugins: \[\n/ do
+          "    svgr(),\n"
         end
       end
 
