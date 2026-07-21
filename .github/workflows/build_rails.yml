@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: ["3.4", "3.3"]
-        version: ["72", "80", "81"]
+        version: ["80", "81"]
     runs-on: "ubuntu-latest"
 
     steps:
