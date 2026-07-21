@@ -13,6 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "baseUrl": ".", // Usually the root of your project
     "paths": {
       "@javascript/*": ["app/javascript/*"],

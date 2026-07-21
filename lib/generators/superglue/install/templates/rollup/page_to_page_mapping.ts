@@ -1,5 +1,5 @@
 const pageIdentifierToPageComponent: Record<string, React.ComponentType> = {}
-const pages = import.meta.glob('../views/**/*.tsx', { eager: true })
+const pages = import.meta.glob('../views/**/*.html.tsx', { eager: true })
 
 for (const key in pages) {
   const identifier = key.replace('../views/', '').split('.')[0]

@@ -27,9 +27,6 @@ module Superglue
       def create_controller_files
         controller_file = File.join("app/controllers", controller_class_path, "#{controller_file_name}_controller.rb")
         template "controller.rb", controller_file
-        inject_into_file controller_file, after: /ApplicationController$/ do
-          "\n  before_action :use_jsx_rendering_defaults"
-        end
       end
 
       # Replaces template_engine (and its default erb), with view_collection
