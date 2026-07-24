@@ -1,5 +1,5 @@
 import React from "react"
-import { createRoot } from "react-dom/client"
+import { createRoot, hydrateRoot } from "react-dom/client"
 import { createApp } from "@thoughtbot/superglue"
 import { buildVisitAndRemote } from "./application_visit"
 import { pageIdentifierToPageComponent } from "./page_to_page_mapping"
@@ -26,8 +26,7 @@ if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
         mapping: pageIdentifierToPageComponent,
       })
 
-      const root = createRoot(appEl)
-      root.render(
+      const app = (
         <div onClick={ujs.onClick} onSubmit={ujs.onSubmit}>
           <Provider>
             <Layout>
@@ -36,6 +35,12 @@ if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
           </Provider>
         </div>
       )
+
+      if (appEl.hasChildNodes()) {
+        hydrateRoot(appEl, app)
+      } else {
+        createRoot(appEl).render(app)
+      }
     }
   })
 }
