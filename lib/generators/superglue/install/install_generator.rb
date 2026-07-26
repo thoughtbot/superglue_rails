@@ -18,10 +18,10 @@ module Superglue
         required: false,
         desc: "JavaScript bundler to use (esbuild, bun, rollup, webpack). Skips interactive prompt."
 
-      class_option :deepkit,
-        type: :boolean,
+      class_option :validator,
+        type: :string,
         required: false,
-        desc: "Enable Deepkit runtime type validation (experimental). Skips interactive prompt."
+        desc: "Runtime type validator to use (deepkit, typia, none). Skips interactive prompt."
 
       class_option :svgr,
         type: :boolean,
@@ -33,7 +33,7 @@ module Superglue
 
         @use_typescript = options["typescript"]
         @bundler = ask_bundler
-        @use_deepkit = @use_typescript && ask_deepkit
+        @validator = @use_typescript ? ask_validator : "none"
         @use_svgr = ask_svgr
 
         if @use_typescript
@@ -75,6 +75,7 @@ module Superglue
       private
 
       BUNDLERS = %w[esbuild bun rollup webpack].freeze
+      VALIDATORS = %w[deepkit typia none].freeze
 
       def detect_bundler
         if File.exist?("webpack.config.js")
@@ -126,16 +127,22 @@ module Superglue
         ask("Which bundler are you using?", limited_to: BUNDLERS, default: detected)
       end
 
-      def ask_deepkit
-        unless options["deepkit"].nil?
-          say "Deepkit runtime type validation: #{options["deepkit"] ? "enabled" : "disabled"}", :green
-          return options["deepkit"]
+      def ask_validator
+        if options["validator"]
+          validator = options["validator"]
+          unless VALIDATORS.include?(validator)
+            raise Thor::Error, "Unknown validator '#{validator}'. Must be one of: #{VALIDATORS.join(", ")}"
+          end
+          say "Runtime type validator: #{validator}", :green
+          return validator
         end
 
         say ""
-        say "Superglue includes an experimental Deepkit integration for runtime type"
-        say "validation during development. This is optional and can be added later."
-        yes?("Would you like to enable Deepkit runtime type validation? (experimental) [y/N]")
+        say "Superglue can add runtime type validation during development."
+        say "  deepkit - works with TypeScript 5 and below (uses bundler plugin)"
+        say "  typia   - works with TypeScript 6 and above (uses ttsc)"
+        say "  none    - skip runtime type validation"
+        ask("Which runtime type validator would you like to use?", limited_to: VALIDATORS, default: "none")
       end
 
       def ask_svgr
@@ -161,41 +168,49 @@ module Superglue
         end
       end
 
+      def bundler_template_for(bundler_name, base_path, variants)
+        if @use_typescript
+          variant_key = variants.key?(@validator) ? @validator : "none"
+          variants[variant_key]
+        else
+          base_path
+        end
+      end
+
       def copy_bundler_config
         case @bundler
         when "esbuild"
-          if @use_typescript
-            template_name = @use_deepkit ? "ts/build.deepkit.mjs" : "ts/build.mjs"
-            say "Adding build.mjs for TypeScript compilation"
-            copy_file "#{__dir__}/templates/#{template_name}", "build.mjs"
-          else
-            say "Adding build.mjs"
-            copy_file "#{__dir__}/templates/js/build.mjs", "build.mjs"
-          end
+          template_name = bundler_template_for("esbuild", "js/build.mjs", {
+            "deepkit" => "ts/build.deepkit.mjs",
+            "typia" => "ts/build.typia.mjs",
+            "none" => "ts/build.mjs"
+          })
+          say "Adding build.mjs for #{@use_typescript ? "TypeScript" : "JavaScript"} compilation"
+          copy_file "#{__dir__}/templates/#{template_name}", "build.mjs"
         when "bun"
-          config_template = if @use_typescript
-            @use_deepkit ? "bun/bun.config.deepkit.js" : "bun/bun.config.ts.js"
-          else
-            "bun/bun.config.js"
-          end
+          template_name = bundler_template_for("bun", "bun/bun.config.js", {
+            "deepkit" => "bun/bun.config.deepkit.js",
+            "typia" => "bun/bun.config.typia.js",
+            "none" => "bun/bun.config.ts.js"
+          })
           say "Overwriting bun.config.js with Superglue configuration"
-          copy_file "#{__dir__}/templates/#{config_template}", "bun.config.js"
+          copy_file "#{__dir__}/templates/#{template_name}", "bun.config.js"
         when "webpack"
-          config_template = if @use_typescript
-            @use_deepkit ? "webpack/webpack.config.deepkit.js" : "webpack/webpack.config.ts.js"
-          else
-            "webpack/webpack.config.js"
-          end
+          template_name = bundler_template_for("webpack", "webpack/webpack.config.js", {
+            "deepkit" => "webpack/webpack.config.deepkit.js",
+            "typia" => "webpack/webpack.config.typia.js",
+            "none" => "webpack/webpack.config.ts.js"
+          })
           say "Overwriting webpack.config.js with Superglue configuration"
-          copy_file "#{__dir__}/templates/#{config_template}", "webpack.config.js"
+          copy_file "#{__dir__}/templates/#{template_name}", "webpack.config.js"
         when "rollup"
-          config_template = if @use_typescript
-            @use_deepkit ? "rollup/rollup.config.deepkit.js" : "rollup/rollup.config.ts.js"
-          else
-            "rollup/rollup.config.js"
-          end
+          template_name = bundler_template_for("rollup", "rollup/rollup.config.js", {
+            "deepkit" => "rollup/rollup.config.deepkit.js",
+            "typia" => "rollup/rollup.config.typia.js",
+            "none" => "rollup/rollup.config.ts.js"
+          })
           say "Overwriting rollup.config.js with Superglue configuration"
-          copy_file "#{__dir__}/templates/#{config_template}", "rollup.config.js"
+          copy_file "#{__dir__}/templates/#{template_name}", "rollup.config.js"
         end
       end
 
@@ -225,9 +240,12 @@ module Superglue
           run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper@0.0.4 typescript"
         end
 
-        if @use_deepkit
+        if @validator == "deepkit"
           say "Installing Deepkit for runtime type validation"
           run "yarn add -D @deepkit/type @deepkit/core @deepkit/type-compiler"
+        elsif @validator == "typia"
+          say "Installing Typia and ttsc for runtime type validation"
+          run "yarn add -D typia ttsc @ttsc/unplugin"
         end
 
         case @bundler
@@ -270,10 +288,15 @@ module Superglue
         say "Copying tsconfig.json"
         copy_file "#{__dir__}/templates/ts/tsconfig.json", "tsconfig.json"
 
-        if @use_deepkit
+        if @validator == "deepkit"
           say "Enabling Deepkit reflection in tsconfig.json"
           inject_into_file "tsconfig.json", before: /\n\}$/ do
             ",\n  \"reflection\": true"
+          end
+        elsif @validator == "typia"
+          say "Adding Superglue typia plugin to tsconfig.json"
+          inject_into_file "tsconfig.json", after: /"compilerOptions": \{/ do
+            "\n    \"plugins\": [{ \"transform\": \"@thoughtbot/superglue/typia\" }],"
           end
         end
       end
@@ -366,26 +389,6 @@ module Superglue
         run %(npm pkg set scripts.build="NODE_ENV=production run-p build:web build:ssr")
         run %(npm pkg set scripts.build:dev="run-p build:web build:ssr")
         run %(npm pkg set scripts.build:watch="run-p -l \\"build:web --watch\\" \\"build:ssr --watch\\"")
-
-        if File.exist?("config/puma.rb")
-          say "Adding MiniRacer SSR context to puma.rb for production"
-          append_to_file "config/puma.rb" do
-            <<~RUBY
-
-              # Create a MiniRacer context for SSR on each worker boot.
-              # MiniRacer is thread safe but not fork safe.
-              if ENV["RAILS_ENV"] == "production"
-                on_worker_boot do
-                  MINI_RACER_SSR = { context: MiniRacer::Context.new(timeout: 1000, ensure_gc_after_idle: 2000) }
-                end
-
-                on_worker_shutdown do
-                  MINI_RACER_SSR[:context].dispose if defined?(MINI_RACER_SSR)
-                end
-              end
-            RUBY
-          end
-        end
       end
 
       def configure_svgr

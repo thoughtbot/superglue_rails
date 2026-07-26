@@ -96,7 +96,7 @@ class SuperglueInstallationTest < Minitest::Test
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "bundle exec rails generate superglue:install --bundler=#{bundler} --no-deepkit #{"--typescript" if USE_TYPESCRIPT}"
+    successfully "bundle exec rails generate superglue:install --bundler=#{bundler} --validator=none #{"--typescript" if USE_TYPESCRIPT}"
     update_package_json
     successfully "rm -rf node_modules"
     successfully "yarn cache clean"
