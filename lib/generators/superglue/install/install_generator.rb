@@ -389,6 +389,26 @@ module Superglue
         run %(npm pkg set scripts.build="NODE_ENV=production run-p build:web build:ssr")
         run %(npm pkg set scripts.build:dev="run-p build:web build:ssr")
         run %(npm pkg set scripts.build:watch="run-p -l \\"build:web --watch\\" \\"build:ssr --watch\\"")
+
+        if File.exist?("config/puma.rb")
+          say "Adding MiniRacer SSR context to puma.rb for production"
+          append_to_file "config/puma.rb" do
+            <<~RUBY
+
+              # Create a MiniRacer context for SSR on each worker boot.
+              # MiniRacer is thread safe but not fork safe.
+              if ENV["RAILS_ENV"] == "production"
+                on_worker_boot do
+                  MINI_RACER_SSR = { context: MiniRacer::Context.new(timeout: 1000, ensure_gc_after_idle: 2000) }
+                end
+
+                on_worker_shutdown do
+                  MINI_RACER_SSR[:context].dispose if defined?(MINI_RACER_SSR)
+                end
+              end
+            RUBY
+          end
+        end
       end
 
       def configure_svgr
