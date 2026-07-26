@@ -1,5 +1,5 @@
 const pageIdentifierToPageComponent: Record<string, React.ComponentType> = {}
-const context = require.context('../views', true, /\.html\.tsx$/)
+const context = require.context('../views', true, /\.[jt]sx$/)
 
 context.keys().forEach((key: string) => {
   const identifier = key.replace('./', '').split('.')[0]

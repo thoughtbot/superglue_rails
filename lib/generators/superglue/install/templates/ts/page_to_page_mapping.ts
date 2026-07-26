@@ -1,5 +1,5 @@
 // @ts-ignore
-import * as pages from '../views/**/*.html.tsx'
+import * as pages from '../views/**/*.{tsx,jsx}'
 
 const pageIdentifierToPageComponent: Record<string, React.ComponentType> = {}
 
