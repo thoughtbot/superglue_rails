@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Ruby ${{ matrix.ruby }}. Rails ${{ matrix.version }}
+  unit:
+    name: Unit - Ruby ${{ matrix.ruby }}. Rails ${{ matrix.version }}
     strategy:
       fail-fast: false
       matrix:
@@ -34,17 +34,71 @@ jobs:
         run: bundle install
       - name: Run unit test
         run: bundle exec rake test
-      - name: Run acceptance test
-        run: BUNDLE_GEMFILE='' ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
-      - name: Kill orphaned processes
-        if: always()
-        run: lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-      - name: Run acceptance test w/ typescript
-        run: BUNDLE_GEMFILE='' USE_TYPESCRIPT=1 ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: superglue_rails_run${{ matrix.ruby }}${{ matrix.version }}
+          name: unit_run${{ matrix.ruby }}${{ matrix.version }}
           path: test/dummy/tmp/screenshots/
           retention-days: 7
+
+  acceptance:
+    name: Acceptance - ${{ matrix.bundler }}${{ matrix.typescript == '1' && ' (TS)' || '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        bundler: [esbuild, bun, webpack, rollup]
+        typescript: ["0", "1"]
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23.10.0
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.bundler == 'bun'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+      - name: Bundle install
+        run: bundle install
+      - name: Run acceptance test
+        run: >
+          BUNDLE_GEMFILE=''
+          USE_TYPESCRIPT=${{ matrix.typescript }}
+          ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
+          --name test_ssr_with_${{ matrix.bundler }}
+      - name: Kill orphaned processes
+        if: always()
+        run: lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+
+  acceptance-e2e:
+    name: Acceptance - E2E${{ matrix.typescript == '1' && ' (TS)' || '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: ["0", "1"]
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23.10.0
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+      - name: Which chromedriver?
+        run: chromedriver -v
+      - name: Bundle install
+        run: bundle install
+      - name: Run E2E test
+        run: >
+          BUNDLE_GEMFILE=''
+          USE_TYPESCRIPT=${{ matrix.typescript }}
+          ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
+          --name test_installation
+      - name: Kill orphaned processes
+        if: always()
+        run: lsof -ti:3000 | xargs kill -9 2>/dev/null || true
