@@ -14,5 +14,5 @@ Gem::Specification.new do |s|
   s.add_dependency "actionpack", ">= 8.0", "< 9.0"
   s.add_dependency "props_template", "~> 1.0.0"
   s.add_dependency "form_props", "~> 0.2"
-  s.add_dependency "humid", "~> 0.7.0"
+  s.add_dependency "humid", "~> 1.1"
 end

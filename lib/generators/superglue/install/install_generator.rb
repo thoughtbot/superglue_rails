@@ -266,8 +266,8 @@ module Superglue
           end
         end
 
-        say "Installing SSR dependencies"
-        run "yarn add -D source-map-support npm-run-all"
+        say "Installing build dependencies"
+        run "yarn add -D npm-run-all"
       end
 
       def copy_ts_files
@@ -344,7 +344,7 @@ module Superglue
           "  ssr_context { Humid.prepare(MINI_RACER_SSR[:context]) if defined?(MINI_RACER_SSR) }\n"
         end
 
-        say "Copying SSR shims"
+        say "Copying MiniRacer shim"
         copy_file "#{__dir__}/templates/ssr/shim.js", "shim.js"
 
         ssr_ext = @use_typescript ? "tsx" : "jsx"
@@ -366,6 +366,11 @@ module Superglue
         when "rollup"
           copy_file "#{__dir__}/templates/ssr/rollup.build_ssr.config.js", "rollup.config.ssr.js"
           gsub_file "rollup.config.ssr.js", "server_rendering.jsx", "server_rendering.#{ssr_ext}"
+          if @use_typescript
+            gsub_file "rollup.config.ssr.js",
+              'presets: [["@babel/preset-react", { runtime: "automatic" }]],',
+              'presets: [["@babel/preset-react", { runtime: "automatic" }], "@babel/preset-typescript"],'
+          end
           run %(npm pkg set scripts.build:ssr="rollup -c rollup.config.ssr.js")
         end
 
@@ -386,9 +391,8 @@ module Superglue
         end
 
         run %(npm pkg set scripts.build:web="#{web_build}")
-        run %(npm pkg set scripts.build="NODE_ENV=production run-p build:web build:ssr")
-        run %(npm pkg set scripts.build:dev="run-p build:web build:ssr")
-        run %(npm pkg set scripts.build:watch="run-p -l \\"build:web --watch\\" \\"build:ssr --watch\\"")
+        run %(npm pkg set scripts.build="run-p 'build:web -- {@}' 'build:ssr -- {@}' --")
+        run %(npm pkg set scripts.build:prod="NODE_ENV=production yarn build")
 
         if File.exist?("config/puma.rb")
           say "Adding MiniRacer SSR context to puma.rb for production"
@@ -434,18 +438,14 @@ module Superglue
       end
 
       def inject_svgr_esbuild(file)
-        inject_into_file file, "import svgr from 'esbuild-plugin-svgr'\n", before: /^const /
-        gsub_file file, "plugins: []", "plugins: [svgr()]"
-        gsub_file file, "plugins:  process.env.NODE_ENV === 'production' ? [] : []", "plugins: [svgr()]"
+        prepend_to_file file, "import svgr from 'esbuild-plugin-svgr'\n"
+        gsub_file file, "importGlobPlugin()", "importGlobPlugin(), svgr()"
       end
 
       def inject_svgr_bun
-        inject_into_file "bun.config.js", after: /plugins: \[/ do
-          "globImportPlugin(), "
-        end
         # bun uses esbuild-plugin-svgr since its plugin API is compatible
-        inject_into_file "bun.config.js", "import svgr from 'esbuild-plugin-svgr'\n", before: /^const /
-        gsub_file "bun.config.js", "plugins: [globImportPlugin()]", "plugins: [globImportPlugin(), svgr()]"
+        prepend_to_file "bun.config.js", "import svgr from 'esbuild-plugin-svgr'\n"
+        gsub_file "bun.config.js", "globImportPlugin()", "globImportPlugin(), svgr()"
       end
 
       def inject_svgr_webpack(file)

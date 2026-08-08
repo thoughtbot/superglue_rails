@@ -3,6 +3,7 @@ require 'superglue/rendering'
 require 'superglue/engine'
 require 'props_template'
 require 'form_props'
+require 'humid'
 
 module Superglue
   extend ActiveSupport::Autoload

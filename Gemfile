@@ -4,7 +4,7 @@ gemspec
 gem "rails", "~> 8.0.0"
 gem "selenium-webdriver"
 gem "props_template", path: "../props_template"
-gem "humid", "~> 0.7.0"
+gem "humid", "~> 1.1"
 gem "standard"
 gem "capybara"
 gem "minitest", "~> 5.27"

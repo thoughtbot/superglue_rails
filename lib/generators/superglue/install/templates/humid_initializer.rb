@@ -1,4 +1,11 @@
 Humid.configure do |config|
+  # Path to a JavaScript file to eval into the MiniRacer context before
+  # the SSR bundle. Provides globals that bare V8 doesn't have
+  # (TextEncoder, URL, MessageChannel, source-map-support, etc.).
+  #
+  # Required for SSR
+  config.prepend = Rails.root.join("shim.js")
+
   # Path to your SSR build file located in `app/assets/builds/`.
   # Use a separate build from your client-side `application.js`.
   #
@@ -25,7 +32,6 @@ Humid.configure do |config|
 end
 
 if Rails.env.local?
-  # Use single_threaded mode for Spring and other forked envs.
   MiniRacer::Platform.set_flags! :single_threaded
   MINI_RACER_SSR = { context: MiniRacer::Context.new(timeout: 1000, ensure_gc_after_idle: 2000) }
 

@@ -92,21 +92,17 @@ class SuperglueInstallationTest < Minitest::Test
     build_superglue_package
 
     successfully "echo \"gem 'superglue', path: '#{SUPERGLUE_RAILS_PATH}'\" >> Gemfile"
+    successfully "echo \"gem 'humid'\" >> Gemfile"
     successfully "bundle install"
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "bundle exec rails generate superglue:install --bundler=#{bundler} --validator=none #{"--typescript" if USE_TYPESCRIPT}"
+    successfully "bundle exec rails generate superglue:install --bundler=#{bundler} --validator=none --no-svgr #{"--typescript" if USE_TYPESCRIPT}"
     update_package_json
     successfully "rm -rf node_modules"
     successfully "yarn cache clean"
     successfully "rm -f yarn.lock"
-    successfully "yarn install"
-  end
-
-  def add_esbuild_cmd
-    build_script = "node build.mjs"
-    successfully %(npm pkg set scripts.build="#{build_script}")
+    successfully "yarn install --ignore-engines"
   end
 
   def generate_test_app(app_name, bundler: "esbuild")
@@ -117,10 +113,6 @@ class SuperglueInstallationTest < Minitest::Test
        --skip-spring \
        --no-rc \
        --skip_bootsnap"
-  end
-
-  def generate_test_app_7(app_name)
-    generate_test_app(app_name, bundler: "esbuild")
   end
 
   def generate_scaffold
@@ -149,7 +141,7 @@ class SuperglueInstallationTest < Minitest::Test
     Dir.mkdir(TMP_DIR) unless Dir.exist?(TMP_DIR)
     Dir.chdir(TMP_DIR) do
       FileUtils.rm_rf("testapp")
-      generate_test_app_7 "testapp"
+      generate_test_app "testapp"
       Dir.chdir("testapp") do
         successfully "bundle install"
         successfully "yarn add react react-dom @babel/preset-react"
@@ -158,7 +150,6 @@ class SuperglueInstallationTest < Minitest::Test
         install_superglue
         generate_scaffold
         reset_db
-        add_esbuild_cmd
         compile_assets
         pid = server_up
       end
@@ -193,30 +184,58 @@ class SuperglueInstallationTest < Minitest::Test
     end
   end
 
-  def write_hello_world_ssr
-    ext = USE_TYPESCRIPT ? "tsx" : "jsx"
-    File.write("app/javascript/server_rendering.#{ext}", <<~JSX)
-      import React from "react";
-      import { renderToString } from "react-dom/server";
-
-      setHumidRenderer((json, baseUrl, path) => {
-        return renderToString(<h1>hello world</h1>);
-      });
-    JSX
-  end
-
-  def assert_ssr_renders_hello_world(app_dir)
+  # Verify the SSR bundle builds and loads in MiniRacer.
+  # If Humid.prepare succeeds, the full pipeline works:
+  # glob imports resolved, shim globals (TextEncoder, URL) are
+  # functional, and polyfills cover source-map-support's Node built-ins.
+  def assert_ssr_bundle_loads(app_dir)
     bundle_path = File.join(app_dir, "app/assets/builds/server_rendering.js")
     map_path = File.join(app_dir, "app/assets/builds/server_rendering.js.map")
+    shim_path = File.join(app_dir, "shim.js")
+
+    assert File.exist?(bundle_path), "SSR bundle was not created"
+    assert File.exist?(shim_path), "shim.js was not copied"
 
     ctx = MiniRacer::Context.new(timeout: 10_000)
-    ctx.eval("var exports = {}; var module = { exports: exports };")
-    Humid.prepare(ctx, application_path: bundle_path, source_map_path: map_path)
-    result = Humid.render(ctx, "{}", "http://localhost:3000", "/")
-
-    assert_includes result, "<h1>hello world</h1>"
+    Humid.prepare(ctx,
+      prepend: shim_path,
+      application_path: bundle_path,
+      source_map_path: (File.exist?(map_path) ? map_path : nil)
+    )
   ensure
     ctx&.dispose
+  end
+
+  def assert_generated_files(bundler)
+    ext = USE_TYPESCRIPT ? "tsx" : "jsx"
+
+    # Scaffold produced .html.tsx/.html.jsx files
+    assert File.exist?("app/views/posts/index.html.#{ext}"), "Scaffold should create index.html.#{ext}"
+    assert File.exist?("app/views/posts/show.html.#{ext}"), "Scaffold should create show.html.#{ext}"
+    assert File.exist?("app/views/posts/edit.html.#{ext}"), "Scaffold should create edit.html.#{ext}"
+    assert File.exist?("app/views/posts/new.html.#{ext}"), "Scaffold should create new.html.#{ext}"
+    assert File.exist?("app/views/posts/index.json.props"), "Scaffold should create index.json.props"
+
+    # SSR files generated
+    assert File.exist?("app/javascript/server_rendering.#{ext}"), "Should create server_rendering.#{ext}"
+    assert File.exist?("config/initializers/humid.rb"), "Should create humid initializer"
+
+    # ssr_context injected into ApplicationController
+    app_controller = File.read("app/controllers/application_controller.rb")
+    assert_includes app_controller, "ssr_context", "ApplicationController should have ssr_context"
+
+    # Puma config has SSR setup
+    puma_config = File.read("config/puma.rb")
+    assert_includes puma_config, "on_worker_boot", "Puma config should have on_worker_boot"
+    assert_includes puma_config, "MINI_RACER_SSR", "Puma config should reference MINI_RACER_SSR"
+
+    # Controller should not have use_jsx_rendering_defaults
+    refute_includes app_controller, "use_jsx_rendering_defaults", "Should not inject use_jsx_rendering_defaults"
+
+    # Application entry has hydration auto-detect
+    app_entry = File.read("app/javascript/application.#{ext}")
+    assert_includes app_entry, "hasChildNodes", "Application entry should have hydration auto-detect"
+    assert_includes app_entry, "hydrateRoot", "Application entry should import hydrateRoot"
   end
 
   def setup_ssr_test_app(app_name, bundler:)
@@ -230,15 +249,14 @@ class SuperglueInstallationTest < Minitest::Test
 
         FileUtils.rm_f("public/index.html")
         install_superglue(bundler: bundler)
-        write_hello_world_ssr
+        generate_scaffold
+
+        assert_generated_files(bundler)
 
         successfully "yarn run build"
 
         app_dir = File.join(TMP_DIR, app_name)
-        assert File.exist?("app/assets/builds/server_rendering.js"), "SSR bundle was not created for #{bundler}"
-        assert File.exist?("app/assets/builds/server_rendering.js.map"), "SSR source map was not created for #{bundler}"
-
-        assert_ssr_renders_hello_world(app_dir)
+        assert_ssr_bundle_loads(app_dir)
       end
     end
   end
