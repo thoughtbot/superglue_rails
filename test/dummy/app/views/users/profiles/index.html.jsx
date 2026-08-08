@@ -5,14 +5,15 @@ export default function ProfileIndex() {
   const { streamFromMessages} = useContent()
   const profile = useFragment(toFragmentRef('profile'), {optional: true})
 
-  useStreamSource(streamFromMessages)
+  const { connected } = useStreamSource(streamFromMessages)
 
   return (
     <div>
       <h1>Users::Profiles</h1>
 
+      <div id="connection_status">{connected ? 'connected' : 'connecting'}</div>
       <div id="users_profiles">
-        {profile?.name}
+        {profile?.name || 'Initial'}
       </div>
     </div>
   )

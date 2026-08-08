@@ -9,11 +9,12 @@ export default function SectionIndex() {
     header,
     streamFromMessages,
   } = content
-  useStreamSource(streamFromMessages)
+  const { connected } = useStreamSource(streamFromMessages)
 
   return (
     <div>
       <h1>{header}</h1>
+      <div id="connection_status">{connected ? 'connected' : 'connecting'}</div>
       <div id="messages">
         { content.messages.map((msg) => <Message {...msg}/>) }
       </div>

@@ -55,13 +55,15 @@ class SuperglueInstallationTest < Minitest::Test
   end
 
   def update_package_json
+    superglue_dir = ENV["SUPERGLUE_DIR"] || SUPERGLUE_SUPERGLUE_PATH
+
     js_version = JSON.parse(
-      File.read(File.expand_path("package.json", SUPERGLUE_SUPERGLUE_PATH)).strip
+      File.read(File.expand_path("package.json", superglue_dir)).strip
     )["version"]
 
     content = File.read("package.json").gsub(
       /"@thoughtbot\/superglue.*$/,
-      "\"@thoughtbot/superglue\":\"file:#{SUPERGLUE_SUPERGLUE_PATH}/thoughtbot-superglue-#{js_version}.tgz\","
+      "\"@thoughtbot/superglue\":\"file:#{superglue_dir}/thoughtbot-superglue-#{js_version}.tgz\","
     )
 
     File.open("package.json", "w") { |file| file.puts content }

@@ -18,7 +18,7 @@ export default function MessagesIndex() {
   } = content
 
   const spotlight = useFragment(toFragmentRef('message-1'), {optional: true})
-  useStreamSource(streamFromMessages)
+  const { connected } = useStreamSource(streamFromMessages)
   const messages = unproxy(content.messages)
 
   return (
@@ -28,6 +28,7 @@ export default function MessagesIndex() {
         {spotlight && spotlight.body}
       </div>
 
+      <div id="connection_status">{connected ? 'connected' : 'connecting'}</div>
       <div id="messages">
         { messages.map((msg) => isFragment(msg) ?  <MessageFragment fragment={msg}/> : <Message {...msg}/>) }
       </div>

@@ -26,6 +26,7 @@ class BroadcastsTest < ApplicationSystemTestCase
 
   test "Message broadcasts with extra attributes to turbo stream tag" do
     visit messages_path
+    assert_text "connected", wait: 10
 
     body = "Message 1"
     within(:element, id: "messages") { assert_no_text body }
@@ -39,6 +40,7 @@ class BroadcastsTest < ApplicationSystemTestCase
 
   test "Message broadcasts later with extra attributes to turbo stream tag" do
     visit messages_path
+    assert_text "connected", wait: 10
 
     perform_enqueued_jobs do
       body = "Message 1"
@@ -79,10 +81,12 @@ class BroadcastsTest < ApplicationSystemTestCase
   end
 
   def assert_broadcasts_text(text, to:, &block)
+    # Wait for ActionCable to connect before broadcasting
+    assert_text "connected", wait: 10
+
     within(:element, id: to) { assert_no_text text }
 
     [text, to].yield_self(&block)
-    sleep 1
 
     within(:element, id: to) { assert_text text }
   end
