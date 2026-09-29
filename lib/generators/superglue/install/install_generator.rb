@@ -10,8 +10,7 @@ module Superglue
       class_option :typescript,
         type: :boolean,
         required: false,
-        default: false,
-        desc: "Use typescript"
+        desc: "Use TypeScript. Skips interactive prompt."
 
       class_option :bundler,
         type: :string,
@@ -31,8 +30,8 @@ module Superglue
       def create_files
         remove_file "#{app_js_path}/application.js"
 
-        @use_typescript = options["typescript"]
         @bundler = ask_bundler
+        @use_typescript = ask_typescript
         @validator = @use_typescript ? ask_validator : "none"
         @use_svgr = ask_svgr
 
@@ -125,6 +124,16 @@ module Superglue
         end
 
         ask("Which bundler are you using?", limited_to: BUNDLERS, default: detected)
+      end
+
+      def ask_typescript
+        unless options["typescript"].nil?
+          say "TypeScript: #{options["typescript"] ? "enabled" : "disabled"}", :green
+          return options["typescript"]
+        end
+
+        say ""
+        yes?("Would you like to use TypeScript? [y/N]")
       end
 
       def ask_validator
