@@ -13,8 +13,7 @@ module Superglue
       class_option :typescript,
         type: :boolean,
         required: false,
-        default: false,
-        desc: "Use typescript"
+        desc: "Use TypeScript. Defaults to true when tsconfig.json exists."
 
       def create_root_folder
         path = File.join("app/views", controller_file_path)
@@ -34,7 +33,7 @@ module Superglue
       def copy_js_files
         available_views.each do |view|
           @action_name = view
-          if options["typescript"]
+          if use_typescript?
             filename = filename_with_tsx_extensions(view)
             template "ts/" + filename, File.join("app/views", controller_file_path, filename)
           else
@@ -46,7 +45,7 @@ module Superglue
 
       def append_mapping
         available_views.each do |action|
-          app_js = if options["typescript"]
+          app_js = if use_typescript?
             "#{app_js_path}/page_to_page_mapping.ts"
           else
             "#{app_js_path}/page_to_page_mapping.js"
@@ -54,7 +53,7 @@ module Superglue
 
           component_name = [plural_table_name, action].map(&:camelcase).join
 
-          js_ext = options["typescript"] ? "html.tsx" : "html.jsx"
+          js_ext = use_typescript? ? "html.tsx" : "html.jsx"
 
           if match_file(app_js, /pageIdentifierToPageComponent = {$/)
             prepend_to_file app_js do
@@ -71,6 +70,14 @@ module Superglue
       end
 
       protected
+
+      def use_typescript?
+        if options["typescript"].nil?
+          File.exist?(File.join(destination_root, "tsconfig.json"))
+        else
+          options["typescript"]
+        end
+      end
 
       def js_component(attribute)
         case attribute.type
