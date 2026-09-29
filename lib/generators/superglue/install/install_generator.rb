@@ -383,6 +383,11 @@ module Superglue
           run %(npm pkg set scripts.build:ssr="rollup -c rollup.config.ssr.js")
         end
 
+        if @validator != "none"
+          say "Adding #{@validator} plugin to SSR build"
+          add_validator_to_ssr_build
+        end
+
         if @use_typescript
           say "Copying server_rendering.tsx"
           copy_file "#{__dir__}/templates/ssr/server_rendering.tsx", "#{app_js_path}/server_rendering.tsx"
@@ -421,6 +426,50 @@ module Superglue
               end
             RUBY
           end
+        end
+      end
+
+      def add_validator_to_ssr_build
+        plugin_call = (@validator == "deepkit") ? "deepkitPlugin()" : "ttscPlugin()"
+        dev_only_plugin = "...(process.env.NODE_ENV === 'production' ? [] : [#{plugin_call}])"
+        plugin_import = ssr_validator_import
+
+        case @bundler
+        when "esbuild"
+          inject_into_file "build_ssr.mjs", plugin_import, after: "const importGlobPlugin = importGlob.default\n"
+          inject_into_file "build_ssr.mjs", "    #{dev_only_plugin},\n", after: "    importGlobPlugin(),\n"
+        when "bun"
+          inject_into_file "build_ssr.js", plugin_import, after: "import { globImportPlugin } from 'bun-plugin-glob-import'\n"
+          gsub_file "build_ssr.js",
+            "plugins: [globImportPlugin()],",
+            "plugins: [\n    globImportPlugin(),\n    #{dev_only_plugin}\n  ],"
+        when "webpack"
+          inject_into_file "webpack.config.ssr.js", plugin_import, after: "const webpack = require(\"webpack\")\n"
+          gsub_file "webpack.config.ssr.js", "    })\n  ]\n}", "    }),\n    #{dev_only_plugin}\n  ]\n}"
+        when "rollup"
+          inject_into_file "rollup.config.ssr.js", plugin_import, after: "import importMetaGlob from \"rollup-plugin-import-meta-glob\"\n"
+          inject_into_file "rollup.config.ssr.js", "    #{dev_only_plugin}\n", after: "    importMetaGlob(),\n"
+        end
+      end
+
+      def ssr_validator_import
+        case [@validator, @bundler]
+        when ["deepkit", "esbuild"]
+          "import { esbuild as deepkitPlugin } from '@thoughtbot/superglue/deepkit'\n"
+        when ["deepkit", "bun"]
+          "import { bun as deepkitPlugin } from '@thoughtbot/superglue/deepkit'\n"
+        when ["deepkit", "webpack"]
+          "const { webpack: deepkitPlugin } = require(\"@thoughtbot/superglue/deepkit\")\n"
+        when ["deepkit", "rollup"]
+          "import { rollup as deepkitPlugin } from \"@thoughtbot/superglue/deepkit\"\n"
+        when ["typia", "esbuild"]
+          "import ttsc from '@ttsc/unplugin'\nconst ttscPlugin = ttsc.esbuild\n"
+        when ["typia", "bun"]
+          "import ttsc from '@ttsc/unplugin'\nconst ttscPlugin = ttsc.bun\n"
+        when ["typia", "webpack"]
+          "const ttscPlugin = require(\"@ttsc/unplugin\").default.webpack\n"
+        when ["typia", "rollup"]
+          "import ttsc from \"@ttsc/unplugin\"\nconst ttscPlugin = ttsc.rollup\n"
         end
       end
 
