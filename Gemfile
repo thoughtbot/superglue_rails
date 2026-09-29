@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 gemspec
 
-gem "rails", "~> 8.0.0"
+gem "rails", "~> 8.1.0"
 gem "selenium-webdriver"
 gem "props_template"
 gem "humid", "~> 1.1"
