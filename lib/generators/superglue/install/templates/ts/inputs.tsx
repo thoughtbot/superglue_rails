@@ -7,7 +7,7 @@
  * There is no style and structured with bare necessities. You should modify
  * these components to fit your design needs.
  */
-import React, { createContext, ReactNode, useContext, useMemo } from "react";
+import { createContext, ReactNode, useContext, useMemo } from "react";
 
 export type {
   CheckboxField as RailsCheckboxFieldProps,

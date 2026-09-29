@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react'
+import type { ReactNode } from 'react'
 import { useAppFlash } from '@javascript/flash'
 
 export const Layout = ({children}: {children: ReactNode}) => {

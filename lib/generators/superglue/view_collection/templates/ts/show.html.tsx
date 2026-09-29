@@ -1,4 +1,3 @@
-import React from 'react'
 import { Layout } from '@javascript/components'
 import { useContent } from '@thoughtbot/superglue'
 

@@ -1,4 +1,3 @@
-import React from "react"
 import { createRoot, hydrateRoot } from "react-dom/client"
 import { createApp } from "@thoughtbot/superglue"
 import { buildVisitAndRemote } from "./application_visit"

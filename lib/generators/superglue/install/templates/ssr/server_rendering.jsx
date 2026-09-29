@@ -1,4 +1,3 @@
-import React from "react";
 import { createApp } from "@thoughtbot/superglue";
 import { buildVisitAndRemote } from "./application_visit";
 import { pageIdentifierToPageComponent } from "./page_to_page_mapping";

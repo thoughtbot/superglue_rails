@@ -1,4 +1,3 @@
-import React from 'react'
 import { useAppFlash } from '@javascript/flash'
 
 export const Layout = ({children}) => {
