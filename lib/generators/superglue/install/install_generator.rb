@@ -355,7 +355,7 @@ module Superglue
 
       def install_packages
         say "Installing Superglue and friends"
-        run "yarn add react react-dom @thoughtbot/superglue@^2.0.0-rc.2"
+        run "yarn add react react-dom @thoughtbot/superglue@^2.0.0-rc.3"
 
         if @use_typescript
           typescript_dev_packages = ["@types/react-dom", "@types/react", "@types/node", "@thoughtbot/candy_wrapper@0.0.4", typescript_package]
