@@ -19,12 +19,10 @@ setHumidRenderer((json, baseUrl, path) => {
   });
 
   return renderToString(
-    <div onClick={ujs.onClick} onSubmit={ujs.onSubmit}>
-      <Provider>
-        <Layout>
-          <Outlet />
-        </Layout>
-      </Provider>
-    </div>,
+    <Provider>
+      <Layout onClick={ujs.onClick} onSubmit={ujs.onSubmit}>
+        <Outlet />
+      </Layout>
+    </Provider>,
   );
 });

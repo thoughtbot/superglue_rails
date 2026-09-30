@@ -31,13 +31,11 @@ if (typeof window !== "undefined" && window.SUPERGLUE_INITIAL_PAGE_STATE) {
       });
 
       const app = (
-        <div onClick={ujs.onClick} onSubmit={ujs.onSubmit}>
-          <Provider>
-            <Layout>
-              <Outlet />
-            </Layout>
-          </Provider>
-        </div>
+        <Provider>
+          <Layout onClick={ujs.onClick} onSubmit={ujs.onSubmit}>
+            <Outlet />
+          </Layout>
+        </Provider>
       );
 
       if (appEl.hasChildNodes()) {

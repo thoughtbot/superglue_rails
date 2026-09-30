@@ -1,10 +1,10 @@
 import { useAppFlash } from '@javascript/flash'
 
-export const Layout = ({children}) => {
+export const Layout = ({children, onClick, onSubmit}) => {
   const flash = useAppFlash()
 
   return (
-    <div>
+    <div onClick={onClick} onSubmit={onSubmit}>
       {flash.success && <p>{flash.success}</p>}
       {flash.notice && <p>{flash.notice}</p>}
       {flash.error && <p>{flash.error}</p>}
