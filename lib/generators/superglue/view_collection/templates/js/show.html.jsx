@@ -1,4 +1,3 @@
-import { Layout } from '@javascript/components'
 import { useContent } from '@thoughtbot/superglue'
 
 export default function <%= js_plural_table_name(:upper) %>Show() {
@@ -11,7 +10,7 @@ export default function <%= js_plural_table_name(:upper) %>Show() {
   } = useContent()
 
   return (
-    <Layout>
+    <>
     <%- showable_attributes.each do |attr| -%>
       <p>
         <strong><%= attr.column_name.humanize %>:</strong>
@@ -20,6 +19,6 @@ export default function <%= js_plural_table_name(:upper) %>Show() {
     <%- end -%>
       <a href={ edit<%= js_singular_table_name(:upper) %>Path } data-sg-visit>Edit</a>
       <a href={ <%= js_plural_table_name %>Path } data-sg-visit>Back</a>
-    </Layout>
+    </>
   )
 }

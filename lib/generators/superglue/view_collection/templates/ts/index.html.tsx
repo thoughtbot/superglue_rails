@@ -1,4 +1,4 @@
-import { Form, FormProps, Layout } from '@javascript/components'
+import { Form, FormProps } from '@javascript/components'
 import { useContent } from '@thoughtbot/superglue'
 
 type ContentProps = {
@@ -52,7 +52,7 @@ export default function <%= js_plural_table_name(:upper) %>Index() {
   })
 
   return (
-    <Layout>
+    <>
       <h1><%= js_plural_table_name(:upper) %></h1>
 
       <table>
@@ -71,6 +71,6 @@ export default function <%= js_plural_table_name(:upper) %>Index() {
       </table>
       <br />
       <a href={new<%= js_singular_table_name(:upper) %>Path} data-sg-visit>New <%= singular_table_name.humanize %></a>
-    </Layout>
+    </>
   )
 }

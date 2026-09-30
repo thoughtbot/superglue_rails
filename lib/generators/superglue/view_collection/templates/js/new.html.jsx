@@ -1,6 +1,5 @@
 import {
   Form,
-  Layout,
   <%- attributes.each do |attr| -%>
   <%= js_component(attr)%>,
   <%- end -%>
@@ -24,7 +23,7 @@ export default function <%= js_plural_table_name(:upper) %>New() {
   const validationErrors = flash["<%= js_singular_table_name%>FormErrors"]
 
   return (
-    <Layout>
+    <>
       <Form {...form} extras={extras} validationErrors={validationErrors} data-sg-visit>
         <%- attributes.each do |attr| -%>
         <<%= js_component(attr)%> {...inputs.<%= attr.column_name.camelize(:lower)%>} label="<%= attr.column_name.humanize %>" errorKey="<%= attr.column_name %>" />
@@ -33,6 +32,6 @@ export default function <%= js_plural_table_name(:upper) %>New() {
       </Form>
 
       <a href={<%= js_plural_table_name %>Path} data-sg-visit>Back</a>
-    </Layout>
+    </>
   )
 }
