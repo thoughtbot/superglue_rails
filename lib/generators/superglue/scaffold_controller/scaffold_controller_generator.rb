@@ -18,7 +18,7 @@ module Superglue
 
       class_option :helper, type: :boolean
       class_option :orm, banner: "NAME", type: :string, required: true,
-                         desc: "ORM to generate the controller for"
+        desc: "ORM to generate the controller for"
 
       class_option :skip_routes, type: :boolean, desc: "Don't add routes to config/routes.rb."
 
@@ -46,17 +46,17 @@ module Superglue
 
       private
 
-        def permitted_params
-          attachments, others = attributes_names.partition { |name| attachments?(name) }
-          params = others.map { |name| ":#{name}" }
-          params += attachments.map { |name| "#{name}: []" }
-          params.join(", ")
-        end
+      def permitted_params
+        attachments, others = attributes_names.partition { |name| attachments?(name) }
+        params = others.map { |name| ":#{name}" }
+        params += attachments.map { |name| "#{name}: []" }
+        params.join(", ")
+      end
 
-        def attachments?(name)
-          attribute = attributes.find { |attr| attr.name == name }
-          attribute&.attachments?
-        end
+      def attachments?(name)
+        attribute = attributes.find { |attr| attr.name == name }
+        attribute&.attachments?
+      end
     end
   end
 end
