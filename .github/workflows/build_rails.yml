@@ -43,12 +43,26 @@ jobs:
           retention-days: 7
 
   acceptance:
-    name: Acceptance - ${{ matrix.bundler }}${{ matrix.typescript == '1' && ' (TS)' || '' }}
+    name: Acceptance - ${{ matrix.bundler }}${{ matrix.typescript == '1' && ' (TS)' || '' }}${{ matrix.validator != 'none' && format(' {0}', matrix.validator) || '' }}${{ matrix.svgr == '1' && ' svgr' || '' }}
     strategy:
       fail-fast: false
       matrix:
         bundler: [esbuild, bun, webpack, rollup]
         typescript: ["0", "1"]
+        validator: ["none"]
+        svgr: ["0"]
+        # The generator's defaults: a validator picked from TypeScript (typia
+        # on a fresh app) and SVGR. deepkit covers the other validator on
+        # esbuild and on rollup, whose plugin order decides whether it sees
+        # the TypeScript source. ttsc bundles its own Go toolchain, so no
+        # setup-go.
+        include:
+          - { bundler: esbuild, typescript: "1", validator: auto, svgr: "1" }
+          - { bundler: bun, typescript: "1", validator: auto, svgr: "1" }
+          - { bundler: webpack, typescript: "1", validator: auto, svgr: "1" }
+          - { bundler: rollup, typescript: "1", validator: auto, svgr: "1" }
+          - { bundler: esbuild, typescript: "1", validator: deepkit, svgr: "1" }
+          - { bundler: rollup, typescript: "1", validator: deepkit, svgr: "1" }
     runs-on: "ubuntu-latest"
 
     steps:
@@ -73,6 +87,8 @@ jobs:
           BUNDLE_GEMFILE=''
           SUPERGLUE_DIR=${{ github.workspace }}/superglue
           USE_TYPESCRIPT=${{ matrix.typescript }}
+          VALIDATOR=${{ matrix.validator }}
+          USE_SVGR=${{ matrix.svgr }}
           ruby -Ilib:test test/acceptance/superglue_installation_acceptance.rb
           --name test_ssr_with_${{ matrix.bundler }}
       - name: Kill orphaned processes

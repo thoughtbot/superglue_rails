@@ -16,6 +16,9 @@ VERSION = File.read(File.expand_path("../../VERSION", __dir__)).strip
 SERVER_PORT = "3000"
 
 USE_TYPESCRIPT = ENV["USE_TYPESCRIPT"] == "1"
+# none (--no-validator), auto (the generator's default), deepkit or typia
+VALIDATOR = ENV.fetch("VALIDATOR", "none")
+USE_SVGR = ENV["USE_SVGR"] == "1"
 
 Minitest.load_plugins
 
@@ -99,12 +102,24 @@ class SuperglueInstallationTest < Minitest::Test
 
     FileUtils.rm_f("app/javascript/application.js")
 
-    successfully "bundle exec rails generate superglue:install --bundler=#{bundler} --no-validator --no-svgr #{USE_TYPESCRIPT ? "--typescript" : "--no-typescript"}"
+    successfully "bundle exec rails generate superglue:install #{install_flags(bundler)}"
     update_package_json
     successfully "rm -rf node_modules"
     successfully "yarn cache clean"
     successfully "rm -f yarn.lock"
     successfully "yarn install --ignore-engines"
+  end
+
+  def install_flags(bundler)
+    validator_flag = case VALIDATOR
+    when "none" then "--no-validator"
+    when "auto" then nil
+    else "--validator=#{VALIDATOR}"
+    end
+    svgr_flag = USE_SVGR ? "--svgr" : "--no-svgr"
+    typescript_flag = USE_TYPESCRIPT ? "--typescript" : "--no-typescript"
+
+    ["--bundler=#{bundler}", validator_flag, svgr_flag, typescript_flag].compact.join(" ")
   end
 
   def generate_test_app(app_name, bundler: "esbuild")
@@ -208,6 +223,23 @@ class SuperglueInstallationTest < Minitest::Test
     ctx&.dispose
   end
 
+  # Not named *_test.rb so this repo's own `rake test` doesn't load it.
+  CONTENT_VALIDATION_TEST = File.join(__dir__, "fixtures", "content_validation_integration.rb")
+
+  # Copy an integration test into the generated app and run it there. It
+  # renders the scaffold's show page server side for a valid post and for one
+  # that breaks its type; see fixtures/content_validation_integration.rb.
+  def assert_content_validation
+    validator_enabled = USE_TYPESCRIPT && VALIDATOR != "none"
+    FileUtils.mkdir_p("test/integration")
+    FileUtils.cp(CONTENT_VALIDATION_TEST, "test/integration/content_validation_test.rb")
+
+    # `rails test` loads db/schema.rb into the test database, and migrating
+    # the scaffold's migration is what writes it.
+    successfully "RAILS_ENV=development bundle exec rails db:migrate"
+    successfully "EXPECT_VALIDATION=#{validator_enabled ? 1 : 0} bundle exec rails test test/integration/content_validation_test.rb"
+  end
+
   def assert_generated_files(bundler)
     ext = USE_TYPESCRIPT ? "tsx" : "jsx"
 
@@ -259,6 +291,7 @@ class SuperglueInstallationTest < Minitest::Test
 
         app_dir = File.join(TMP_DIR, app_name)
         assert_ssr_bundle_loads(app_dir)
+        assert_content_validation
       end
     end
   end
