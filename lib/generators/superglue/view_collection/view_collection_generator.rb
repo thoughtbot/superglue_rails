@@ -43,32 +43,6 @@ module Superglue
         end
       end
 
-      def append_mapping
-        available_views.each do |action|
-          app_js = if use_typescript?
-            "#{app_js_path}/page_to_page_mapping.ts"
-          else
-            "#{app_js_path}/page_to_page_mapping.js"
-          end
-
-          component_name = [plural_table_name, action].map(&:camelcase).join
-
-          js_ext = use_typescript? ? "html.tsx" : "html.jsx"
-
-          if match_file(app_js, /pageIdentifierToPageComponent = {$/)
-            prepend_to_file app_js do
-              "import #{component_name} from '#{view_path}/#{controller_file_path}/#{action}.#{js_ext}'\n"
-            end
-
-            inject_into_file app_js, after: /pageIdentifierToPageComponent = {$/ do
-              "\n  '#{[controller_file_path, action].join("/")}': #{component_name},"
-            end
-          else
-            say "Skipping appending to #{app_js}, you may be using a bundler that supports globing."
-          end
-        end
-      end
-
       protected
 
       def use_typescript?
@@ -129,14 +103,6 @@ module Superglue
 
       def available_views
         %w[index edit show new]
-      end
-
-      def view_path
-        "@views"
-      end
-
-      def app_js_path
-        "app/javascript"
       end
 
       attr_reader :action_name
