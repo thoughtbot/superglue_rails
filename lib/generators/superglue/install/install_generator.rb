@@ -17,11 +17,14 @@ module Superglue
         required: false,
         desc: "JavaScript bundler to use (esbuild, bun, rollup, webpack). Defaults to the detected bundler."
 
+      # A string default, rather than nil, lets `--no-validator` (which Thor
+      # parses as nil) be told apart from leaving the option out.
       class_option :validator,
         type: :string,
-        required: false,
-        desc: "Runtime type validator to use (deepkit, typia, none). Defaults to typia on TypeScript 7 or later " \
-          "(or when TypeScript is not installed yet) and deepkit on TypeScript 6 or earlier."
+        default: "auto",
+        desc: "Runtime type validator to use (deepkit, typia). Pass --no-validator to skip it. " \
+          "auto picks typia on TypeScript 7 or later (or when TypeScript is not installed yet) " \
+          "and deepkit on TypeScript 6 or earlier."
 
       class_option :svgr,
         type: :boolean,
@@ -108,6 +111,7 @@ module Superglue
       # TypeScript 7 removed.
       TYPIA_MIN_TYPESCRIPT = 7
       DEEPKIT_MAX_TYPESCRIPT = 6
+      AUTO_VALIDATOR = "auto"
 
       def resolve_choices
         @bundler = resolve_bundler
@@ -169,21 +173,22 @@ module Superglue
         nil
       end
 
+      # --no-validator and --skip-validator arrive as nil; --validator=none
+      # still works too.
       def resolve_validator
         requested_validator = options["validator"]
-        validator_requested = !requested_validator.nil?
+        validator_disabled = requested_validator.nil? || requested_validator == "none"
+        validator_automatic = requested_validator == AUTO_VALIDATOR
 
-        if !@use_typescript
-          if validator_requested && requested_validator != "none"
-            raise Thor::Error, "--validator=#{requested_validator} requires TypeScript. Remove --no-typescript."
-          end
-
+        if validator_disabled
           "none"
-        elsif validator_requested
+        elsif validator_automatic
+          @use_typescript ? default_validator : "none"
+        elsif !@use_typescript
+          raise Thor::Error, "--validator=#{requested_validator} requires TypeScript. Remove --no-typescript."
+        else
           ensure_validator_supported(requested_validator)
           requested_validator
-        else
-          default_validator
         end
       end
 
@@ -230,14 +235,18 @@ module Superglue
         else
           "will install #{typescript_package}"
         end
-        validator_source = options["validator"] ? "from --validator" : typescript_source
+        validator_source = case options["validator"]
+        when AUTO_VALIDATOR then typescript_source
+        when nil then "from --no-validator"
+        else "from --validator"
+        end
 
         say ""
         say "Installing Superglue with:", :green
         say "  Bundler:    #{@bundler} (#{bundler_source}; change with --bundler)"
         if @use_typescript
           say "  TypeScript: yes (#{typescript_source}; --no-typescript for JavaScript)"
-          say "  Validator:  #{@validator} (#{validator_source}; change with --validator=deepkit|typia|none)"
+          say "  Validator:  #{@validator} (#{validator_source}; change with --validator=deepkit|typia or --no-validator)"
         else
           say "  TypeScript: no (--typescript to enable)"
         end

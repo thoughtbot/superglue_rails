@@ -106,6 +106,37 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     assert_match "Unknown validator 'zod'", error.message
   end
 
+  test "disables the validator with --no-validator" do
+    write_package_json
+    install_typescript("7.0.2")
+
+    choices = resolve_choices("--no-validator")
+
+    assert choices[:use_typescript]
+    assert_equal "none", choices[:validator]
+  end
+
+  test "disables the validator with --skip-validator" do
+    write_package_json
+
+    assert_equal "none", resolve_choices("--skip-validator")[:validator]
+  end
+
+  test "still disables the validator with --validator=none" do
+    write_package_json
+
+    assert_equal "none", resolve_choices("--validator=none")[:validator]
+  end
+
+  test "allows --no-validator for JavaScript" do
+    write_package_json
+
+    choices = resolve_choices("--no-typescript", "--no-validator")
+
+    refute choices[:use_typescript]
+    assert_equal "none", choices[:validator]
+  end
+
   test "uses no validator for JavaScript" do
     write_package_json
 
