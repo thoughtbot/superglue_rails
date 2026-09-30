@@ -3,7 +3,7 @@ import { asObject as pages } from '../views/**/*.{tsx,jsx}'
 const pageIdentifierToPageComponent: Record<string, React.ComponentType> = {}
 
 for (const key in pages) {
-  const identifier = key.split('.')[0]
+  const identifier = key.replace('../views/', '').split('.')[0]
   pageIdentifierToPageComponent[identifier] = (pages[key] as { default: React.ComponentType }).default
 }
 
