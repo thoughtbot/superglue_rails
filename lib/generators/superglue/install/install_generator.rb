@@ -570,7 +570,7 @@ module Superglue
         when ["typia", "esbuild"]
           "import ttsc from '@ttsc/unplugin'\nconst ttscPlugin = ttsc.esbuild\n"
         when ["typia", "bun"]
-          "import ttsc from '@ttsc/unplugin'\nconst ttscPlugin = ttsc.bun\n"
+          "import ttscPlugin from '@ttsc/unplugin/bun'\n"
         when ["typia", "webpack"]
           "const ttscPlugin = require(\"@ttsc/unplugin\").default.webpack\n"
         when ["typia", "rollup"]
