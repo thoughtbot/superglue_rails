@@ -1,7 +1,7 @@
 import { useContent } from '@thoughtbot/superglue'
 
 type ContentProps = {
-  id: string
+  id: number
   <%- attributes.each do |attr| -%>
   <%= attr.column_name.camelize(:lower)%>: <%= json_mappable_type(attr)%>
   <%- end -%>
