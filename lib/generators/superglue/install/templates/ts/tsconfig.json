@@ -14,10 +14,9 @@
     "esModuleInterop": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "baseUrl": ".", // Usually the root of your project
     "paths": {
-      "@javascript/*": ["app/javascript/*"],
-      "@views/*": ["app/views/*"]
+      "@javascript/*": ["./app/javascript/*"],
+      "@views/*": ["./app/views/*"]
     },
     "types": ["node"]
   },

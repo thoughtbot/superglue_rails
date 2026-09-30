@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "baseUrl": ".", // Usually the root of your project
     "paths": {
-      "@javascript/*": ["app/javascript/*"],
-      "@views/*": ["app/views/*"]
+      "@javascript/*": ["./app/javascript/*"],
+      "@views/*": ["./app/views/*"]
     }
   }
 }
