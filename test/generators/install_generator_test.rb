@@ -189,7 +189,33 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     assert_equal ["typia", "ttsc"], peer_packages("typia", "ttsc")
   end
 
+  test "wraps the layout's yield in the app root only once" do
+    write_layout
+
+    2.times { capture(:stdout) { generator.send(:update_application_layout) } }
+
+    layout = File.read(File.join(destination_root, "app/views/layouts/application.html.erb"))
+    assert_equal 1, layout.scan('<div id="app"><%= yield %></div>').size
+    assert_equal 1, layout.scan('<div id="app">').size
+    assert_equal 1, layout.scan("SUPERGLUE_INITIAL_PAGE_STATE").size
+  end
+
   private
+
+  def write_layout
+    layout_dir = File.join(destination_root, "app", "views", "layouts")
+    FileUtils.mkdir_p(layout_dir)
+    File.write(File.join(layout_dir, "application.html.erb"), <<~ERB)
+      <html>
+        <head>
+          <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+        </head>
+        <body>
+          <%= yield %>
+        </body>
+      </html>
+    ERB
+  end
 
   def peer_packages(*package_names)
     Dir.chdir(destination_root) do

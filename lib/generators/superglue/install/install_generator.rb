@@ -470,7 +470,8 @@ module Superglue
           ERB
         end
 
-        gsub_file layout_path, "<%= yield %>", '<div id="app"><%= yield %></div>'
+        inject_into_file layout_path, '<div id="app">', before: "<%= yield %>"
+        inject_into_file layout_path, "</div>", after: "<%= yield %>"
       end
 
       def copy_ssr_files
