@@ -331,7 +331,7 @@ module Superglue
 
         if @validator == "deepkit"
           say "Installing Deepkit for runtime type validation"
-          run "yarn add -D @deepkit/type @deepkit/core @deepkit/type-compiler"
+          run "yarn add -D @deepkit/type @deepkit/core @deepkit/type-compiler unplugin"
         elsif @validator == "typia"
           say "Installing Typia and ttsc for runtime type validation"
           run "yarn add -D typia ttsc @ttsc/unplugin"
