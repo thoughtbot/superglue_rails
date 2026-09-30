@@ -59,6 +59,9 @@ module Superglue
         say "Copying stream.json.props"
         copy_file "#{__dir__}/templates/stream.json.props", "app/views/layouts/stream.json.props"
 
+        say "Adding initial page state and #app container to application.html.erb"
+        update_application_layout
+
         say "Adding required member methods to ApplicationRecord"
         add_member_methods
 
@@ -345,6 +348,22 @@ module Superglue
   end
           RUBY
         end
+      end
+
+      def update_application_layout
+        layout_path = "app/views/layouts/application.html.erb"
+
+        inject_into_file layout_path, before: /^\s*<%= javascript_include_tag/ do
+          <<-ERB
+
+    <script type="text/javascript">
+      window.SUPERGLUE_INITIAL_PAGE_STATE=<%= render_props %>;<%# erblint:disable ErbSafety %>
+    </script>
+
+          ERB
+        end
+
+        gsub_file layout_path, "<%= yield %>", '<div id="app"><%= yield %></div>'
       end
 
       def copy_ssr_files
