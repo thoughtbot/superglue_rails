@@ -9,31 +9,30 @@ module Superglue
 
       class_option :typescript,
         type: :boolean,
-        required: false,
-        desc: "Use TypeScript. Skips interactive prompt."
+        default: true,
+        desc: "Use TypeScript. Pass --no-typescript for JavaScript."
 
       class_option :bundler,
         type: :string,
         required: false,
-        desc: "JavaScript bundler to use (esbuild, bun, rollup, webpack). Skips interactive prompt."
+        desc: "JavaScript bundler to use (esbuild, bun, rollup, webpack). Defaults to the detected bundler."
 
       class_option :validator,
         type: :string,
         required: false,
-        desc: "Runtime type validator to use (deepkit, typia, none). Skips interactive prompt."
+        desc: "Runtime type validator to use (deepkit, typia, none). Defaults to typia on TypeScript 7 or later " \
+          "(or when TypeScript is not installed yet) and deepkit on TypeScript 6 or earlier."
 
       class_option :svgr,
         type: :boolean,
-        required: false,
-        desc: "Enable SVGR to import SVGs as React components. Skips interactive prompt."
+        default: true,
+        desc: "Enable SVGR to import SVGs as React components. Pass --no-svgr to disable."
 
       def create_files
         remove_file "#{app_js_path}/application.js"
 
-        @bundler = ask_bundler
-        @use_typescript = ask_typescript
-        @validator = @use_typescript ? ask_validator : "none"
-        @use_svgr = ask_svgr
+        resolve_choices
+        say_choices
 
         if @use_typescript
           copy_ts_files
@@ -104,20 +103,32 @@ module Superglue
         false
       end
 
-      def ask_bundler
-        if options["bundler"]
-          bundler = options["bundler"]
-          unless BUNDLERS.include?(bundler)
-            raise Thor::Error, "Unknown bundler '#{bundler}'. Must be one of: #{BUNDLERS.join(", ")}"
+      # typia's ttsc toolchain needs TypeScript 7's native compiler, while
+      # deepkit's type compiler needs the JavaScript compiler API that
+      # TypeScript 7 removed.
+      TYPIA_MIN_TYPESCRIPT = 7
+      DEEPKIT_MAX_TYPESCRIPT = 6
+
+      def resolve_choices
+        @bundler = resolve_bundler
+        @use_typescript = options["typescript"]
+        @typescript_major = detect_typescript_major
+        @validator = resolve_validator
+        @use_svgr = options["svgr"]
+      end
+
+      def resolve_bundler
+        requested_bundler = options["bundler"]
+        detected_bundler = detect_bundler
+
+        if requested_bundler
+          unless BUNDLERS.include?(requested_bundler)
+            raise Thor::Error, "Unknown bundler '#{requested_bundler}'. Must be one of: #{BUNDLERS.join(", ")}"
           end
-          say "Using bundler: #{bundler}", :green
-          return bundler
-        end
 
-        detected = detect_bundler
-
-        if detected
-          say "Detected #{detected} in your project.", :green
+          requested_bundler
+        elsif detected_bundler
+          detected_bundler
         else
           say "No JavaScript bundler detected.", :red
           say "Install one first via jsbundling-rails:"
@@ -125,48 +136,113 @@ module Superglue
           say "See: https://github.com/rails/jsbundling-rails"
           raise Thor::Error, "No bundler found. Install one via jsbundling-rails and re-run this generator."
         end
-
-        ask("Which bundler are you using?", limited_to: BUNDLERS, default: detected)
       end
 
-      def ask_typescript
-        unless options["typescript"].nil?
-          say "TypeScript: #{options["typescript"] ? "enabled" : "disabled"}", :green
-          return options["typescript"]
+      # The major version of the project's TypeScript: the installed package
+      # first, then the range declared in package.json. nil when TypeScript is
+      # not part of the project yet, or its range has no version (e.g. "latest").
+      def detect_typescript_major
+        installed_version = installed_typescript_version
+        declared_range = declared_typescript_range
+        version = installed_version || declared_range
+
+        version.to_s[/\d+/]&.to_i
+      end
+
+      def installed_typescript_version
+        manifest_path = "node_modules/typescript/package.json"
+
+        if File.exist?(manifest_path)
+          JSON.parse(File.read(manifest_path))["version"]
         end
-
-        say ""
-        yes?("Would you like to use TypeScript? [y/N]")
+      rescue JSON::ParserError
+        nil
       end
 
-      def ask_validator
-        if options["validator"]
-          validator = options["validator"]
-          unless VALIDATORS.include?(validator)
-            raise Thor::Error, "Unknown validator '#{validator}'. Must be one of: #{VALIDATORS.join(", ")}"
+      def declared_typescript_range
+        if File.exist?("package.json")
+          package_json = JSON.parse(File.read("package.json"))
+          dependencies = (package_json["dependencies"] || {}).merge(package_json["devDependencies"] || {})
+          dependencies["typescript"]
+        end
+      rescue JSON::ParserError
+        nil
+      end
+
+      def resolve_validator
+        requested_validator = options["validator"]
+        validator_requested = !requested_validator.nil?
+
+        if !@use_typescript
+          if validator_requested && requested_validator != "none"
+            raise Thor::Error, "--validator=#{requested_validator} requires TypeScript. Remove --no-typescript."
           end
-          say "Runtime type validator: #{validator}", :green
-          return validator
-        end
 
-        say ""
-        say "Superglue can add runtime type validation during development."
-        say "  deepkit - works with TypeScript 5 and below (uses bundler plugin)"
-        say "  typia   - works with TypeScript 6 and above (uses ttsc)"
-        say "  none    - skip runtime type validation"
-        ask("Which runtime type validator would you like to use?", limited_to: VALIDATORS, default: "none")
+          "none"
+        elsif validator_requested
+          ensure_validator_supported(requested_validator)
+          requested_validator
+        else
+          default_validator
+        end
       end
 
-      def ask_svgr
-        unless options["svgr"].nil?
-          say "SVGR: #{options["svgr"] ? "enabled" : "disabled"}", :green
-          return options["svgr"]
+      def default_validator
+        typescript_supports_typia = @typescript_major.nil? || @typescript_major >= TYPIA_MIN_TYPESCRIPT
+
+        if typescript_supports_typia
+          "typia"
+        else
+          "deepkit"
         end
+      end
+
+      def ensure_validator_supported(validator)
+        typescript_detected = !@typescript_major.nil?
+        typia_unsupported = validator == "typia" && typescript_detected && @typescript_major < TYPIA_MIN_TYPESCRIPT
+        deepkit_unsupported = validator == "deepkit" && typescript_detected && @typescript_major > DEEPKIT_MAX_TYPESCRIPT
+
+        if !VALIDATORS.include?(validator)
+          raise Thor::Error, "Unknown validator '#{validator}'. Must be one of: #{VALIDATORS.join(", ")}"
+        elsif typia_unsupported
+          raise Thor::Error, "typia requires TypeScript #{TYPIA_MIN_TYPESCRIPT} or later, found TypeScript #{@typescript_major}"
+        elsif deepkit_unsupported
+          raise Thor::Error, "deepkit requires TypeScript #{DEEPKIT_MAX_TYPESCRIPT} or earlier, found TypeScript #{@typescript_major}"
+        end
+      end
+
+      # The TypeScript package to install, or nil to keep the project's own.
+      # Re-adding an existing typescript would upgrade it to the latest release.
+      def typescript_package
+        typescript_missing = @typescript_major.nil?
+
+        if typescript_missing && @validator == "deepkit"
+          "typescript@^#{DEEPKIT_MAX_TYPESCRIPT}"
+        elsif typescript_missing
+          "typescript@^#{TYPIA_MIN_TYPESCRIPT}"
+        end
+      end
+
+      def say_choices
+        bundler_source = options["bundler"] ? "from --bundler" : "detected"
+        typescript_source = if @typescript_major
+          "TypeScript #{@typescript_major} detected"
+        else
+          "will install #{typescript_package}"
+        end
+        validator_source = options["validator"] ? "from --validator" : typescript_source
 
         say ""
-        say "SVGR lets you import SVGs as React components."
-        say "e.g., import Logo from '@images/logo.svg'"
-        yes?("Would you like to enable SVGR? [y/N]")
+        say "Installing Superglue with:", :green
+        say "  Bundler:    #{@bundler} (#{bundler_source}; change with --bundler)"
+        if @use_typescript
+          say "  TypeScript: yes (#{typescript_source}; --no-typescript for JavaScript)"
+          say "  Validator:  #{@validator} (#{validator_source}; change with --validator=deepkit|typia|none)"
+        else
+          say "  TypeScript: no (--typescript to enable)"
+        end
+        say "  SVGR:       #{@use_svgr ? "yes (--no-svgr to disable)" : "no (--svgr to enable)"}"
+        say ""
       end
 
       def update_build_script
@@ -249,7 +325,8 @@ module Superglue
         run "yarn add react react-dom @thoughtbot/superglue@^2.0.0-rc.2"
 
         if @use_typescript
-          run "yarn add -D @types/react-dom @types/react @types/node @thoughtbot/candy_wrapper@0.0.4 typescript"
+          typescript_dev_packages = ["@types/react-dom", "@types/react", "@types/node", "@thoughtbot/candy_wrapper@0.0.4", typescript_package]
+          run "yarn add -D #{typescript_dev_packages.compact.join(" ")}"
         end
 
         if @validator == "deepkit"
