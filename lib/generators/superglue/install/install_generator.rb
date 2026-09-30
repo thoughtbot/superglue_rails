@@ -1,4 +1,5 @@
 require "json"
+require "shellwords"
 require "rails/generators/named_base"
 require "rails/generators/resource_helpers"
 
@@ -228,6 +229,29 @@ module Superglue
         end
       end
 
+      # Pins each package to the range @thoughtbot/superglue declares as a
+      # peer, so the validator toolchain matches what superglue was tested
+      # against. Runs after superglue is installed; a package superglue
+      # doesn't declare installs at its latest version.
+      def superglue_peer_packages(*package_names)
+        manifest_path = "node_modules/@thoughtbot/superglue/package.json"
+        peer_ranges = if File.exist?(manifest_path)
+          JSON.parse(File.read(manifest_path))["peerDependencies"] || {}
+        else
+          {}
+        end
+
+        package_names.map do |package_name|
+          peer_range = peer_ranges[package_name]
+
+          if peer_range
+            Shellwords.escape("#{package_name}@#{peer_range}")
+          else
+            package_name
+          end
+        end
+      end
+
       def say_choices
         bundler_source = options["bundler"] ? "from --bundler" : "detected"
         typescript_source = if @typescript_major
@@ -340,10 +364,10 @@ module Superglue
 
         if @validator == "deepkit"
           say "Installing Deepkit for runtime type validation"
-          run "yarn add -D @deepkit/type @deepkit/core @deepkit/type-compiler unplugin"
+          run "yarn add -D @deepkit/core #{superglue_peer_packages("@deepkit/type", "@deepkit/type-compiler", "unplugin").join(" ")}"
         elsif @validator == "typia"
           say "Installing Typia and ttsc for runtime type validation"
-          run "yarn add -D typia ttsc @ttsc/unplugin"
+          run "yarn add -D #{superglue_peer_packages("typia", "ttsc", "@ttsc/unplugin").join(" ")}"
         end
 
         case @bundler

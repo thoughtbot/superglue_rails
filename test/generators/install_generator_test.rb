@@ -174,7 +174,37 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     assert_match "No bundler found", error.message
   end
 
+  test "pins validator packages to superglue's peer ranges" do
+    write_package_json
+    install_superglue("ttsc" => ">=0.30.0 <0.31.0", "typia" => "^15.0.0")
+
+    shell_arguments = Shellwords.split(peer_packages("typia", "ttsc", "@ttsc/unplugin").join(" "))
+
+    assert_equal ["typia@^15.0.0", "ttsc@>=0.30.0 <0.31.0", "@ttsc/unplugin"], shell_arguments
+  end
+
+  test "installs validator packages unpinned without superglue installed" do
+    write_package_json
+
+    assert_equal ["typia", "ttsc"], peer_packages("typia", "ttsc")
+  end
+
   private
+
+  def peer_packages(*package_names)
+    Dir.chdir(destination_root) do
+      generator.send(:superglue_peer_packages, *package_names)
+    end
+  end
+
+  def install_superglue(peer_dependencies)
+    superglue_dir = File.join(destination_root, "node_modules", "@thoughtbot", "superglue")
+    FileUtils.mkdir_p(superglue_dir)
+    File.write(
+      File.join(superglue_dir, "package.json"),
+      JSON.generate({"name" => "@thoughtbot/superglue", "peerDependencies" => peer_dependencies})
+    )
+  end
 
   def resolve_choices(*flags)
     install_generator = generator([], flags)
