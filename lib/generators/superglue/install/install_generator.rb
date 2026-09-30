@@ -357,11 +357,8 @@ module Superglue
           say "Installing esbuild-loader for JSX support"
           run "yarn add -D esbuild-loader"
         when "rollup"
-          say "Installing rollup plugins for JSX and glob support"
-          run "yarn add -D @rollup/plugin-babel @babel/core @babel/preset-react @rollup/plugin-commonjs @rollup/plugin-alias @rollup/plugin-replace rollup-plugin-import-meta-glob"
-          if @use_typescript
-            run "yarn add -D @babel/preset-typescript"
-          end
+          say "Installing rollup plugins for JSX, TypeScript, and glob support"
+          run "yarn add -D rollup-plugin-esbuild esbuild @rollup/plugin-commonjs @rollup/plugin-alias @rollup/plugin-replace rollup-plugin-import-meta-glob"
         end
 
         say "Installing build dependencies"
@@ -480,11 +477,6 @@ module Superglue
         when "rollup"
           copy_file "#{__dir__}/templates/ssr/rollup.build_ssr.config.js", "rollup.config.ssr.js"
           gsub_file "rollup.config.ssr.js", "server_rendering.jsx", "server_rendering.#{ssr_ext}"
-          if @use_typescript
-            gsub_file "rollup.config.ssr.js",
-              'presets: [["@babel/preset-react", { runtime: "automatic" }]],',
-              'presets: [["@babel/preset-react", { runtime: "automatic" }], "@babel/preset-typescript"],'
-          end
           run %(npm pkg set scripts.build:ssr="rollup -c rollup.config.ssr.js")
         end
 
@@ -553,7 +545,9 @@ module Superglue
           gsub_file "webpack.config.ssr.js", "    })\n  ]\n}", "    }),\n    #{dev_only_plugin}\n  ]\n}"
         when "rollup"
           inject_into_file "rollup.config.ssr.js", plugin_import, after: "import importMetaGlob from \"rollup-plugin-import-meta-glob\"\n"
-          inject_into_file "rollup.config.ssr.js", "    #{dev_only_plugin}\n", after: "    importMetaGlob(),\n"
+          # Before esbuild: the validator rewrites the TypeScript source and
+          # esbuild compiles its output. Rollup runs plugins in array order.
+          inject_into_file "rollup.config.ssr.js", "    #{dev_only_plugin},\n", before: "    esbuild({ jsx: \"automatic\" }),\n"
         end
       end
 
